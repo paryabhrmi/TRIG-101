@@ -4,8 +4,6 @@ import { Checkpoint } from '../components/Checkpoint'
 import { Instruments } from '../components/Instruments'
 import { RiveStage } from '../components/RiveStage'
 import { TOTAL_LESSONS, lessons, slotNumber } from '../data/curriculum'
-import { ui } from '../data/ui'
-import { useI18n } from '../lib/i18n'
 import { useProgress } from '../lib/progress'
 import { useInstruments } from '../lib/useInstruments'
 import type { Rive } from '@rive-app/react-canvas'
@@ -19,15 +17,14 @@ interface Props {
 }
 
 export function LessonScreen({ lesson, onBack, onGoto, onFinish }: Props) {
-  const { t } = useI18n()
   const { progress, complete } = useProgress()
   const [rive, setRive] = useState<Rive | null>(null)
-  const [expanded, setExpanded] = useState(false)
   const [toggles, setToggles] = useState<Record<string, boolean>>({})
 
   const index = lessons.indexOf(lesson)
   const nextLesson = lessons[index + 1]
   const alreadyDone = !!progress[lesson.id]
+  const n = slotNumber(lesson.id)
 
   const { values, solved, markSolved } = useInstruments(rive, lesson, alreadyDone)
 
@@ -53,27 +50,32 @@ export function LessonScreen({ lesson, onBack, onGoto, onFinish }: Props) {
     if (action.completes) markSolved()
   }
 
+  // Light artboards keep the dark app-bar treatment; the navy ones let the bar
+  // sit straight on the artwork so the canvas reads as one full-bleed field.
+  const overDark = lesson.stage !== 'paper'
+
   return (
     <div className={`screen lesson lesson--${lesson.stage}`}>
-      <div className="blueprint" />
-
+      {/* Over a navy artboard the bar is absolutely positioned and the canvas
+          runs underneath it; over a light one it sits in flow above. Either
+          way it comes first in the DOM so the reading order is right. */}
       <AppBar
         onBack={onBack}
-        subtitle={`${t(ui.lesson)} ${slotNumber(lesson.id)} ${t(ui.of)} ${TOTAL_LESSONS}`}
-        title={t(lesson.title)}
+        variant={overDark ? 'over-dark' : 'light'}
+        subtitle={`Lesson ${n} of ${TOTAL_LESSONS}`}
+        title={lesson.title}
         right={
           solved ? (
-            <span className="pill pill--done">{t(ui.done)}</span>
+            <span className="pill pill--done">Done</span>
           ) : (
-            <span className="pill">
-              {String(slotNumber(lesson.id)).padStart(2, '0')}
-            </span>
+            <span className="pill">{String(n).padStart(2, '0')}</span>
           )
         }
         progress={(index + (solved ? 1 : 0)) / lessons.length}
       />
 
-      <div className="lesson__stagewrap">
+      {/* Full-bleed stage: no card, no inset — the artwork is the backdrop. */}
+      <div className="lesson__stage">
         <RiveStage
           key={lesson.id}
           artboard={lesson.artboard}
@@ -85,8 +87,10 @@ export function LessonScreen({ lesson, onBack, onGoto, onFinish }: Props) {
       </div>
 
       <div className="sheet">
+        <div className="sheet__grip" aria-hidden="true" />
         <div className="sheet__scroll">
-          <p className="sheet__tagline">{t(lesson.tagline)}</p>
+          <h1 className="sheet__title">{lesson.title}</h1>
+          <p className="sheet__tagline">{lesson.tagline}</p>
 
           {lesson.actions && lesson.actions.length > 0 && (
             <div className="actions">
@@ -100,7 +104,7 @@ export function LessonScreen({ lesson, onBack, onGoto, onFinish }: Props) {
                   onClick={() => runAction(action)}
                   disabled={!rive}
                 >
-                  {t(action.label)}
+                  {action.label}
                 </button>
               ))}
             </div>
@@ -112,22 +116,11 @@ export function LessonScreen({ lesson, onBack, onGoto, onFinish }: Props) {
             <Checkpoint checkpoint={lesson.checkpoint} solved={solved} />
           )}
 
-          <button
-            type="button"
-            className="linkish linkish--center"
-            aria-expanded={expanded}
-            onClick={() => setExpanded((v) => !v)}
-          >
-            {expanded ? t(ui.readLess) : t(ui.readMore)}
-          </button>
-
-          {expanded && (
-            <div className="prose">
-              {lesson.body.map((para, i) => (
-                <p key={i}>{t(para)}</p>
-              ))}
-            </div>
-          )}
+          <div className="prose">
+            {lesson.body.map((para, i) => (
+              <p key={i}>{para}</p>
+            ))}
+          </div>
 
           <div className="sheet__foot">
             {nextLesson ? (
@@ -136,7 +129,7 @@ export function LessonScreen({ lesson, onBack, onGoto, onFinish }: Props) {
                 className="btn btn--primary btn--wide"
                 onClick={() => onGoto(nextLesson.id)}
               >
-                {t(ui.next)} — {t(nextLesson.title)}
+                Next — {nextLesson.title}
               </button>
             ) : (
               <button
@@ -144,7 +137,7 @@ export function LessonScreen({ lesson, onBack, onGoto, onFinish }: Props) {
                 className="btn btn--primary btn--wide"
                 onClick={onFinish}
               >
-                {t(ui.finish)}
+                Finish the course
               </button>
             )}
           </div>

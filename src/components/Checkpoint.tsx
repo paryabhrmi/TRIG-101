@@ -1,6 +1,4 @@
 import { useEffect, useState } from 'react'
-import { ui } from '../data/ui'
-import { useI18n } from '../lib/i18n'
 import type { Checkpoint as CheckpointModel } from '../data/curriculum'
 
 interface Props {
@@ -14,7 +12,6 @@ interface Props {
  * the app just watches for it.
  */
 export function Checkpoint({ checkpoint, solved }: Props) {
-  const { t } = useI18n()
   const [showHint, setShowHint] = useState(false)
 
   // A hint that stayed open from the previous lesson would be noise.
@@ -26,20 +23,18 @@ export function Checkpoint({ checkpoint, solved }: Props) {
         <span className="checkpoint__badge" aria-hidden="true">
           {solved ? '✓' : '◆'}
         </span>
-        <span className="checkpoint__kicker">
-          {solved ? t(ui.solved) : t(ui.tryIt)}
-        </span>
+        <span className="checkpoint__kicker">{solved ? 'Got it' : 'Try this'}</span>
       </div>
 
-      <p className="checkpoint__goal">{t(checkpoint.goal)}</p>
+      <p className="checkpoint__goal">{checkpoint.goal}</p>
 
       {solved ? (
-        <p className="checkpoint__note">{t(ui.solvedNote)}</p>
+        <p className="checkpoint__note">Checkpoint cleared.</p>
       ) : showHint ? (
-        <p className="checkpoint__note">{t(checkpoint.hint)}</p>
+        <p className="checkpoint__note">{checkpoint.hint}</p>
       ) : (
         <button type="button" className="linkish" onClick={() => setShowHint(true)}>
-          {t(ui.hint)}
+          Need a hint?
         </button>
       )}
     </div>

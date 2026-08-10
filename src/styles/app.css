@@ -9,31 +9,13 @@
   flex-direction: column;
   height: var(--vh, 100dvh);
   overflow: hidden;
-  background: var(--navy);
-}
-
-/* ---------------------------------------------------------------------------
-   Panel — the app's workhorse surface, copied from the Rive Ratio panel:
-   dark navy inside a thin steel-blue rule, gently rounded.
-   --------------------------------------------------------------------------- */
-.panel {
-  background: var(--panel);
-  border: 1px solid var(--panel-line);
-  border-radius: var(--r-md);
-}
-
-.panel__head {
-  padding: 9px 14px;
-  background: var(--panel-head);
-  border-bottom: 1px solid var(--panel-line);
-  border-radius: var(--r-md) var(--r-md) 0 0;
-  font-size: 13px;
-  font-weight: 800;
-  text-align: center;
+  background: var(--paper);
 }
 
 /* ===========================================================================
    App bar
+   In a lesson the bar floats directly on the artwork, so the canvas can run
+   edge to edge instead of sitting in a box below a solid strip.
    =========================================================================== */
 
 .appbar {
@@ -41,10 +23,28 @@
   z-index: 3;
   flex: 0 0 auto;
   padding-top: var(--safe-t);
-  background: linear-gradient(180deg, #0c0f5c 0%, rgba(12, 15, 92, 0.86) 100%);
-  border-bottom: 1px solid var(--panel-line-soft);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+}
+
+.appbar--light {
+  background: rgba(255, 255, 255, 0.88);
+  border-bottom: 1px solid var(--line);
+  backdrop-filter: saturate(180%) blur(16px);
+  -webkit-backdrop-filter: saturate(180%) blur(16px);
+}
+
+/* Over a navy artboard: no plate, just a soft gradient so the title stays
+   legible while the artwork continues underneath it. */
+.appbar--over-dark {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(6, 8, 48, 0.72) 0%,
+    rgba(6, 8, 48, 0.34) 62%,
+    rgba(6, 8, 48, 0) 100%
+  );
 }
 
 .appbar__row {
@@ -52,7 +52,7 @@
   align-items: center;
   gap: 12px;
   padding: 10px 12px;
-  min-height: 56px;
+  min-height: 58px;
 }
 
 .appbar__titles {
@@ -61,7 +61,6 @@
   display: flex;
   flex-direction: column;
   gap: 1px;
-  text-align: start;
 }
 
 .appbar__sub {
@@ -69,21 +68,25 @@
   font-weight: 800;
   letter-spacing: 0.09em;
   text-transform: uppercase;
-  color: var(--cyan);
-}
-
-html[dir='rtl'] .appbar__sub {
-  letter-spacing: normal;
+  color: var(--ink-3);
 }
 
 .appbar__title {
   font-size: 17px;
   font-weight: 800;
   line-height: 1.2;
-  color: var(--text);
+  color: var(--ink);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.appbar--over-dark .appbar__sub {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.appbar--over-dark .appbar__title {
+  color: #ffffff;
 }
 
 .appbar__right {
@@ -94,146 +97,141 @@ html[dir='rtl'] .appbar__sub {
 }
 
 .appbar__track {
-  height: 4px;
-  background: #070a3f;
-  overflow: hidden;
+  height: 3px;
+  background: var(--line);
+}
+
+.appbar--over-dark .appbar__track {
+  background: rgba(255, 255, 255, 0.18);
 }
 
 .appbar__fill {
   height: 100%;
   transform-origin: left center;
-  background: linear-gradient(90deg, var(--btn-gloss), var(--blue));
+  background: linear-gradient(90deg, var(--cyan), var(--blue));
   transition: transform 0.45s var(--ease);
-}
-
-html[dir='rtl'] .appbar__fill {
-  transform-origin: right center;
 }
 
 .iconbtn {
   flex: 0 0 auto;
   display: grid;
   place-items: center;
-  width: 38px;
-  height: 38px;
+  width: 40px;
+  height: 40px;
   border-radius: var(--r-pill);
-  background: var(--panel);
-  border: 1px solid var(--panel-line);
-  font-size: 24px;
-  line-height: 1;
-  padding-bottom: 3px;
-  transition: background 0.18s var(--ease), transform 0.18s var(--ease);
+  background: var(--paper);
+  border: 1px solid var(--line);
+  color: var(--ink);
+  box-shadow: var(--lift-1);
+  transition: transform 0.18s var(--ease), background 0.18s var(--ease);
+}
+
+.appbar--over-dark .iconbtn {
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.3);
+  color: #ffffff;
+  box-shadow: none;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
 .iconbtn:active {
   transform: scale(0.94);
-  background: var(--panel-soft);
 }
 
 .iconbtn--ghost {
   background: none;
   border-color: transparent;
+  box-shadow: none;
   pointer-events: none;
 }
 
 .pill {
   display: inline-flex;
   align-items: center;
-  height: 27px;
-  padding: 0 11px;
+  height: 28px;
+  padding: 0 12px;
   border-radius: var(--r-pill);
-  background: var(--panel);
-  border: 1px solid var(--panel-line);
+  background: var(--surface);
+  border: 1px solid var(--line);
   font-size: 11px;
   font-weight: 900;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   white-space: nowrap;
-  color: var(--text-dim);
+  color: var(--ink-2);
+}
+
+.appbar--over-dark .pill {
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.28);
+  color: #ffffff;
 }
 
 .pill--done {
-  background: rgba(124, 255, 176, 0.14);
-  border-color: rgba(124, 255, 176, 0.5);
+  background: rgba(33, 181, 115, 0.12);
+  border-color: rgba(33, 181, 115, 0.4);
   color: var(--mint);
+}
+
+.appbar--over-dark .pill--done {
+  background: rgba(70, 230, 160, 0.2);
+  border-color: rgba(70, 230, 160, 0.5);
+  color: #7bffc4;
 }
 
 .pill--soon {
   background: rgba(254, 175, 54, 0.14);
-  border-color: rgba(254, 175, 54, 0.5);
-  color: var(--amber);
+  border-color: rgba(254, 175, 54, 0.45);
+  color: #b57708;
 }
 
 /* ===========================================================================
-   Buttons — the glossy pill from the Rive "Frequency (B)" row:
-   silver edge, deep blue face, cyan gloss across the top half.
+   Buttons
    =========================================================================== */
 
 .btn {
-  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  min-height: 48px;
+  min-height: 50px;
   padding: 0 22px;
   border-radius: var(--r-pill);
   font-size: 15px;
   font-weight: 800;
-  color: var(--text);
-  overflow: hidden;
-  transition: transform 0.16s var(--ease), filter 0.2s var(--ease),
-    opacity 0.2s var(--ease);
+  transition: transform 0.16s var(--ease), box-shadow 0.2s var(--ease),
+    filter 0.2s var(--ease), opacity 0.2s var(--ease);
 }
 
 .btn--primary {
-  /* `isolation` lets the gloss sit at z-index -1: above the button's own
-     background, below its label, without wrapping every label in a span. */
-  isolation: isolate;
-  background: linear-gradient(180deg, var(--btn-face) 0%, var(--btn-face-deep) 100%);
-  border: 2px solid var(--btn-edge);
-  box-shadow: 0 5px 14px -6px rgba(0, 0, 0, 0.75);
-  text-shadow: 0 1px 2px rgba(0, 20, 80, 0.55);
+  color: #ffffff;
+  background: linear-gradient(180deg, #2b8cff 0%, var(--blue) 100%);
+  box-shadow: 0 1px 1px rgba(255, 255, 255, 0.4) inset,
+    0 6px 18px -8px rgba(0, 117, 255, 0.9);
 }
 
-/* The gloss: a rounded cyan band inset across the upper half. */
-.btn--primary::before {
-  content: '';
-  position: absolute;
-  z-index: -1;
-  top: 3px;
-  left: 8px;
-  right: 8px;
-  height: 42%;
-  border-radius: var(--r-pill);
-  background: linear-gradient(180deg, var(--btn-gloss) 0%, rgba(127, 233, 255, 0) 100%);
-  opacity: 0.85;
-  pointer-events: none;
-}
-
-.btn:active {
-  transform: scale(0.97);
-  filter: brightness(1.08);
-}
-
-.btn:disabled {
-  opacity: 0.4;
-  pointer-events: none;
-}
-
-/* Toggled-on state keeps the same construction in green. */
 .btn--primary.is-on {
-  background: linear-gradient(180deg, #24c46d 0%, #0d8a45 100%);
-}
-
-.btn--primary.is-on::before {
-  background: linear-gradient(180deg, #9dffc7 0%, rgba(157, 255, 199, 0) 100%);
+  background: linear-gradient(180deg, #34cd8b 0%, var(--mint) 100%);
+  box-shadow: 0 1px 1px rgba(255, 255, 255, 0.4) inset,
+    0 6px 18px -8px rgba(33, 181, 115, 0.9);
 }
 
 .btn--ghost {
-  background: var(--panel);
-  border: 1px solid var(--panel-line);
-  color: var(--text);
+  color: var(--ink);
+  background: var(--paper);
+  border: 1px solid var(--line-strong);
+  box-shadow: var(--lift-1);
+}
+
+.btn:active {
+  transform: scale(0.975);
+  filter: brightness(1.04);
+}
+
+.btn:disabled {
+  opacity: 0.45;
+  pointer-events: none;
 }
 
 .btn--wide {
@@ -243,13 +241,9 @@ html[dir='rtl'] .appbar__fill {
 .linkish {
   display: inline-block;
   padding: 8px 4px;
-  font-size: 13px;
+  font-size: 13.5px;
   font-weight: 800;
-  color: var(--cyan);
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  text-decoration-thickness: 1.5px;
-  text-decoration-color: rgba(43, 175, 247, 0.45);
+  color: var(--blue);
 }
 
 .linkish--center {
@@ -260,44 +254,21 @@ html[dir='rtl'] .appbar__fill {
 
 .linkish--warn {
   color: var(--rose);
-  text-decoration-color: rgba(255, 93, 125, 0.45);
 }
 
-.langtoggle {
-  display: inline-flex;
-  padding: 3px;
-  border-radius: var(--r-pill);
-  background: var(--panel);
-  border: 1px solid var(--panel-line);
-}
-
-.langtoggle button {
-  min-width: 38px;
-  height: 26px;
-  border-radius: var(--r-pill);
-  font-size: 12px;
-  font-weight: 800;
-  color: var(--text-mute);
-  transition: color 0.18s var(--ease), background 0.18s var(--ease);
-}
-
-.langtoggle button.is-on {
-  color: #ffffff;
-  background: linear-gradient(180deg, var(--btn-face) 0%, var(--btn-face-deep) 100%);
-  box-shadow: inset 0 1px 0 rgba(127, 233, 255, 0.8);
+.linkish--onDark {
+  color: #9fd2ff;
 }
 
 /* ===========================================================================
-   Rive stage
+   Rive stage — full bleed, never a floating card
    =========================================================================== */
 
 .stage {
   position: relative;
   flex: 1;
   min-height: 0;
-  border-radius: var(--r-lg);
   overflow: hidden;
-  border: 1px solid var(--panel-line-soft);
   /* The canvas is the app's input surface: a drag on an in-canvas slider
      must not scroll the page out from under the finger. */
   touch-action: none;
@@ -315,7 +286,6 @@ html[dir='rtl'] .appbar__fill {
 
 .stage--paper {
   background: var(--paper);
-  border-color: rgba(255, 255, 255, 0.5);
 }
 
 .stage__canvas {
@@ -331,7 +301,7 @@ html[dir='rtl'] .appbar__fill {
   background: linear-gradient(
     100deg,
     transparent 20%,
-    rgba(127, 233, 255, 0.1) 42%,
+    rgba(43, 175, 247, 0.12) 42%,
     transparent 64%
   );
   background-size: 220% 100%;
@@ -358,8 +328,6 @@ html[dir='rtl'] .appbar__fill {
 .splash__art {
   position: absolute;
   inset: 0;
-  border-radius: 0;
-  border: 0;
   flex: none;
 }
 
@@ -382,7 +350,7 @@ html[dir='rtl'] .appbar__fill {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  padding: 0 var(--gut) calc(26px + var(--safe-b));
+  padding: 0 var(--gut) calc(30px + var(--safe-b));
   opacity: 0;
   transform: translateY(14px);
   transition: opacity 0.6s var(--ease), transform 0.6s var(--ease);
@@ -395,17 +363,11 @@ html[dir='rtl'] .appbar__fill {
 
 .splash__tagline {
   text-align: center;
-  font-size: 15px;
+  font-size: 15.5px;
   font-weight: 700;
   line-height: 1.55;
-  color: var(--text-dim);
+  color: rgba(255, 255, 255, 0.82);
   text-wrap: balance;
-}
-
-.splash__lang {
-  display: flex;
-  justify-content: center;
-  padding-top: 2px;
 }
 
 /* ===========================================================================
@@ -428,39 +390,66 @@ html[dir='rtl'] .appbar__fill {
   height: calc(28px + var(--safe-b));
 }
 
-.home__stat {
+.progresscard {
+  margin-top: 18px;
+  padding: 18px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  box-shadow: var(--lift-1);
+}
+
+.progresscard__row {
   display: flex;
-  align-items: baseline;
-  gap: 8px;
-  padding: 18px 2px 6px;
+  align-items: center;
+  gap: 14px;
 }
 
-.home__stat strong {
-  font-size: 30px;
+.progresscard__num {
+  font-size: 38px;
   font-weight: 900;
-  color: var(--text);
+  line-height: 1;
+  color: var(--ink);
 }
 
-.home__stat span {
-  font-size: 13px;
+.progresscard__num em {
+  font-style: normal;
+  font-size: 20px;
   font-weight: 800;
-  color: var(--text-mute);
+  color: var(--ink-3);
 }
 
-.home__medal {
-  margin-inline-start: auto;
-  padding: 4px 10px;
+.progresscard__label {
+  font-size: 13.5px;
+  font-weight: 800;
+  line-height: 1.35;
+  color: var(--ink-2);
+}
+
+.progresscard__label small {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-3);
+}
+
+.progresscard__track {
+  margin-top: 14px;
+  height: 8px;
   border-radius: var(--r-pill);
-  background: rgba(254, 175, 54, 0.16);
-  border: 1px solid rgba(254, 175, 54, 0.5);
-  color: var(--amber) !important;
-  font-size: 11px !important;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.progresscard__fill {
+  height: 100%;
+  transform-origin: left center;
+  border-radius: var(--r-pill);
+  background: linear-gradient(90deg, var(--cyan), var(--blue));
+  transition: transform 0.5s var(--ease);
 }
 
 .chapter {
-  padding-top: 22px;
+  padding-top: 26px;
 }
 
 .chapter__head {
@@ -472,31 +461,28 @@ html[dir='rtl'] .appbar__fill {
   font-weight: 900;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--cyan);
-}
-
-html[dir='rtl'] .chapter__no {
-  letter-spacing: normal;
+  color: var(--blue);
 }
 
 .chapter__title {
   margin-top: 3px;
-  font-size: 21px;
+  font-size: 22px;
   font-weight: 900;
-  color: var(--text);
+  letter-spacing: -0.01em;
+  color: var(--ink);
 }
 
 .chapter__blurb {
   margin-top: 3px;
   font-size: 13.5px;
-  font-weight: 700;
-  color: var(--text-mute);
+  font-weight: 600;
+  color: var(--ink-3);
 }
 
 .lesslist {
   display: flex;
   flex-direction: column;
-  gap: 9px;
+  gap: 10px;
 }
 
 .lesscard {
@@ -504,54 +490,53 @@ html[dir='rtl'] .chapter__no {
   align-items: center;
   gap: 14px;
   width: 100%;
-  padding: 14px 15px;
+  padding: 15px;
   text-align: start;
-  background: var(--panel);
-  border: 1px solid var(--panel-line);
+  background: var(--paper);
+  border: 1px solid var(--line);
   border-radius: var(--r-md);
-  transition: transform 0.16s var(--ease), background 0.2s var(--ease),
+  box-shadow: var(--lift-1);
+  transition: transform 0.16s var(--ease), box-shadow 0.2s var(--ease),
     border-color 0.2s var(--ease);
 }
 
 .lesscard:active {
   transform: scale(0.985);
-  background: var(--panel-soft);
+  box-shadow: var(--lift-2);
 }
 
 .lesscard.is-done {
-  border-color: rgba(124, 255, 176, 0.45);
+  border-color: rgba(33, 181, 115, 0.35);
 }
 
 .lesscard.is-soon {
-  background: rgba(11, 14, 88, 0.5);
+  background: var(--paper-2);
   border-style: dashed;
-  border-color: rgba(151, 181, 236, 0.3);
+  box-shadow: none;
 }
 
 .lesscard__no {
   flex: 0 0 auto;
   display: grid;
   place-items: center;
-  width: 34px;
-  height: 34px;
+  width: 36px;
+  height: 36px;
   border-radius: var(--r-pill);
-  background: #070a44;
-  border: 1px solid var(--panel-line);
+  background: var(--surface);
   font-size: 13px;
   font-weight: 900;
   font-variant-numeric: tabular-nums;
-  color: var(--text-dim);
+  color: var(--ink-2);
 }
 
 .lesscard.is-done .lesscard__no {
-  background: rgba(124, 255, 176, 0.18);
-  border-color: rgba(124, 255, 176, 0.55);
+  background: rgba(33, 181, 115, 0.14);
   color: var(--mint);
   font-size: 16px;
 }
 
 .lesscard.is-soon .lesscard__no {
-  color: var(--text-mute);
+  color: var(--ink-3);
 }
 
 .lesscard__text {
@@ -565,37 +550,33 @@ html[dir='rtl'] .chapter__no {
 .lesscard__title {
   font-size: 15.5px;
   font-weight: 800;
-  color: var(--text);
+  color: var(--ink);
 }
 
 .lesscard.is-soon .lesscard__title {
-  color: var(--text-dim);
+  color: var(--ink-2);
 }
 
 .lesscard__tag {
   font-size: 12.5px;
-  font-weight: 700;
+  font-weight: 600;
   line-height: 1.4;
-  color: var(--text-mute);
+  color: var(--ink-3);
 }
 
 .lesscard__go {
   flex: 0 0 auto;
-  font-size: 17px;
-  color: var(--text-mute);
-}
-
-html[dir='rtl'] .lesscard__go {
-  transform: scaleX(-1);
+  display: grid;
+  place-items: center;
+  color: var(--ink-3);
 }
 
 .lesscard__soon {
   flex: 0 0 auto;
-  padding: 3px 9px;
+  padding: 4px 10px;
   border-radius: var(--r-pill);
-  background: rgba(254, 175, 54, 0.14);
-  border: 1px solid rgba(254, 175, 54, 0.45);
-  color: var(--amber);
+  background: rgba(254, 175, 54, 0.15);
+  color: #b57708;
   font-size: 10px;
   font-weight: 900;
   letter-spacing: 0.07em;
@@ -603,36 +584,49 @@ html[dir='rtl'] .lesscard__go {
   white-space: nowrap;
 }
 
-html[dir='rtl'] .lesscard__soon {
-  letter-spacing: normal;
-}
-
 /* ===========================================================================
-   Lesson
+   Lesson — full-bleed stage with the sheet rising over it
    =========================================================================== */
 
-.lesson__stagewrap {
+/* The artboards are square and carry their own sliders near the bottom edge,
+   so the stage must reserve a full square: anything the sheet covers is a
+   control the learner can no longer reach. The padding is the strip the sheet
+   overlaps, kept outside the canvas box. */
+.lesson__stage {
   position: relative;
   z-index: 1;
-  flex: 1 1 auto;
-  min-height: 30dvh;
+  flex: 0 0 auto;
+  width: 100%;
+  aspect-ratio: 1;
+  max-height: 58dvh;
+  padding-bottom: var(--sheet-overlap);
   display: flex;
-  padding: 12px var(--gut) 0;
 }
 
+/* The sheet overlaps that padding strip so the two read as one composition
+   rather than two stacked boxes. */
 .sheet {
   position: relative;
   z-index: 2;
-  flex: 0 0 auto;
-  max-height: min(48dvh, 430px);
+  flex: 1 1 auto;
+  min-height: 0;
   display: flex;
-  margin-top: 12px;
-  background: var(--panel);
-  border-top: 1px solid var(--panel-line);
+  flex-direction: column;
+  margin-top: calc(-1 * var(--sheet-overlap));
+  background: var(--paper);
   border-radius: var(--r-xl) var(--r-xl) 0 0;
-  box-shadow: 0 -18px 40px -24px rgba(0, 0, 0, 0.9);
+  box-shadow: var(--lift-3);
   /* Without this, scrolled content shows through the rounded top corners. */
   overflow: hidden;
+}
+
+.sheet__grip {
+  flex: 0 0 auto;
+  width: 40px;
+  height: 4px;
+  margin: 9px auto 0;
+  border-radius: var(--r-pill);
+  background: var(--line-strong);
 }
 
 .sheet__scroll {
@@ -641,14 +635,23 @@ html[dir='rtl'] .lesscard__soon {
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
-  padding: 18px var(--gut) calc(18px + var(--safe-b));
+  padding: 14px var(--gut) calc(18px + var(--safe-b));
+}
+
+.sheet__title {
+  font-size: 22px;
+  font-weight: 900;
+  letter-spacing: -0.015em;
+  line-height: 1.2;
+  color: var(--ink);
 }
 
 .sheet__tagline {
-  font-size: 16px;
-  font-weight: 800;
+  padding-top: 6px;
+  font-size: 15px;
+  font-weight: 700;
   line-height: 1.5;
-  color: var(--text);
+  color: var(--ink-2);
   text-wrap: balance;
 }
 
@@ -656,100 +659,99 @@ html[dir='rtl'] .lesscard__soon {
   display: flex;
   flex-wrap: wrap;
   gap: 9px;
-  padding-top: 14px;
+  padding-top: 16px;
 }
+
+/* ---------------------------------------------------------------------------
+   Readout tiles — the SOH CAH TOA cards from the Rive file: a solid accent
+   header over a tinted body.
+   --------------------------------------------------------------------------- */
 
 .instruments {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  padding-top: 14px;
+  padding-top: 16px;
 }
 
-/* Readout tile: the Rive panel treatment at chip scale. */
 .chip {
+  flex: 1 1 auto;
+  min-width: 96px;
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  flex: 1 1 auto;
-  min-width: 94px;
-  padding: 8px 12px;
-  background: #080b4c;
-  border: 1px solid var(--panel-line-soft);
   border-radius: var(--r-sm);
-  border-inline-start-width: 3px;
+  overflow: hidden;
+  background: var(--surface);
 }
 
 .chip__label {
+  padding: 5px 10px;
   font-size: 10.5px;
-  font-weight: 800;
-  letter-spacing: 0.05em;
+  font-weight: 900;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
+  color: #ffffff;
   white-space: nowrap;
 }
 
-html[dir='rtl'] .chip__label {
-  letter-spacing: normal;
-}
-
 .chip__value {
-  font-family: var(--font-num);
-  font-size: 18px;
+  padding: 7px 10px 9px;
+  font-size: 19px;
   font-weight: 800;
   font-variant-numeric: tabular-nums;
-  line-height: 1.15;
-  color: var(--text);
+  line-height: 1.1;
+  color: var(--ink);
 }
 
-/* Label takes the accent colour, exactly as the Rive ratio panel does. */
-.chip--blue {
-  border-inline-start-color: var(--blue);
-}
 .chip--blue .chip__label {
-  color: #74b4ff;
+  background: var(--blue);
 }
-.chip--cyan {
-  border-inline-start-color: var(--cyan);
+.chip--blue .chip__value {
+  background: rgba(0, 117, 255, var(--tint));
 }
 .chip--cyan .chip__label {
-  color: var(--cyan);
+  background: var(--cyan);
 }
-.chip--amber {
-  border-inline-start-color: var(--amber);
+.chip--cyan .chip__value {
+  background: rgba(43, 175, 247, var(--tint));
 }
 .chip--amber .chip__label {
-  color: var(--amber);
+  background: #e89100;
 }
-.chip--violet {
-  border-inline-start-color: var(--violet);
+.chip--amber .chip__value {
+  background: rgba(254, 175, 54, 0.16);
 }
 .chip--violet .chip__label {
-  color: var(--violet);
+  background: var(--violet);
 }
-.chip--mint {
-  border-inline-start-color: var(--mint);
+.chip--violet .chip__value {
+  background: rgba(133, 77, 184, var(--tint));
 }
 .chip--mint .chip__label {
-  color: var(--mint);
+  background: var(--mint);
 }
-.chip--rose {
-  border-inline-start-color: var(--rose);
+.chip--mint .chip__value {
+  background: rgba(33, 181, 115, var(--tint));
 }
 .chip--rose .chip__label {
-  color: var(--rose);
+  background: var(--rose);
+}
+.chip--rose .chip__value {
+  background: rgba(255, 77, 106, var(--tint));
 }
 
 .checkpoint {
-  margin-top: 14px;
-  padding: 14px 15px;
-  background: #080b4c;
-  border: 1px solid rgba(43, 175, 247, 0.42);
+  margin-top: 16px;
+  padding: 15px;
+  background: rgba(0, 117, 255, 0.06);
+  border: 1px solid rgba(0, 117, 255, 0.22);
   border-radius: var(--r-md);
-  transition: border-color 0.3s var(--ease);
+  transition: background 0.3s var(--ease), border-color 0.3s var(--ease);
 }
 
 .checkpoint.is-solved {
-  border-color: rgba(124, 255, 176, 0.5);
+  background: rgba(33, 181, 115, 0.08);
+  border-color: rgba(33, 181, 115, 0.3);
 }
 
 .checkpoint__head {
@@ -761,18 +763,17 @@ html[dir='rtl'] .chip__label {
 .checkpoint__badge {
   display: grid;
   place-items: center;
-  width: 20px;
-  height: 20px;
+  width: 21px;
+  height: 21px;
   border-radius: var(--r-pill);
-  background: var(--cyan);
-  color: #041033;
+  background: var(--blue);
+  color: #ffffff;
   font-size: 11px;
   font-weight: 900;
 }
 
 .checkpoint.is-solved .checkpoint__badge {
   background: var(--mint);
-  color: #05301a;
   animation: pop 0.4s var(--ease);
 }
 
@@ -793,11 +794,7 @@ html[dir='rtl'] .chip__label {
   font-weight: 900;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--cyan);
-}
-
-html[dir='rtl'] .checkpoint__kicker {
-  letter-spacing: normal;
+  color: var(--blue);
 }
 
 .checkpoint.is-solved .checkpoint__kicker {
@@ -809,38 +806,38 @@ html[dir='rtl'] .checkpoint__kicker {
   font-size: 14.5px;
   font-weight: 700;
   line-height: 1.55;
-  color: var(--text);
+  color: var(--ink);
 }
 
 .checkpoint__note {
   padding-top: 6px;
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 600;
   line-height: 1.5;
-  color: var(--text-dim);
+  color: var(--ink-2);
 }
 
 .prose {
-  padding-top: 4px;
+  padding-top: 18px;
   display: flex;
   flex-direction: column;
-  gap: 11px;
+  gap: 12px;
 }
 
 .prose p {
   font-size: 14.5px;
   font-weight: 500;
   line-height: 1.75;
-  color: var(--text-dim);
+  color: var(--ink-2);
 }
 
 .prose__dim {
-  color: var(--text-mute) !important;
-  font-size: 13px !important;
+  color: var(--ink-3) !important;
+  font-size: 13.5px !important;
 }
 
 .sheet__foot {
-  padding-top: 16px;
+  padding-top: 20px;
 }
 
 /* ===========================================================================
@@ -856,7 +853,7 @@ html[dir='rtl'] .checkpoint__kicker {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 16px;
+  gap: 14px;
   padding: 24px var(--gut) calc(28px + var(--safe-b));
   text-align: center;
 }
@@ -864,34 +861,29 @@ html[dir='rtl'] .checkpoint__kicker {
 .soon__art {
   display: grid;
   place-items: center;
-  width: 148px;
-  height: 148px;
+  width: 140px;
+  height: 140px;
   border-radius: var(--r-lg);
-  background: var(--panel);
-  border: 1px dashed rgba(151, 181, 236, 0.35);
-  opacity: 0.9;
+  background: var(--paper-2);
+  border: 1px dashed var(--line-strong);
 }
 
 .soon__badge {
   padding: 5px 12px;
   border-radius: var(--r-pill);
-  background: rgba(254, 175, 54, 0.14);
-  border: 1px solid rgba(254, 175, 54, 0.5);
-  color: var(--amber);
+  background: rgba(254, 175, 54, 0.15);
+  color: #b57708;
   font-size: 11px;
   font-weight: 900;
   letter-spacing: 0.09em;
   text-transform: uppercase;
 }
 
-html[dir='rtl'] .soon__badge {
-  letter-spacing: normal;
-}
-
 .soon__title {
-  font-size: 24px;
+  font-size: 25px;
   font-weight: 900;
-  color: var(--text);
+  letter-spacing: -0.015em;
+  color: var(--ink);
   text-wrap: balance;
 }
 
@@ -900,7 +892,7 @@ html[dir='rtl'] .soon__badge {
   font-size: 14.5px;
   font-weight: 700;
   line-height: 1.6;
-  color: var(--text-dim);
+  color: var(--ink-2);
   text-wrap: balance;
 }
 
@@ -909,39 +901,52 @@ html[dir='rtl'] .soon__badge {
   font-size: 13px;
   font-weight: 500;
   line-height: 1.6;
-  color: var(--text-mute);
+  color: var(--ink-3);
 }
 
 .soon__foot {
   width: 100%;
   max-width: 360px;
-  padding-top: 6px;
+  padding-top: 8px;
 }
 
 /* ===========================================================================
    About
    =========================================================================== */
 
-.about__art {
-  height: 200px;
-  margin: 14px 0 18px;
-  border-radius: var(--r-lg);
-  overflow: hidden;
-  background: var(--navy);
-  border: 1px solid var(--panel-line-soft);
+.about__hero {
   display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 28px 0 22px;
+}
+
+.about__name {
+  font-size: 24px;
+  font-weight: 900;
+  letter-spacing: -0.015em;
+  color: var(--ink);
+}
+
+.about__kicker {
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-3);
 }
 
 .about__stat {
-  margin-top: 18px;
-  padding: 12px;
-  background: var(--panel);
-  border: 1px solid var(--panel-line);
+  margin-top: 20px;
+  padding: 14px;
+  background: var(--paper-2);
+  border: 1px solid var(--line);
   border-radius: var(--r-md);
   text-align: center;
   font-size: 13px;
   font-weight: 800;
-  color: var(--text-dim);
+  color: var(--ink-2);
 }
 
 /* ===========================================================================
@@ -954,20 +959,11 @@ html[dir='rtl'] .soon__badge {
   display: grid;
   place-items: center;
   padding: 48px 32px;
-  background: radial-gradient(120% 90% at 50% -10%, #1a2091 0%, #0a0d55 62%);
+  background: radial-gradient(120% 90% at 50% -20%, #eef3ff 0%, var(--paper) 60%);
   overflow-y: auto;
 }
 
-.gate__lang {
-  position: absolute;
-  top: 24px;
-  inset-inline-end: 28px;
-  z-index: 2;
-}
-
 .gate__inner {
-  position: relative;
-  z-index: 1;
   width: min(880px, 100%);
   display: flex;
   flex-direction: column;
@@ -984,44 +980,38 @@ html[dir='rtl'] .soon__badge {
   font-weight: 900;
   letter-spacing: 0.22em;
   text-transform: uppercase;
-  color: var(--amber);
-}
-
-html[dir='rtl'] .gate__kicker {
-  letter-spacing: normal;
+  color: var(--ink-3);
 }
 
 .gate__title {
-  margin-top: 8px;
-  font-size: clamp(34px, 5vw, 54px);
+  margin-top: 10px;
+  font-size: clamp(34px, 5vw, 56px);
   font-weight: 900;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.03em;
   line-height: 1.02;
-  background: linear-gradient(180deg, #ffffff, #8ecdff);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  color: var(--ink);
 }
 
 .gate__tagline {
   margin-top: 12px;
   max-width: 46ch;
   font-size: 16px;
-  font-weight: 700;
+  font-weight: 600;
   line-height: 1.6;
-  color: var(--text-dim);
+  color: var(--ink-2);
 }
 
 .gate__card {
-  margin-top: 34px;
+  margin-top: 36px;
   width: 100%;
   display: flex;
   align-items: center;
   gap: 32px;
   padding: 28px;
-  background: var(--panel);
-  border: 1px solid var(--panel-line);
+  background: var(--paper);
+  border: 1px solid var(--line);
   border-radius: var(--r-xl);
+  box-shadow: var(--lift-2);
   text-align: start;
 }
 
@@ -1035,8 +1025,7 @@ html[dir='rtl'] .gate__kicker {
   padding: 5px 11px;
   border-radius: var(--r-pill);
   background: rgba(254, 175, 54, 0.15);
-  border: 1px solid rgba(254, 175, 54, 0.5);
-  color: var(--amber);
+  color: #b57708;
   font-size: 11px;
   font-weight: 900;
   letter-spacing: 0.05em;
@@ -1045,9 +1034,10 @@ html[dir='rtl'] .gate__kicker {
 
 .gate__h2 {
   margin-top: 12px;
-  font-size: 24px;
+  font-size: 25px;
   font-weight: 900;
-  color: var(--text);
+  letter-spacing: -0.015em;
+  color: var(--ink);
 }
 
 .gate__body {
@@ -1056,7 +1046,7 @@ html[dir='rtl'] .gate__kicker {
   font-size: 14.5px;
   font-weight: 500;
   line-height: 1.7;
-  color: var(--text-dim);
+  color: var(--ink-2);
 }
 
 .gate__qr {
@@ -1067,7 +1057,8 @@ html[dir='rtl'] .gate__kicker {
   gap: 10px;
   padding: 14px;
   border-radius: var(--r-lg);
-  background: #ffffff;
+  background: var(--paper-2);
+  border: 1px solid var(--line);
 }
 
 .gate__qr canvas {
@@ -1081,7 +1072,7 @@ html[dir='rtl'] .gate__kicker {
   font-size: 11px;
   font-weight: 800;
   line-height: 1.4;
-  color: var(--navy);
+  color: var(--ink-2);
 }
 
 /* ===========================================================================
@@ -1094,7 +1085,7 @@ html[dir='rtl'] .gate__kicker {
   display: grid;
   place-items: center;
   padding: 40px;
-  background: radial-gradient(120% 90% at 50% -10%, #1a2091 0%, #0a0d55 62%);
+  background: radial-gradient(120% 90% at 50% -20%, #eef3ff 0%, var(--paper) 60%);
 }
 
 .framer__close {
@@ -1111,9 +1102,9 @@ html[dir='rtl'] .gate__kicker {
   height: min(844px, calc(100dvh - 80px));
   padding: 12px;
   border-radius: 54px;
-  background: linear-gradient(160deg, #2b3170, #0b0e3a);
-  box-shadow: 0 40px 90px -30px rgba(0, 0, 0, 0.85),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+  background: linear-gradient(160deg, #dfe4f2, #b9c1d8);
+  box-shadow: 0 40px 90px -34px rgba(20, 26, 70, 0.45),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.7);
 }
 
 .framer__notch {
@@ -1124,7 +1115,7 @@ html[dir='rtl'] .gate__kicker {
   width: 116px;
   height: 26px;
   border-radius: var(--r-pill);
-  background: #05071f;
+  background: #141a46;
   z-index: 2;
 }
 
@@ -1134,7 +1125,7 @@ html[dir='rtl'] .gate__kicker {
   height: 100%;
   border-radius: 42px;
   overflow: hidden;
-  background: var(--navy);
+  background: var(--paper);
 }
 
 /* The framed app must measure itself against the frame, not the window. */
@@ -1146,18 +1137,9 @@ html[dir='rtl'] .gate__kicker {
    Short viewports
    =========================================================================== */
 
-@media (max-height: 700px) {
-  .sheet {
-    max-height: min(52dvh, 360px);
-  }
-
-  .lesson__stagewrap {
-    min-height: 26dvh;
-    padding-top: 8px;
-  }
-
-  .sheet__scroll {
-    padding-top: 14px;
+@media (max-height: 720px) {
+  .lesson__stage {
+    max-height: 52dvh;
   }
 }
 

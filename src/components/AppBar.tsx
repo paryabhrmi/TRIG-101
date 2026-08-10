@@ -1,4 +1,3 @@
-import { useI18n } from '../lib/i18n'
 import type { ReactNode } from 'react'
 
 interface Props {
@@ -8,18 +7,36 @@ interface Props {
   right?: ReactNode
   /** 0–1. Renders the hairline course progress bar under the bar. */
   progress?: number
+  /**
+   * `over-dark` lets the bar sit directly on a navy artboard so the canvas
+   * runs edge to edge instead of being boxed in below a white strip.
+   */
+  variant?: 'light' | 'over-dark'
 }
 
-export function AppBar({ onBack, title, subtitle, right, progress }: Props) {
-  const { dir } = useI18n()
-  const backGlyph = dir === 'rtl' ? '›' : '‹'
-
+export function AppBar({
+  onBack,
+  title,
+  subtitle,
+  right,
+  progress,
+  variant = 'light',
+}: Props) {
   return (
-    <header className="appbar">
+    <header className={`appbar appbar--${variant}`}>
       <div className="appbar__row">
         {onBack ? (
           <button type="button" className="iconbtn" onClick={onBack} aria-label="Back">
-            <span aria-hidden="true">{backGlyph}</span>
+            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+              <path
+                d="M15 5 L8 12 L15 19"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.4"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
           </button>
         ) : (
           <span className="iconbtn iconbtn--ghost" aria-hidden="true" />

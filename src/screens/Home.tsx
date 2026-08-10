@@ -1,8 +1,5 @@
 import { AppBar } from '../components/AppBar'
-import { LangToggle } from '../components/LangToggle'
 import { TOTAL_LESSONS, chapters, lessons, slotNumber, upcoming } from '../data/curriculum'
-import { ui } from '../data/ui'
-import { useI18n } from '../lib/i18n'
 import { useProgress } from '../lib/progress'
 
 interface Props {
@@ -13,7 +10,6 @@ interface Props {
 
 /** The course index: fifteen slots, ten playable, one visible thread. */
 export function Home({ onOpen, onAbout, onBack }: Props) {
-  const { t } = useI18n()
   const { progress } = useProgress()
 
   const doneCount = lessons.filter((l) => progress[l.id]).length
@@ -21,25 +17,32 @@ export function Home({ onOpen, onAbout, onBack }: Props) {
 
   return (
     <div className="screen home">
-      <div className="blueprint" />
-
       <AppBar
         onBack={onBack}
-        subtitle={t(ui.appName)}
-        title={t(ui.lessons)}
-        right={<LangToggle />}
+        subtitle="Trigonometry 101"
+        title="Lessons"
         progress={ratio}
       />
 
       <div className="home__scroll">
-        <div className="home__stat">
-          <strong>
-            {doneCount}/{lessons.length}
-          </strong>
-          <span>{t(ui.complete)}</span>
-          {doneCount === lessons.length && (
-            <span className="home__medal">{t(ui.courseDone)}</span>
-          )}
+        <div className="progresscard">
+          <div className="progresscard__row">
+            <span className="progresscard__num">
+              {doneCount}
+              <em>/{lessons.length}</em>
+            </span>
+            <span className="progresscard__label">
+              lessons complete
+              <br />
+              <small>{lessons.length} of {TOTAL_LESSONS} built so far</small>
+            </span>
+          </div>
+          <div className="progresscard__track" aria-hidden="true">
+            <div
+              className="progresscard__fill"
+              style={{ transform: `scaleX(${ratio})` }}
+            />
+          </div>
         </div>
 
         {chapters.map((chapter) => {
@@ -50,11 +53,9 @@ export function Home({ onOpen, onAbout, onBack }: Props) {
           return (
             <section key={chapter.id} className="chapter">
               <div className="chapter__head">
-                <span className="chapter__no">
-                  {t(ui.chapter)} {chapter.id}
-                </span>
-                <h2 className="chapter__title">{t(chapter.title)}</h2>
-                <p className="chapter__blurb">{t(chapter.blurb)}</p>
+                <span className="chapter__no">Chapter {chapter.id}</span>
+                <h2 className="chapter__title">{chapter.title}</h2>
+                <p className="chapter__blurb">{chapter.blurb}</p>
               </div>
 
               <ul className="lesslist">
@@ -71,11 +72,20 @@ export function Home({ onOpen, onAbout, onBack }: Props) {
                           {done ? '✓' : String(slotNumber(lesson.id)).padStart(2, '0')}
                         </span>
                         <span className="lesscard__text">
-                          <span className="lesscard__title">{t(lesson.title)}</span>
-                          <span className="lesscard__tag">{t(lesson.tagline)}</span>
+                          <span className="lesscard__title">{lesson.title}</span>
+                          <span className="lesscard__tag">{lesson.tagline}</span>
                         </span>
                         <span className="lesscard__go" aria-hidden="true">
-                          →
+                          <svg viewBox="0 0 24 24" width="18" height="18">
+                            <path
+                              d="M9 5 L16 12 L9 19"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2.4"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          </svg>
                         </span>
                       </button>
                     </li>
@@ -93,10 +103,10 @@ export function Home({ onOpen, onAbout, onBack }: Props) {
                         {String(slotNumber(lesson.id)).padStart(2, '0')}
                       </span>
                       <span className="lesscard__text">
-                        <span className="lesscard__title">{t(lesson.title)}</span>
-                        <span className="lesscard__tag">{t(lesson.tagline)}</span>
+                        <span className="lesscard__title">{lesson.title}</span>
+                        <span className="lesscard__tag">{lesson.tagline}</span>
                       </span>
-                      <span className="lesscard__soon">{t(ui.soon)}</span>
+                      <span className="lesscard__soon">Soon</span>
                     </button>
                   </li>
                 ))}
@@ -105,12 +115,8 @@ export function Home({ onOpen, onAbout, onBack }: Props) {
           )
         })}
 
-        <p className="chapter__blurb" style={{ padding: '18px 2px 0', textAlign: 'center' }}>
-          {lessons.length}/{TOTAL_LESSONS} {t(ui.lessons)}
-        </p>
-
         <button type="button" className="linkish linkish--center" onClick={onAbout}>
-          {t(ui.about)}
+          About this app
         </button>
         <div className="home__pad" />
       </div>

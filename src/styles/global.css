@@ -1,53 +1,56 @@
 /* ---------------------------------------------------------------------------
    Trigonometry 101 — design tokens
-   Every value here is sampled from, or matched to, the Rive artboards so the
-   app chrome and the canvas read as one piece of design rather than a canvas
-   dropped into someone else's UI.
+
+   A light, premium shell derived from the light-themed panels inside the Rive
+   file (the SOH CAH TOA card): near-white paper, soft grey surfaces, and the
+   file's own saturated accents used sparingly and with intent.
    --------------------------------------------------------------------------- */
 
 :root {
-  /* Surfaces — the first two are literal artboard background colours. */
+  /* Paper */
+  --paper: #ffffff;
+  --paper-2: #f6f7fb;
+  --surface: #f2f4fa;
+  --line: #e6e9f4;
+  --line-strong: #d5dae9;
+
+  /* Ink — sampled from the label text in the Angle artboard. */
+  --ink: #141a46;
+  --ink-2: #4a5279;
+  --ink-3: #858db0;
+  --ink-mute: #8a92b4;
+
+  /* Artboard backdrops, used behind the canvas so it never looks boxed in. */
   --navy: #0d1062;
   --deep: #00047d;
-  --paper: #ffffff;
 
-  /* Panels: Rive draws a slightly darker navy inside a thin steel-blue rule. */
-  --panel: #0b0e58;
-  --panel-soft: #101472;
-  --panel-line: rgba(151, 181, 236, 0.42);
-  --panel-line-soft: rgba(151, 181, 236, 0.22);
-  /* The teal-to-navy wash across a Rive panel header. */
-  --panel-head: linear-gradient(90deg, #10416f 0%, #0c1566 78%);
-
-  /* Glossy button, straight off the Frequency (B) buttons. */
-  --btn-edge: #cfd4d8;
-  --btn-gloss: #7fe9ff;
-  --btn-face: #0b62f0;
-  --btn-face-deep: #0a37c4;
-
-  /* Accents */
+  /* Accents, straight out of the artwork. */
   --blue: #0075ff;
   --cyan: #2baff7;
   --amber: #feaf36;
-  --violet: #a06fd8;
-  --mint: #7cffb0;
-  --rose: #ff5d7d;
-  --red: #ff3b3b;
+  --violet: #854db8;
+  --mint: #21b573;
+  --rose: #ff4d6a;
 
-  /* Text */
-  --text: #ffffff;
-  --text-dim: #b3c0f0;
-  --text-mute: #7c89c8;
+  /* Tints for accent-backed surfaces (the Rive formula rows). */
+  --tint: 0.1;
 
-  /* Shape — Rive's panels are gently rounded, not pill-soft. */
-  --r-sm: 8px;
-  --r-md: 12px;
-  --r-lg: 18px;
-  --r-xl: 26px;
+  /* Shape */
+  --r-sm: 10px;
+  --r-md: 14px;
+  --r-lg: 20px;
+  --r-xl: 28px;
   --r-pill: 999px;
+
+  /* Elevation — premium means soft and low-contrast, never heavy. */
+  --lift-1: 0 1px 2px rgba(20, 26, 70, 0.05), 0 2px 8px rgba(20, 26, 70, 0.04);
+  --lift-2: 0 2px 6px rgba(20, 26, 70, 0.06), 0 10px 26px rgba(20, 26, 70, 0.08);
+  --lift-3: 0 -2px 10px rgba(20, 26, 70, 0.05), 0 -18px 44px rgba(20, 26, 70, 0.12);
 
   /* Rhythm */
   --gut: 20px;
+  /* How far the bottom sheet rides up over the artwork. */
+  --sheet-overlap: 22px;
   --safe-t: env(safe-area-inset-top, 0px);
   --safe-b: env(safe-area-inset-bottom, 0px);
 
@@ -55,14 +58,8 @@
      closest geometric rounded face available for free on the web. */
   --font-ui: 'M PLUS Rounded 1c', 'Nunito', ui-rounded, 'SF Pro Rounded',
     system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --font-fa: 'Vazirmatn', 'Segoe UI', Tahoma, system-ui, sans-serif;
-  --font-num: var(--font-ui);
 
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-html[dir='rtl'] {
-  --font-ui: 'Vazirmatn', 'M PLUS Rounded 1c', 'Segoe UI', Tahoma, sans-serif;
 }
 
 * {
@@ -78,16 +75,16 @@ body,
 html {
   /* The app never scrolls as a document; panes opt into scrolling. */
   overflow: hidden;
-  background: var(--navy);
+  background: var(--paper);
   -webkit-text-size-adjust: 100%;
 }
 
 body {
   margin: 0;
   font-family: var(--font-ui);
-  font-weight: 700;
-  color: var(--text);
-  background: var(--navy);
+  font-weight: 500;
+  color: var(--ink);
+  background: var(--paper);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   overscroll-behavior: none;
@@ -121,21 +118,9 @@ ul {
 }
 
 :focus-visible {
-  outline: 2px solid var(--cyan);
+  outline: 2px solid var(--blue);
   outline-offset: 3px;
   border-radius: 6px;
-}
-
-/* The blueprint grid behind the Cover artboard, continued into the app. */
-.blueprint {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background-image: linear-gradient(rgba(94, 156, 255, 0.11) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(94, 156, 255, 0.11) 1px, transparent 1px);
-  background-size: 34px 34px;
-  mask-image: radial-gradient(130% 85% at 50% 0%, #000 45%, transparent 100%);
-  -webkit-mask-image: radial-gradient(130% 85% at 50% 0%, #000 45%, transparent 100%);
 }
 
 @media (prefers-reduced-motion: reduce) {
