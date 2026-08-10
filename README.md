@@ -1,8 +1,8 @@
 # Trigonometry 101
 
 An interactive, mobile-first course that teaches sine, cosine and tangent by
-letting you drag them. Ten lessons, three chapters, one Rive file doing the
-heavy lifting.
+letting you drag them. Fifteen lessons planned, ten built, one Rive file doing
+the heavy lifting.
 
 **Live:** https://paryabhrmi.github.io/TRIG-101/
 
@@ -47,8 +47,29 @@ means the lesson tasks are real manipulations instead of multiple-choice.
 | 9 | Amplitude and frequency | `AmpFrqSin` | Max amplitude, frequency 3 |
 | 10 | Where the wave shows up | `TheSwing` | Release the pendulum |
 
+Slots 11–15 (`upcoming` in `src/data/curriculum.ts`) are placeholders: they
+appear in the index with a SOON badge and open a screen naming what they will
+cover. Titles are provisional — rename them freely, and move an entry from
+`upcoming` into `lessons` once its artboard exists.
+
 Copy is bilingual (English / Persian) with full RTL support; the switch is in
-the app bar. Progress persists in `localStorage`.
+the app bar. Progress persists in `localStorage` and tracks the ten playable
+lessons; numbering runs against all fifteen.
+
+## Design
+
+The app chrome deliberately borrows the file's own visual language so the
+canvas does not look pasted into someone else's UI:
+
+- the navy `#0D1062` and the blueprint grid come from the `Cover` artboard;
+- panels are drawn like the `Ratio` panel — dark navy inside a thin steel-blue
+  rule, with a teal-to-navy header wash;
+- buttons reproduce the glossy silver-edged pills from the `Frequency (B)` row;
+- readout labels take accent colours the way the ratio panel colours its terms;
+- **M PLUS Rounded 1c** stands in for the file's DIN Round Pro.
+
+Light-themed artboards (`Angle`, `SecretRatios`) sit on a white card; the dark
+ones blend straight into the page.
 
 ## Rive integration notes
 
@@ -114,24 +135,13 @@ Pushing to `main` (or this feature branch) runs
 `.github/workflows/deploy.yml`, which builds and publishes `dist/` to GitHub
 Pages.
 
-### One-time setup — required before the first successful deploy
+Pages is enabled and the site is live; no manual setup is needed. The workflow
+passes `enablement: true` to `configure-pages`, so a fresh fork or a renamed
+repository provisions its own Pages site on the first run.
 
-The build steps pass, but publishing currently stops at `configure-pages` with
-`Create Pages site failed — Resource not accessible by integration`, because
-**Pages has never been enabled on this repository and it is private.** GitHub
-Pages on a private repository requires a paid plan (Pro / Team / Enterprise);
-on Free it can only serve public repositories. The workflow token cannot
-create the site on its own, so this needs one manual choice:
-
-- **Make the repository public** — Settings → General → Danger Zone → Change
-  visibility. Then Settings → Pages → Source: **GitHub Actions**. Works on the
-  Free plan.
-- **Or keep it private and upgrade** to GitHub Pro, then Settings → Pages →
-  Source: **GitHub Actions**.
-
-Re-run the workflow afterwards (Actions → Deploy to GitHub Pages → Re-run
-jobs). The workflow passes `enablement: true`, so once the plan permits it the
-site is provisioned automatically and no further setup is needed.
+One caveat worth knowing if this repo ever goes private again: GitHub Pages on
+a private repository requires a paid plan. On Free, `configure-pages` fails
+with `Resource not accessible by integration` until the repo is public again.
 
 `vite.config.ts` sets `base: '/TRIG-101/'` for production. If the repository is
 ever renamed, that value has to change with it.
