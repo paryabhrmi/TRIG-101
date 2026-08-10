@@ -1,0 +1,19 @@
+{
+  "name": "Trigonometry 101",
+  "short_name": "Trig 101",
+  "description": "Learn sine, cosine and tangent by dragging, not by reading.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0D1062",
+  "theme_color": "#0D1062",
+  "icons": [
+    {
+      "src": "./favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
