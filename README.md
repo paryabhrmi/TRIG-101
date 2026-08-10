@@ -114,8 +114,24 @@ Pushing to `main` (or this feature branch) runs
 `.github/workflows/deploy.yml`, which builds and publishes `dist/` to GitHub
 Pages.
 
-One-time setup: **Settings → Pages → Build and deployment → Source: GitHub
-Actions**.
+### One-time setup — required before the first successful deploy
+
+The build steps pass, but publishing currently stops at `configure-pages` with
+`Create Pages site failed — Resource not accessible by integration`, because
+**Pages has never been enabled on this repository and it is private.** GitHub
+Pages on a private repository requires a paid plan (Pro / Team / Enterprise);
+on Free it can only serve public repositories. The workflow token cannot
+create the site on its own, so this needs one manual choice:
+
+- **Make the repository public** — Settings → General → Danger Zone → Change
+  visibility. Then Settings → Pages → Source: **GitHub Actions**. Works on the
+  Free plan.
+- **Or keep it private and upgrade** to GitHub Pro, then Settings → Pages →
+  Source: **GitHub Actions**.
+
+Re-run the workflow afterwards (Actions → Deploy to GitHub Pages → Re-run
+jobs). The workflow passes `enablement: true`, so once the plan permits it the
+site is provisioned automatically and no further setup is needed.
 
 `vite.config.ts` sets `base: '/TRIG-101/'` for production. If the repository is
 ever renamed, that value has to change with it.
