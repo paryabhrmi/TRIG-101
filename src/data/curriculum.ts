@@ -151,7 +151,35 @@ export const lessons: Lesson[] = [
         fa: 'تمرکز را بین زاویهٔ A و B جابه‌جا کنید. مثلث تکان نمی‌خورد؛ فقط برچسب‌ها عوض می‌شوند.',
       },
     ],
-    readouts: [],
+    // `Angle` carries no view model, so these come from the state machine's
+    // own boolean instead. Only the focus is live data — the side letters are
+    // derived from it, never numbers copied out of the artboard.
+    readouts: [
+      {
+        id: 'focus',
+        label: { en: 'Focus', fa: 'تمرکز' },
+        tone: 'cyan',
+        value: (s) => (s.b['Boolean 1'] ? 'Angle A' : 'Angle B'),
+      },
+      {
+        id: 'opp',
+        label: { en: 'Opposite', fa: 'روبه‌رو' },
+        tone: 'amber',
+        value: (s) => (s.b['Boolean 1'] ? 'BC' : 'AC'),
+      },
+      {
+        id: 'adj',
+        label: { en: 'Adjacent', fa: 'مجاور' },
+        tone: 'mint',
+        value: (s) => (s.b['Boolean 1'] ? 'AC' : 'BC'),
+      },
+      {
+        id: 'hyp',
+        label: { en: 'Hypotenuse', fa: 'وتر' },
+        tone: 'violet',
+        value: () => 'AB',
+      },
+    ],
     checkpoint: {
       goal: {
         en: 'Move the focus onto angle B and watch the two labels trade places.',
