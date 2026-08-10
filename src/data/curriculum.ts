@@ -69,6 +69,20 @@ export interface Lesson {
   watchInputs?: string[]
 }
 
+/**
+ * A lesson that is planned but has no artboard wired up yet. The course is
+ * scoped at 15; these are the slots still to be authored, shown in the index
+ * so the shape of the whole course is visible from day one.
+ */
+export interface UpcomingLesson {
+  id: string
+  chapter: number
+  title: Localized
+  tagline: Localized
+  /** What it will cover once the artboard exists. */
+  note: Localized
+}
+
 export interface Chapter {
   id: number
   title: Localized
@@ -118,6 +132,14 @@ export const chapters: Chapter[] = [
     blurb: {
       en: 'Where trigonometry meets the real world.',
       fa: 'جایی که مثلثات به دنیای واقعی می‌رسد.',
+    },
+  },
+  {
+    id: 4,
+    title: { en: 'Coming Next', fa: 'به‌زودی' },
+    blurb: {
+      en: 'Planned lessons — artboards still to be authored.',
+      fa: 'درس‌های برنامه‌ریزی‌شده — آرت‌بوردشان هنوز ساخته نشده.',
     },
   },
 ]
@@ -775,7 +797,91 @@ export const lessons: Lesson[] = [
   },
 ]
 
+/**
+ * Slots 11–15. Titles are provisional: rename them freely, and promote one
+ * into `lessons` as soon as its artboard lands.
+ */
+export const upcoming: UpcomingLesson[] = [
+  {
+    id: 'phase',
+    chapter: 4,
+    title: { en: 'Phase shift', fa: 'اختلاف فاز' },
+    tagline: {
+      en: 'Sliding a wave sideways without changing it.',
+      fa: 'جابه‌جا کردن موج بدون تغییر دادنش.',
+    },
+    note: {
+      en: 'y = A·sin(Bθ + C) — the third dial, and why two identical waves can cancel each other out.',
+      fa: 'y = A·sin(Bθ + C) — درجه‌بندی سوم، و اینکه چرا دو موج یکسان می‌توانند همدیگر را خنثی کنند.',
+    },
+  },
+  {
+    id: 'identity',
+    chapter: 4,
+    title: { en: 'The Pythagorean identity', fa: 'اتحاد فیثاغورسی' },
+    tagline: {
+      en: 'sin²θ + cos²θ = 1, and why it cannot be otherwise.',
+      fa: 'sin²θ + cos²θ = ۱، و چرا نمی‌تواند جور دیگری باشد.',
+    },
+    note: {
+      en: 'The unit circle has radius 1. Pythagoras does the rest — no memorisation required.',
+      fa: 'شعاع دایرهٔ واحد ۱ است. باقی‌اش با فیثاغورس — نیازی به حفظ کردن نیست.',
+    },
+  },
+  {
+    id: 'inverse',
+    chapter: 4,
+    title: { en: 'Going backwards', fa: 'راه برگشت' },
+    tagline: {
+      en: 'You know the ratio. What was the angle?',
+      fa: 'نسبت را می‌دانید. زاویه چه بود؟',
+    },
+    note: {
+      en: 'arcsin, arccos and arctan — and why a calculator has to pick just one of infinitely many answers.',
+      fa: 'آرک‌سینوس، آرک‌کسینوس و آرک‌تانژانت — و چرا ماشین‌حساب باید از میان بی‌نهایت جواب یکی را انتخاب کند.',
+    },
+  },
+  {
+    id: 'solving',
+    chapter: 4,
+    title: { en: 'Measuring the unreachable', fa: 'اندازه‌گیری چیزی که دست‌نیافتنی است' },
+    tagline: {
+      en: 'One angle and one distance is enough for a tower.',
+      fa: 'یک زاویه و یک فاصله برای اندازه‌گیری یک برج کافی است.',
+    },
+    note: {
+      en: 'Solving right triangles in the field: heights, slopes, and how surveyors actually work.',
+      fa: 'حل مثلث قائم‌الزاویه در عمل: ارتفاع‌ها، شیب‌ها، و اینکه نقشه‌برداران واقعاً چه می‌کنند.',
+    },
+  },
+  {
+    id: 'signals',
+    chapter: 4,
+    title: { en: 'Everything is waves', fa: 'همه‌چیز موج است' },
+    tagline: {
+      en: 'Stack enough sines and you can draw anything.',
+      fa: 'به اندازهٔ کافی سینوس روی هم بگذارید، هر شکلی می‌سازید.',
+    },
+    note: {
+      en: 'A first look at Fourier: sound, light and every signal as a sum of the waves you already know.',
+      fa: 'نگاهی نخست به فوریه: صدا، نور و هر سیگنالی، به‌صورت جمعی از همان موج‌هایی که می‌شناسید.',
+    },
+  },
+]
+
+/** Every slot in the course, ready or not — used for numbering and counts. */
+export const TOTAL_LESSONS = lessons.length + upcoming.length
+
 export const lessonById = (id: string): Lesson | undefined =>
   lessons.find((l) => l.id === id)
 
-export const lessonIndex = (id: string): number => lessons.findIndex((l) => l.id === id)
+export const upcomingById = (id: string): UpcomingLesson | undefined =>
+  upcoming.find((l) => l.id === id)
+
+/** 1-based position in the full 15-slot course. */
+export function slotNumber(id: string): number {
+  const ready = lessons.findIndex((l) => l.id === id)
+  if (ready >= 0) return ready + 1
+  const soon = upcoming.findIndex((l) => l.id === id)
+  return soon >= 0 ? lessons.length + soon + 1 : 0
+}

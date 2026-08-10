@@ -5,7 +5,8 @@ import { About } from './screens/About'
 import { Home } from './screens/Home'
 import { LessonScreen } from './screens/Lesson'
 import { Splash } from './screens/Splash'
-import { lessonById } from './data/curriculum'
+import { Upcoming } from './screens/Upcoming'
+import { lessonById, upcomingById } from './data/curriculum'
 import { useRoute } from './lib/router'
 import { useIsDesktop, useViewportHeight } from './lib/useViewport'
 
@@ -25,6 +26,16 @@ function Course() {
     case 'lesson': {
       const lesson = lessonById(route.id)
       if (!lesson) {
+        const planned = upcomingById(route.id)
+        if (planned) {
+          return (
+            <Upcoming
+              key={planned.id}
+              lesson={planned}
+              onBack={() => navigate({ name: 'home' })}
+            />
+          )
+        }
         navigate({ name: 'home' }, true)
         return null
       }

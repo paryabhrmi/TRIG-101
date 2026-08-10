@@ -1,6 +1,6 @@
 import { AppBar } from '../components/AppBar'
 import { LangToggle } from '../components/LangToggle'
-import { chapters, lessons } from '../data/curriculum'
+import { TOTAL_LESSONS, chapters, lessons, slotNumber, upcoming } from '../data/curriculum'
 import { ui } from '../data/ui'
 import { useI18n } from '../lib/i18n'
 import { useProgress } from '../lib/progress'
@@ -11,7 +11,7 @@ interface Props {
   onBack: () => void
 }
 
-/** The course index: three chapters, ten lessons, one visible thread. */
+/** The course index: fifteen slots, ten playable, one visible thread. */
 export function Home({ onOpen, onAbout, onBack }: Props) {
   const { t } = useI18n()
   const { progress } = useProgress()
@@ -43,7 +43,10 @@ export function Home({ onOpen, onAbout, onBack }: Props) {
         </div>
 
         {chapters.map((chapter) => {
-          const items = lessons.filter((l) => l.chapter === chapter.id)
+          const ready = lessons.filter((l) => l.chapter === chapter.id)
+          const soon = upcoming.filter((l) => l.chapter === chapter.id)
+          if (!ready.length && !soon.length) return null
+
           return (
             <section key={chapter.id} className="chapter">
               <div className="chapter__head">
@@ -55,8 +58,7 @@ export function Home({ onOpen, onAbout, onBack }: Props) {
               </div>
 
               <ul className="lesslist">
-                {items.map((lesson) => {
-                  const n = lessons.indexOf(lesson) + 1
+                {ready.map((lesson) => {
                   const done = !!progress[lesson.id]
                   return (
                     <li key={lesson.id}>
@@ -66,7 +68,7 @@ export function Home({ onOpen, onAbout, onBack }: Props) {
                         onClick={() => onOpen(lesson.id)}
                       >
                         <span className="lesscard__no" aria-hidden="true">
-                          {done ? '✓' : String(n).padStart(2, '0')}
+                          {done ? '✓' : String(slotNumber(lesson.id)).padStart(2, '0')}
                         </span>
                         <span className="lesscard__text">
                           <span className="lesscard__title">{t(lesson.title)}</span>
@@ -79,10 +81,33 @@ export function Home({ onOpen, onAbout, onBack }: Props) {
                     </li>
                   )
                 })}
+
+                {soon.map((lesson) => (
+                  <li key={lesson.id}>
+                    <button
+                      type="button"
+                      className="lesscard is-soon"
+                      onClick={() => onOpen(lesson.id)}
+                    >
+                      <span className="lesscard__no" aria-hidden="true">
+                        {String(slotNumber(lesson.id)).padStart(2, '0')}
+                      </span>
+                      <span className="lesscard__text">
+                        <span className="lesscard__title">{t(lesson.title)}</span>
+                        <span className="lesscard__tag">{t(lesson.tagline)}</span>
+                      </span>
+                      <span className="lesscard__soon">{t(ui.soon)}</span>
+                    </button>
+                  </li>
+                ))}
               </ul>
             </section>
           )
         })}
+
+        <p className="chapter__blurb" style={{ padding: '18px 2px 0', textAlign: 'center' }}>
+          {lessons.length}/{TOTAL_LESSONS} {t(ui.lessons)}
+        </p>
 
         <button type="button" className="linkish linkish--center" onClick={onAbout}>
           {t(ui.about)}

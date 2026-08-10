@@ -1,42 +1,49 @@
 /* ---------------------------------------------------------------------------
    Trigonometry 101 — design tokens
-   The palette is sampled straight out of the Rive artboards so the canvas
-   dissolves into the page instead of sitting on top of it.
+   Every value here is sampled from, or matched to, the Rive artboards so the
+   app chrome and the canvas read as one piece of design rather than a canvas
+   dropped into someone else's UI.
    --------------------------------------------------------------------------- */
 
 :root {
-  /* Surfaces — two of these are literal artboard background colours. */
+  /* Surfaces — the first two are literal artboard background colours. */
   --navy: #0d1062;
   --deep: #00047d;
   --paper: #ffffff;
-  --void: #070a3c;
-  --raise: #161a76;
-  --raise-2: #1e238b;
+
+  /* Panels: Rive draws a slightly darker navy inside a thin steel-blue rule. */
+  --panel: #0b0e58;
+  --panel-soft: #101472;
+  --panel-line: rgba(151, 181, 236, 0.42);
+  --panel-line-soft: rgba(151, 181, 236, 0.22);
+  /* The teal-to-navy wash across a Rive panel header. */
+  --panel-head: linear-gradient(90deg, #10416f 0%, #0c1566 78%);
+
+  /* Glossy button, straight off the Frequency (B) buttons. */
+  --btn-edge: #cfd4d8;
+  --btn-gloss: #7fe9ff;
+  --btn-face: #0b62f0;
+  --btn-face-deep: #0a37c4;
 
   /* Accents */
   --blue: #0075ff;
   --cyan: #2baff7;
   --amber: #feaf36;
-  --violet: #854db8;
-  --mint: #37d67a;
+  --violet: #a06fd8;
+  --mint: #7cffb0;
   --rose: #ff5d7d;
+  --red: #ff3b3b;
 
   /* Text */
   --text: #ffffff;
-  --text-dim: #a8b0e8;
-  --text-mute: #6f79bd;
-  --on-paper: #1b1f4a;
-  --on-paper-dim: #5b6289;
+  --text-dim: #b3c0f0;
+  --text-mute: #7c89c8;
 
-  /* Lines */
-  --hair: rgba(255, 255, 255, 0.1);
-  --hair-strong: rgba(255, 255, 255, 0.18);
-
-  /* Shape */
-  --r-sm: 10px;
-  --r-md: 16px;
-  --r-lg: 24px;
-  --r-xl: 32px;
+  /* Shape — Rive's panels are gently rounded, not pill-soft. */
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-lg: 18px;
+  --r-xl: 26px;
   --r-pill: 999px;
 
   /* Rhythm */
@@ -44,18 +51,18 @@
   --safe-t: env(safe-area-inset-top, 0px);
   --safe-b: env(safe-area-inset-bottom, 0px);
 
-  /* Type */
-  --font-ui: 'Nunito', ui-rounded, 'SF Pro Rounded', system-ui, -apple-system,
-    'Segoe UI', sans-serif;
+  /* Type — DIN Round Pro is the file's font; M PLUS Rounded 1c is the
+     closest geometric rounded face available for free on the web. */
+  --font-ui: 'M PLUS Rounded 1c', 'Nunito', ui-rounded, 'SF Pro Rounded',
+    system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-fa: 'Vazirmatn', 'Segoe UI', Tahoma, system-ui, sans-serif;
-  --font-num: 'Nunito', ui-monospace, 'SF Mono', Menlo, monospace;
+  --font-num: var(--font-ui);
 
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 html[dir='rtl'] {
-  --font-ui: var(--font-fa);
-  --font-num: var(--font-fa);
+  --font-ui: 'Vazirmatn', 'M PLUS Rounded 1c', 'Segoe UI', Tahoma, sans-serif;
 }
 
 * {
@@ -69,18 +76,18 @@ body,
 }
 
 html {
-  /* Lock the app to the visual viewport: it is a full-screen product, not a
-     document. Scrolling happens inside panes that opt into it. */
+  /* The app never scrolls as a document; panes opt into scrolling. */
   overflow: hidden;
-  background: var(--void);
+  background: var(--navy);
   -webkit-text-size-adjust: 100%;
 }
 
 body {
   margin: 0;
   font-family: var(--font-ui);
+  font-weight: 700;
   color: var(--text);
-  background: var(--void);
+  background: var(--navy);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   overscroll-behavior: none;
@@ -119,16 +126,16 @@ ul {
   border-radius: 6px;
 }
 
-/* The blueprint grid that runs behind every dark screen. */
+/* The blueprint grid behind the Cover artboard, continued into the app. */
 .blueprint {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background-image: linear-gradient(rgba(43, 175, 247, 0.07) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(43, 175, 247, 0.07) 1px, transparent 1px);
-  background-size: 32px 32px;
-  mask-image: radial-gradient(120% 80% at 50% 0%, #000 35%, transparent 100%);
-  -webkit-mask-image: radial-gradient(120% 80% at 50% 0%, #000 35%, transparent 100%);
+  background-image: linear-gradient(rgba(94, 156, 255, 0.11) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(94, 156, 255, 0.11) 1px, transparent 1px);
+  background-size: 34px 34px;
+  mask-image: radial-gradient(130% 85% at 50% 0%, #000 45%, transparent 100%);
+  -webkit-mask-image: radial-gradient(130% 85% at 50% 0%, #000 45%, transparent 100%);
 }
 
 @media (prefers-reduced-motion: reduce) {

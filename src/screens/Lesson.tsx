@@ -3,7 +3,7 @@ import { AppBar } from '../components/AppBar'
 import { Checkpoint } from '../components/Checkpoint'
 import { Instruments } from '../components/Instruments'
 import { RiveStage } from '../components/RiveStage'
-import { lessons } from '../data/curriculum'
+import { TOTAL_LESSONS, lessons, slotNumber } from '../data/curriculum'
 import { ui } from '../data/ui'
 import { useI18n } from '../lib/i18n'
 import { useProgress } from '../lib/progress'
@@ -59,13 +59,15 @@ export function LessonScreen({ lesson, onBack, onGoto, onFinish }: Props) {
 
       <AppBar
         onBack={onBack}
-        subtitle={`${t(ui.lesson)} ${index + 1} ${t(ui.of)} ${lessons.length}`}
+        subtitle={`${t(ui.lesson)} ${slotNumber(lesson.id)} ${t(ui.of)} ${TOTAL_LESSONS}`}
         title={t(lesson.title)}
         right={
           solved ? (
             <span className="pill pill--done">{t(ui.done)}</span>
           ) : (
-            <span className="pill pill--idle">{String(index + 1).padStart(2, '0')}</span>
+            <span className="pill">
+              {String(slotNumber(lesson.id)).padStart(2, '0')}
+            </span>
           )
         }
         progress={(index + (solved ? 1 : 0)) / lessons.length}

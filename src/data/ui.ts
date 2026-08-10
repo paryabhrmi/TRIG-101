@@ -43,6 +43,14 @@ export const ui = {
     fa: 'هر چیزی روی بوم قابل کشیدن است.',
   },
 
+  soon: { en: 'Soon', fa: 'به‌زودی' },
+  soonTitle: { en: 'Not built yet', fa: 'هنوز ساخته نشده' },
+  soonNote: {
+    en: 'Planned, but its animation has not been authored yet. Every lesson above it is ready to play.',
+    fa: 'برنامه‌ریزی شده، اما انیمیشنش هنوز ساخته نشده است. همهٔ درس‌های بالاتر آمادهٔ اجرا هستند.',
+  },
+  backToLessons: { en: 'Back to the lessons', fa: 'بازگشت به درس‌ها' },
+
   courseDone: { en: 'Course complete', fa: 'دوره تمام شد' },
   courseDoneBody: {
     en: 'Ten lessons, one idea: a circle, measured honestly, is a wave.',

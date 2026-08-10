@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import QRCode from 'qrcode'
 import { LangToggle } from './LangToggle'
+import { Mark } from './Mark'
 import { ui } from '../data/ui'
 import { useI18n } from '../lib/i18n'
 
@@ -41,12 +42,8 @@ export function DesktopGate({ onPreview }: Props) {
       </div>
 
       <div className="gate__inner">
-        <div className="gate__mark" aria-hidden="true">
-          <svg viewBox="0 0 64 64" width="56" height="56">
-            <circle cx="32" cy="32" r="19" fill="none" stroke="#0075FF" strokeWidth="2.5" opacity=".55" />
-            <path d="M14 46 H46 L14 20 Z" fill="none" stroke="#2BAFF7" strokeWidth="4" strokeLinejoin="round" />
-            <path d="M14 46 H46" stroke="#FEAF36" strokeWidth="4" strokeLinecap="round" />
-          </svg>
+        <div className="gate__mark">
+          <Mark size={64} />
         </div>
 
         <span className="gate__kicker">{t(ui.presents)}</span>
