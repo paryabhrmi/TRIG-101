@@ -4,6 +4,7 @@ import { PhoneFrame } from './components/PhoneFrame'
 import { About } from './screens/About'
 import { Home } from './screens/Home'
 import { LessonScreen } from './screens/Lesson'
+import { Review } from './screens/Review'
 import { Splash } from './screens/Splash'
 import { Upcoming } from './screens/Upcoming'
 import { lessonById, upcomingById } from './data/curriculum'
@@ -18,6 +19,7 @@ function Course() {
       return (
         <Home
           onOpen={(id) => navigate({ name: 'lesson', id })}
+          onReview={(chapter) => navigate({ name: 'review', chapter })}
           onAbout={() => navigate({ name: 'about' })}
           onBack={() => navigate({ name: 'splash' })}
         />
@@ -45,10 +47,22 @@ function Course() {
           lesson={lesson}
           onBack={() => navigate({ name: 'home' })}
           onGoto={(id) => navigate({ name: 'lesson', id })}
+          onReview={(chapter) => navigate({ name: 'review', chapter })}
           onFinish={() => navigate({ name: 'home' })}
         />
       )
     }
+
+    case 'review':
+      return (
+        <Review
+          key={route.chapter}
+          chapter={route.chapter}
+          onBack={() => navigate({ name: 'home' })}
+          onGoto={(id) => navigate({ name: 'lesson', id })}
+          onFinish={() => navigate({ name: 'home' })}
+        />
+      )
 
     case 'about':
       return <About onBack={() => navigate({ name: 'home' })} />

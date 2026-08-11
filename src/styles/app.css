@@ -540,28 +540,30 @@
    Lesson — full-bleed stage with the sheet rising over it
    =========================================================================== */
 
-/* The artboards are square and carry their own sliders near the bottom edge,
-   so the stage must reserve a full square: anything the sheet covers is a
-   control the learner can no longer reach. The padding is the strip the sheet
+/* The stage takes whatever the sheet does not. That is the point of the
+   stepped flow: a short step leaves more room, so the artwork grows instead
+   of the empty space. Fit.Contain never crops, so a smaller box only ever means
+   smaller artwork — never a hidden slider. The padding is the strip the sheet
    overlaps, kept outside the canvas box. */
 .lesson__stage {
   position: relative;
   z-index: 1;
-  flex: 0 0 auto;
+  flex: 1 1 auto;
+  min-height: 30dvh;
   width: 100%;
-  aspect-ratio: 1;
-  max-height: 58dvh;
   padding-bottom: var(--sheet-overlap);
   display: flex;
 }
 
 /* The sheet overlaps that padding strip so the two read as one composition
-   rather than two stacked boxes. */
+   rather than two stacked boxes. It is sized by its step's content, capped so
+   the longest step still leaves the artwork usable. */
 .sheet {
   position: relative;
   z-index: 2;
-  flex: 1 1 auto;
+  flex: 0 1 auto;
   min-height: 0;
+  max-height: min(56dvh, 470px);
   display: flex;
   flex-direction: column;
   margin-top: calc(-1 * var(--sheet-overlap));
@@ -570,15 +572,6 @@
   box-shadow: var(--lift-3);
   /* Without this, scrolled content shows through the rounded top corners. */
   overflow: hidden;
-}
-
-.sheet__grip {
-  flex: 0 0 auto;
-  width: 40px;
-  height: 4px;
-  margin: 9px auto 0;
-  border-radius: var(--r-pill);
-  background: var(--line-strong);
 }
 
 .sheet__scroll {
@@ -590,21 +583,94 @@
   padding: 14px var(--gut) calc(18px + var(--safe-b));
 }
 
-.sheet__title {
-  font-size: 22px;
-  font-weight: 900;
-  letter-spacing: -0.015em;
-  line-height: 1.2;
-  color: var(--ink);
+/* ---------------------------------------------------------------------------
+   Stepped lesson: find it → try it → why it works. One step at a time keeps
+   the sheet short, which is what gives the canvas its height back.
+   --------------------------------------------------------------------------- */
+
+.steps {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 13px var(--gut) 0;
 }
 
-.sheet__tagline {
-  padding-top: 6px;
-  font-size: 15px;
-  font-weight: 700;
+.steps__dot {
+  width: 22px;
+  height: 5px;
+  padding: 0;
+  border-radius: var(--r-pill);
+  background: var(--line);
+  transition: background 0.25s var(--ease), width 0.25s var(--ease);
+}
+
+.steps__dot.is-done {
+  background: var(--mint);
+}
+
+.steps__dot.is-current {
+  width: 34px;
+  background: var(--blue);
+}
+
+.steps__label {
+  margin-inline-start: auto;
+  font-size: 10.5px;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.step__lead {
+  font-size: 17px;
+  font-weight: 800;
+  line-height: 1.45;
+  color: var(--ink);
+  text-wrap: balance;
+}
+
+.step__hint {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 600;
   line-height: 1.5;
   color: var(--ink-2);
-  text-wrap: balance;
+}
+
+.step__win {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--mint);
+}
+
+.step__win span {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: var(--r-pill);
+  background: var(--mint);
+  color: #ffffff;
+  font-size: 11px;
+  animation: pop 0.4s var(--ease);
+}
+
+.hintrow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-top: 12px;
+}
+
+.linkish--quiet {
+  margin-inline-start: auto;
+  color: var(--ink-3);
 }
 
 .actions {
@@ -790,6 +856,149 @@
 
 .sheet__foot {
   padding-top: 20px;
+}
+
+/* ===========================================================================
+   Chapter review
+   =========================================================================== */
+
+.quiz {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  padding: 22px var(--gut) calc(24px + var(--safe-b));
+}
+
+.quiz__prompt {
+  font-size: 19px;
+  font-weight: 800;
+  line-height: 1.45;
+  color: var(--ink);
+  text-wrap: balance;
+}
+
+.quiz__options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 20px;
+}
+
+.quiz__option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 15px;
+  text-align: start;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.4;
+  color: var(--ink);
+  background: var(--paper);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-md);
+  box-shadow: var(--lift-1);
+  transition: transform 0.14s var(--ease), border-color 0.2s var(--ease),
+    background 0.2s var(--ease), opacity 0.2s var(--ease);
+}
+
+.quiz__option:active {
+  transform: scale(0.985);
+}
+
+.quiz__key {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--r-pill);
+  background: var(--surface);
+  font-size: 12px;
+  font-weight: 900;
+  color: var(--ink-2);
+}
+
+.quiz__option.is-right {
+  background: rgba(33, 181, 115, 0.08);
+  border-color: rgba(33, 181, 115, 0.5);
+}
+
+.quiz__option.is-right .quiz__key {
+  background: var(--mint);
+  color: #ffffff;
+}
+
+.quiz__option.is-wrong {
+  background: rgba(255, 77, 106, 0.07);
+  border-color: rgba(255, 77, 106, 0.45);
+}
+
+.quiz__option.is-wrong .quiz__key {
+  background: var(--rose);
+  color: #ffffff;
+}
+
+.quiz__option.is-dim {
+  opacity: 0.5;
+}
+
+.quiz__explain {
+  margin-top: 18px;
+  padding: 15px;
+  background: var(--paper-2);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.65;
+  color: var(--ink-2);
+}
+
+.score {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.score strong {
+  font-size: 54px;
+  font-weight: 900;
+  line-height: 1;
+  color: var(--ink);
+}
+
+.score strong em {
+  font-style: normal;
+  font-size: 26px;
+  color: var(--ink-3);
+}
+
+.score.is-perfect strong {
+  color: var(--mint);
+}
+
+.score span {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--ink-3);
+}
+
+.lesscard--review {
+  border-style: solid;
+  border-color: rgba(0, 117, 255, 0.28);
+  background: rgba(0, 117, 255, 0.04);
+}
+
+.lesscard--review .lesscard__no {
+  background: rgba(0, 117, 255, 0.12);
+  color: var(--blue);
 }
 
 /* ===========================================================================
@@ -1098,5 +1307,36 @@
 @media (max-width: 360px) {
   :root {
     --gut: 16px;
+  }
+}
+
+/* A short, wide viewport stacked vertically leaves the artwork a tiny stamp
+   in a sea of white. Put the sheet beside it instead. */
+@media (orientation: landscape) and (max-height: 560px) {
+  .lesson {
+    display: grid;
+    grid-template-columns: 1fr minmax(300px, 42%);
+    grid-template-rows: auto 1fr;
+  }
+
+  .lesson .appbar {
+    grid-column: 1 / -1;
+  }
+
+  .lesson__stage {
+    grid-column: 1;
+    width: auto;
+    height: auto;
+    aspect-ratio: auto;
+    max-height: none;
+    padding: 0;
+    min-height: 0;
+  }
+
+  .lesson .sheet {
+    grid-column: 2;
+    margin-top: 0;
+    border-radius: var(--r-xl) 0 0 0;
+    box-shadow: -14px 0 34px -22px rgba(20, 26, 70, 0.35);
   }
 }

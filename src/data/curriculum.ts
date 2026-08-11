@@ -60,6 +60,8 @@ export interface Lesson {
   chapter: number
   title: string
   tagline: string
+  /** Step 1: what to touch. This is where the canvas is taught as a control. */
+  watch: string
   body: string[]
   readouts: Readout[]
   actions?: LessonAction[]
@@ -82,10 +84,26 @@ export interface UpcomingLesson {
   note: string
 }
 
+/** One multiple-choice item in a chapter review. */
+export interface Question {
+  prompt: string
+  options: string[]
+  /** Index into `options`. */
+  answer: number
+  /** Shown after answering, right or wrong. Teaches, never just confirms. */
+  explain: string
+}
+
 export interface Chapter {
   id: number
   title: string
   blurb: string
+  /**
+   * Checkpoints prove the learner moved a slider; these prove they understood
+   * why. Placed at the end of a chapter so a question can span several
+   * lessons rather than echo the one just finished.
+   */
+  review?: Question[]
 }
 
 const SM = 'State Machine 1'
@@ -113,16 +131,105 @@ export const chapters: Chapter[] = [
     id: 1,
     title: 'The Right Triangle',
     blurb: 'Where the ratios come from.',
+    review: [
+      {
+        prompt:
+          'A right triangle has sides 3, 4 and 5. Standing at the angle opposite the side of length 4, what is sin of that angle?',
+        options: ['3/5', '4/5', '3/4', '4/3'],
+        answer: 1,
+        explain:
+          'Sine is opposite over hypotenuse. The opposite side is 4, and the hypotenuse — always the longest — is 5.',
+      },
+      {
+        prompt: 'You double the length of every side. What happens to cos θ?',
+        options: ['It doubles', 'It halves', 'It does not change', 'It depends on the angle'],
+        answer: 2,
+        explain:
+          'Both sides in the ratio grew by the same factor, so the fraction is untouched. Ratios track shape, not size.',
+      },
+      {
+        prompt: 'Why does tan θ have no value at exactly 90°?',
+        options: [
+          'The opposite side becomes zero',
+          'The adjacent side becomes zero, and nothing divides by zero',
+          'The hypotenuse becomes infinite',
+          'It does have a value — it is 1',
+        ],
+        answer: 1,
+        explain:
+          'tan θ is opposite ÷ adjacent. At 90° the adjacent side has collapsed to nothing, and the division is undefined.',
+      },
+    ],
   },
   {
     id: 2,
     title: 'The Circle',
     blurb: 'Where the triangle stops being enough.',
+    review: [
+      {
+        prompt: 'One radian is the angle you have turned when…',
+        options: [
+          'you have gone a quarter of the way round',
+          'the arc you travelled is as long as the radius',
+          'the arc you travelled is as long as the diameter',
+          'you have turned exactly 60°',
+        ],
+        answer: 1,
+        explain:
+          'That is the whole definition, and it is why a half turn is π radians: a little over three radii laid around the rim.',
+      },
+      {
+        prompt: 'At which of these angles is cos θ negative?',
+        options: ['30°', '45°', '89°', '120°'],
+        answer: 3,
+        explain:
+          'Past 90° the adjacent side points backwards, so cosine goes negative — a reading a right triangle cannot produce.',
+      },
+      {
+        prompt: 'A half turn is how many radians?',
+        options: ['π/2', 'π', '2π', '180'],
+        answer: 1,
+        explain: 'A full turn is 2π, so half of it is π — roughly 3.14 radians.',
+      },
+    ],
   },
   {
     id: 3,
     title: 'The Wave',
     blurb: 'Where trigonometry meets the real world.',
+    review: [
+      {
+        prompt: 'After how much angle does the sine wave repeat exactly?',
+        options: ['π/2', 'π', '2π', 'It never repeats'],
+        answer: 2,
+        explain:
+          'One full turn of the circle is one full cycle of the wave. That repeat is what periodic means.',
+      },
+      {
+        prompt: 'In y = A·sin(Bθ), what does raising B do?',
+        options: [
+          'Makes the peaks taller',
+          'Squeezes the wave so more cycles fit in the same span',
+          'Shifts the wave sideways',
+          'Flips the wave upside down',
+        ],
+        answer: 1,
+        explain:
+          'A sets the height, B sets how many cycles fit. Louder versus higher-pitched, if the wave is a sound.',
+      },
+      {
+        prompt: 'How does the cosine wave differ from the sine wave?',
+        options: [
+          'It is taller',
+          'It repeats twice as often',
+          'It is the same wave, shifted a quarter turn',
+          'It is upside down',
+        ],
+        answer: 2,
+        explain:
+          'Same shape, same period, started a quarter turn early: cos θ = sin(θ + π/2). That offset is a phase shift.',
+      },
+    ],
   },
   {
     id: 4,
@@ -143,6 +250,8 @@ export const lessons: Lesson[] = [
     watchInputs: ['Boolean 1'],
     title: 'Naming the sides',
     tagline: 'Opposite and adjacent are job titles, not names.',
+    watch:
+      'Under the triangle is a switch — everything on the canvas responds to your finger. Flip it.',
     body: [
       'Every right triangle has one side whose name never changes: the hypotenuse. Always across from the right angle, always the longest.',
       'The other two swap. Which one is opposite and which is adjacent depends entirely on the angle you are standing at.',
@@ -192,6 +301,8 @@ export const lessons: Lesson[] = [
     chapter: 1,
     title: 'Shape, not size',
     tagline: 'Blow the triangle up. The ratios refuse to change.',
+    watch:
+      'Two sliders sit under the triangle: Angle and Scale. Drag either one and watch the panel.',
     body: [
       'Two triangles with the same angles are one shape at two sizes. Mathematicians call them similar.',
       'Similar triangles share their side ratios exactly. That is the hinge the entire subject swings on.',
@@ -210,24 +321,10 @@ export const lessons: Lesson[] = [
         tone: 'violet',
         value: (s) => fixed(num(s, 'ScaleControl'), 0),
       },
-      {
-        id: 'opp',
-        label: 'Opposite',
-        tone: 'amber',
-        value: (s) => fixed(num(s, 'Opp'), 2),
-      },
-      {
-        id: 'adj',
-        label: 'Adjacent',
-        tone: 'mint',
-        value: (s) => fixed(num(s, 'Adj'), 2),
-      },
-      {
-        id: 'hyp',
-        label: 'Hypotenuse',
-        tone: 'blue',
-        value: (s) => fixed(num(s, 'Hyp'), 2),
-      },
+      // The artboard already prints Opposite, Adjacent and Hypotenuse next to
+      // the sides themselves. Repeating them here cost eight tiles, filled the
+      // sheet, and squeezed the artwork. Show only the invariant — which is
+      // the entire point of the lesson.
       {
         id: 'oh',
         label: 'Opp ÷ Hyp',
@@ -263,6 +360,8 @@ export const lessons: Lesson[] = [
     chapter: 1,
     title: 'SOH CAH TOA',
     tagline: 'Three ratios, three names. That is the whole vocabulary.',
+    watch:
+      'One slider under the circle sets the angle. Drag it and watch all three ratios at once.',
     body: [
       'Shrink the hypotenuse to exactly 1 and the ratios stop being fractions — they become the sides themselves.',
       'sin θ is the opposite side. cos θ is the adjacent side. tan θ is one divided by the other.',
@@ -317,6 +416,8 @@ export const lessons: Lesson[] = [
     chapter: 2,
     title: 'Radians',
     tagline: 'A degree is a convention. A radian is a measurement.',
+    watch:
+      'Drag the slider at the bottom. Both dials turn together — one counts degrees, one counts radii.',
     body: [
       '360 is a number inherited from Babylonian astronomers. Nothing about a circle requires it.',
       'A radian is honest: it is the angle you have turned when the arc you walked is exactly as long as the radius.',
@@ -357,6 +458,8 @@ export const lessons: Lesson[] = [
     chapter: 2,
     title: 'The unit circle',
     tagline: 'Trigonometry escapes the triangle.',
+    watch:
+      'Press Spin it below, then watch Opp and Adj as the arm goes all the way round.',
     body: [
       'Set the hypotenuse to 1 and pin it at the origin. Now the angle can keep going — past 90°, past 180°, past a full turn.',
       "The handle's height above the axis is sin θ. Its distance along the axis is cos θ. Always.",
@@ -403,6 +506,8 @@ export const lessons: Lesson[] = [
     chapter: 3,
     title: 'Unrolling the sine',
     tagline: 'A wave is a circle, walked in a straight line.',
+    watch:
+      'Drag the slider along the bottom to unroll the circle into the wave.',
     body: [
       'Keep the angle turning, and plot the height of the handle against the angle itself.',
       "The circle's vertical position, stretched out along an axis, is the sine wave. There is nothing more mysterious in it than that.",
@@ -443,6 +548,8 @@ export const lessons: Lesson[] = [
     chapter: 3,
     title: 'Cosine, one quarter early',
     tagline: 'Cosine is sine with a head start.',
+    watch:
+      'The same slider as before — but now it plots the horizontal position instead of the vertical.',
     body: [
       'Plot the horizontal position instead of the vertical one and the cosine wave falls out.',
       'Same shape, same period. It simply starts at 1 instead of 0.',
@@ -483,6 +590,8 @@ export const lessons: Lesson[] = [
     chapter: 3,
     title: 'Tangent and its walls',
     tagline: 'The ratio that runs off the page.',
+    watch:
+      'Drag slowly through the first quarter turn. The interesting part is only a degree wide.',
     body: [
       'Tangent is sine over cosine — height divided by width.',
       'As the angle nears 90°, the width collapses toward zero while the height holds near 1. Dividing by almost nothing gives almost everything.',
@@ -527,6 +636,8 @@ export const lessons: Lesson[] = [
     chapter: 3,
     title: 'Amplitude and frequency',
     tagline: 'Two dials turn one wave into every wave.',
+    watch:
+      'A slider for amplitude, three buttons for frequency. Try them in any order.',
     body: [
       'y = A·sin(Bθ). A stretches the wave vertically; B squeezes it horizontally.',
       'Amplitude is how loud. Frequency is how high the note. For sound, that is not a metaphor.',
@@ -562,6 +673,8 @@ export const lessons: Lesson[] = [
     chapter: 3,
     title: 'Where the wave shows up',
     tagline: 'A pendulum knows no trigonometry. It obeys it anyway.',
+    watch:
+      'Press Release it below and follow the weight as it traces its path.',
     body: [
       'Release the weight and track its horizontal position over time.',
       'The trace is a sine wave. So is a plucked string, an alternating current, a tide, and the brightness of one pixel in a radio signal.',
@@ -643,6 +756,36 @@ export const lessonById = (id: string): Lesson | undefined =>
 
 export const upcomingById = (id: string): UpcomingLesson | undefined =>
   upcoming.find((l) => l.id === id)
+
+export const chapterById = (id: number): Chapter | undefined =>
+  chapters.find((c) => c.id === id)
+
+/** Progress-store key for a chapter review. */
+export const reviewKey = (chapter: number) => `review-${chapter}`
+
+/**
+ * Where "next" goes from a lesson: the following lesson, or the chapter
+ * review if this was the last lesson of a chapter that has one.
+ */
+export function nextStop(
+  lessonId: string,
+): { kind: 'lesson'; id: string } | { kind: 'review'; chapter: number } | null {
+  const i = lessons.findIndex((l) => l.id === lessonId)
+  if (i < 0) return null
+  const current = lessons[i]
+  const next = lessons[i + 1]
+  const endOfChapter = !next || next.chapter !== current.chapter
+  if (endOfChapter && chapterById(current.chapter)?.review?.length) {
+    return { kind: 'review', chapter: current.chapter }
+  }
+  return next ? { kind: 'lesson', id: next.id } : null
+}
+
+/** The first lesson of the chapter after this one, if any. */
+export function lessonAfterReview(chapter: number): string | null {
+  const next = lessons.find((l) => l.chapter > chapter)
+  return next ? next.id : null
+}
 
 /** 1-based position in the full 15-slot course. */
 export function slotNumber(id: string): number {

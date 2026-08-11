@@ -1,15 +1,23 @@
 import { AppBar } from '../components/AppBar'
-import { TOTAL_LESSONS, chapters, lessons, slotNumber, upcoming } from '../data/curriculum'
+import {
+  TOTAL_LESSONS,
+  chapters,
+  lessons,
+  reviewKey,
+  slotNumber,
+  upcoming,
+} from '../data/curriculum'
 import { useProgress } from '../lib/progress'
 
 interface Props {
   onOpen: (lessonId: string) => void
+  onReview: (chapter: number) => void
   onAbout: () => void
   onBack: () => void
 }
 
 /** The course index: fifteen slots, ten playable, one visible thread. */
-export function Home({ onOpen, onAbout, onBack }: Props) {
+export function Home({ onOpen, onReview, onAbout, onBack }: Props) {
   const { progress } = useProgress()
 
   const doneCount = lessons.filter((l) => progress[l.id]).length
@@ -91,6 +99,40 @@ export function Home({ onOpen, onAbout, onBack }: Props) {
                     </li>
                   )
                 })}
+
+                {chapter.review?.length ? (
+                  <li>
+                    <button
+                      type="button"
+                      className={`lesscard lesscard--review ${
+                        progress[reviewKey(chapter.id)] ? 'is-done' : ''
+                      }`.trim()}
+                      onClick={() => onReview(chapter.id)}
+                    >
+                      <span className="lesscard__no" aria-hidden="true">
+                        {progress[reviewKey(chapter.id)] ? '✓' : '?'}
+                      </span>
+                      <span className="lesscard__text">
+                        <span className="lesscard__title">Chapter review</span>
+                        <span className="lesscard__tag">
+                          {chapter.review.length} questions on everything above.
+                        </span>
+                      </span>
+                      <span className="lesscard__go" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" width="18" height="18">
+                          <path
+                            d="M9 5 L16 12 L9 19"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2.4"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                      </span>
+                    </button>
+                  </li>
+                ) : null}
 
                 {soon.map((lesson) => (
                   <li key={lesson.id}>

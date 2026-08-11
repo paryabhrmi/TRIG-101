@@ -11,12 +11,17 @@ export type Route =
   | { name: 'splash' }
   | { name: 'home' }
   | { name: 'lesson'; id: string }
+  | { name: 'review'; chapter: number }
   | { name: 'about' }
 
 function parse(hash: string): Route {
   const path = hash.replace(/^#\/?/, '').split('?')[0]
   const [head, tail] = path.split('/')
   if (head === 'lesson' && tail) return { name: 'lesson', id: decodeURIComponent(tail) }
+  if (head === 'review' && tail) {
+    const chapter = Number(tail)
+    if (Number.isFinite(chapter)) return { name: 'review', chapter }
+  }
   if (head === 'about') return { name: 'about' }
   if (head === 'home') return { name: 'home' }
   return { name: 'splash' }
@@ -26,6 +31,8 @@ export function toPath(route: Route): string {
   switch (route.name) {
     case 'lesson':
       return `#/lesson/${encodeURIComponent(route.id)}`
+    case 'review':
+      return `#/review/${route.chapter}`
     case 'about':
       return '#/about'
     case 'home':
