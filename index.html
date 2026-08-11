@@ -26,9 +26,129 @@
       rel="stylesheet"
     />
     <title>Trigonometry 101</title>
+
+    <!-- Inlined so the boot screen still renders if the stylesheet fails. -->
+    <style>
+      .boot {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 18px;
+        padding: 32px;
+        text-align: center;
+        font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+        color: #4a5279;
+        background: #ffffff;
+      }
+      .boot__mark {
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        border: 3px solid #e6e9f4;
+        border-top-color: #0075ff;
+        animation: bootspin 0.9s linear infinite;
+      }
+      .boot--failed .boot__mark {
+        animation: none;
+        border-color: #ff4d6a;
+        border-top-color: #ff4d6a;
+      }
+      .boot__msg {
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        font-size: 15px;
+        font-weight: 600;
+        line-height: 1.6;
+        max-width: 34ch;
+      }
+      .boot__msg strong {
+        font-size: 17px;
+        font-weight: 800;
+        color: #141a46;
+      }
+      .boot__hint {
+        font-size: 13px;
+        color: #858db0;
+      }
+      @keyframes bootspin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <!-- Replaced the moment React mounts. If it is still here, something
+           failed before first render — which used to show as a blank page. -->
+      <div id="boot" class="boot">
+        <div class="boot__mark"></div>
+        <p class="boot__msg">Loading Trigonometry 101…</p>
+      </div>
+    </div>
+
+    <!-- Classic script on purpose: it has to run even in a browser that skips
+         module scripts entirely, which is one way the page went blank. -->
+    <script>
+      (function () {
+        var first = null
+        var timer = null
+
+        // Errors are recorded, never shown straight away. The legacy fallback
+        // deliberately throws while probing for module support, and a blocked
+        // web font is a resource error too — neither stops the app. Only a
+        // boot screen that is *still* on the page proves something failed.
+        function render() {
+          var boot = document.getElementById('boot')
+          if (!boot) return
+          var msg = boot.querySelector('.boot__msg')
+          if (!msg) return
+          boot.className = 'boot boot--failed'
+          msg.innerHTML =
+            '<strong>' +
+            (first ? first.title : 'The app did not start') +
+            '</strong><span>' +
+            (first && first.detail ? first.detail : '') +
+            '</span><span class="boot__hint">Try reloading the page. If it keeps ' +
+            'happening, this browser may be too old to run the app.</span>'
+        }
+
+        function note(title, detail) {
+          if (!first) first = { title: title, detail: detail }
+          if (timer) return
+          timer = window.setTimeout(render, 2500)
+        }
+
+        window.addEventListener(
+          'error',
+          function (e) {
+            var src = e && e.target && (e.target.src || e.target.href)
+            if (src) {
+              // A blocked web font never stops the app; blaming it would send
+              // whoever is debugging this down the wrong path.
+              if (String(src).indexOf(location.origin) !== 0) return
+              note('A file failed to load', String(src).split('/').pop())
+            } else {
+              note('The app hit an error', e && e.message ? e.message : '')
+            }
+          },
+          true,
+        )
+
+        window.addEventListener('unhandledrejection', function (e) {
+          note('The app hit an error', e && e.reason ? String(e.reason) : '')
+        })
+
+        // Nothing mounted after a generous wait: say so rather than sit blank.
+        window.setTimeout(render, 15000)
+      })()
+    </script>
+
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
