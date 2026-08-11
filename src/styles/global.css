@@ -20,9 +20,16 @@
   --ink-3: #858db0;
   --ink-mute: #8a92b4;
 
-  /* Artboard backdrops, used behind the canvas so it never looks boxed in. */
-  --navy: #0d1062;
-  --deep: #00047d;
+  /**
+   * Eight of the ten artboards are drawn light-on-navy inside the Rive file.
+   * Their colours cannot be changed from here, and simply hiding the navy
+   * erases the artwork with it — the labels, axes and graphs are all white.
+   *
+   * Inverting and rotating the hue back turns the navy into paper and the
+   * white ink into dark ink, keeping every accent roughly on-hue. The
+   * brightness/contrast pair lifts the result the last step to white.
+   */
+  --invert-artboard: invert(1) hue-rotate(180deg) brightness(1.06) contrast(1.06);
 
   /* Accents, straight out of the artwork. */
   --blue: #0075ff;

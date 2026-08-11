@@ -50,18 +50,10 @@ export function LessonScreen({ lesson, onBack, onGoto, onFinish }: Props) {
     if (action.completes) markSolved()
   }
 
-  // Light artboards keep the dark app-bar treatment; the navy ones let the bar
-  // sit straight on the artwork so the canvas reads as one full-bleed field.
-  const overDark = lesson.stage !== 'paper'
-
   return (
     <div className={`screen lesson lesson--${lesson.stage}`}>
-      {/* Over a navy artboard the bar is absolutely positioned and the canvas
-          runs underneath it; over a light one it sits in flow above. Either
-          way it comes first in the DOM so the reading order is right. */}
       <AppBar
         onBack={onBack}
-        variant={overDark ? 'over-dark' : 'light'}
         subtitle={`Lesson ${n} of ${TOTAL_LESSONS}`}
         title={lesson.title}
         right={

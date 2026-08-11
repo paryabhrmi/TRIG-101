@@ -32,21 +32,6 @@
   -webkit-backdrop-filter: saturate(180%) blur(16px);
 }
 
-/* Over a navy artboard: no plate, just a soft gradient so the title stays
-   legible while the artwork continues underneath it. */
-.appbar--over-dark {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  background: linear-gradient(
-    180deg,
-    rgba(6, 8, 48, 0.72) 0%,
-    rgba(6, 8, 48, 0.34) 62%,
-    rgba(6, 8, 48, 0) 100%
-  );
-}
-
 .appbar__row {
   display: flex;
   align-items: center;
@@ -81,14 +66,6 @@
   white-space: nowrap;
 }
 
-.appbar--over-dark .appbar__sub {
-  color: rgba(255, 255, 255, 0.72);
-}
-
-.appbar--over-dark .appbar__title {
-  color: #ffffff;
-}
-
 .appbar__right {
   flex: 0 0 auto;
   display: flex;
@@ -99,10 +76,6 @@
 .appbar__track {
   height: 3px;
   background: var(--line);
-}
-
-.appbar--over-dark .appbar__track {
-  background: rgba(255, 255, 255, 0.18);
 }
 
 .appbar__fill {
@@ -124,15 +97,6 @@
   color: var(--ink);
   box-shadow: var(--lift-1);
   transition: transform 0.18s var(--ease), background 0.18s var(--ease);
-}
-
-.appbar--over-dark .iconbtn {
-  background: rgba(255, 255, 255, 0.16);
-  border-color: rgba(255, 255, 255, 0.3);
-  color: #ffffff;
-  box-shadow: none;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
 }
 
 .iconbtn:active {
@@ -162,22 +126,10 @@
   color: var(--ink-2);
 }
 
-.appbar--over-dark .pill {
-  background: rgba(255, 255, 255, 0.16);
-  border-color: rgba(255, 255, 255, 0.28);
-  color: #ffffff;
-}
-
 .pill--done {
   background: rgba(33, 181, 115, 0.12);
   border-color: rgba(33, 181, 115, 0.4);
   color: var(--mint);
-}
-
-.appbar--over-dark .pill--done {
-  background: rgba(70, 230, 160, 0.2);
-  border-color: rgba(70, 230, 160, 0.5);
-  color: #7bffc4;
 }
 
 .pill--soon {
@@ -256,10 +208,6 @@
   color: var(--rose);
 }
 
-.linkish--onDark {
-  color: #9fd2ff;
-}
-
 /* ===========================================================================
    Rive stage — full bleed, never a floating card
    =========================================================================== */
@@ -276,14 +224,10 @@
   user-select: none;
 }
 
-.stage--navy {
-  background: var(--navy);
-}
-
-.stage--deep {
-  background: var(--deep);
-}
-
+/* Every stage is paper now — the two dark artboard themes are inverted into
+   the light one, so the whole product is a single white surface. */
+.stage--navy,
+.stage--deep,
 .stage--paper {
   background: var(--paper);
 }
@@ -293,6 +237,13 @@
   height: 100%;
   display: block;
   touch-action: none;
+}
+
+/* Applied to the canvas, not the wrapper, so the white behind it stays white
+   while the artboard is being loaded and there is never a navy flash. */
+.stage--navy .stage__canvas,
+.stage--deep .stage__canvas {
+  filter: var(--invert-artboard);
 }
 
 .stage__pending {
@@ -322,7 +273,7 @@
    =========================================================================== */
 
 .splash {
-  background: var(--navy);
+  background: var(--paper);
 }
 
 .splash__art {
@@ -331,6 +282,7 @@
   flex: none;
 }
 
+/* The cover inverts to a white blueprint, so the scrim fades to paper. */
 .splash__scrim {
   position: absolute;
   inset: 0;
@@ -338,8 +290,8 @@
   background: linear-gradient(
     180deg,
     transparent 30%,
-    rgba(13, 16, 98, 0.6) 62%,
-    rgba(13, 16, 98, 0.97) 100%
+    rgba(255, 255, 255, 0.72) 58%,
+    #ffffff 82%
   );
 }
 
@@ -366,7 +318,7 @@
   font-size: 15.5px;
   font-weight: 700;
   line-height: 1.55;
-  color: rgba(255, 255, 255, 0.82);
+  color: var(--ink-2);
   text-wrap: balance;
 }
 

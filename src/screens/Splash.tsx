@@ -56,7 +56,7 @@ export function Splash({ onStart, onResume }: Props) {
         {started && nextUp && (
           <button
             type="button"
-            className="linkish linkish--center linkish--onDark"
+            className="linkish linkish--center"
             onClick={() => onResume(nextUp.id)}
           >
             Lesson {lessons.indexOf(nextUp) + 1} — {nextUp.title}

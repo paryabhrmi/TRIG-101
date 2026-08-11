@@ -7,23 +7,11 @@ interface Props {
   right?: ReactNode
   /** 0–1. Renders the hairline course progress bar under the bar. */
   progress?: number
-  /**
-   * `over-dark` lets the bar sit directly on a navy artboard so the canvas
-   * runs edge to edge instead of being boxed in below a white strip.
-   */
-  variant?: 'light' | 'over-dark'
 }
 
-export function AppBar({
-  onBack,
-  title,
-  subtitle,
-  right,
-  progress,
-  variant = 'light',
-}: Props) {
+export function AppBar({ onBack, title, subtitle, right, progress }: Props) {
   return (
-    <header className={`appbar appbar--${variant}`}>
+    <header className="appbar appbar--light">
       <div className="appbar__row">
         {onBack ? (
           <button type="button" className="iconbtn" onClick={onBack} aria-label="Back">
