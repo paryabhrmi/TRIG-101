@@ -36,7 +36,6 @@ export function DesktopGate({ onPreview }: Props) {
           <Mark size={64} />
         </div>
 
-        <span className="gate__kicker">Lucid Paper Studios presents</span>
         <h1 className="gate__title">Trigonometry 101</h1>
         <p className="gate__tagline">
           Learn sine, cosine and tangent by dragging — not by reading.

@@ -17,8 +17,8 @@ deploy — see [Deploying](#deploying))
 
 ## The idea
 
-The course is built around one Rive file (`public/trig101.riv`, 44 artboards)
-authored by Lucid Paper Studios. Those artboards ship with their own sliders,
+The course is built around one Rive file (`public/trig101.riv`, 44 artboards).
+Those artboards ship with their own sliders,
 toggles and buttons and are fully interactive on their own.
 
 So the app does not re-implement the controls. Instead:
@@ -154,5 +154,5 @@ server rewrites needed) · no CSS framework.
 
 ## Credits
 
-Animation and artwork: **Lucid Paper Studios**, authored in
-[Rive](https://rive.app). This repository is the course shell around that file.
+Animation and artwork authored in [Rive](https://rive.app). This repository is
+the course shell around that file.

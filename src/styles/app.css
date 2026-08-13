@@ -1090,14 +1090,6 @@
   color: var(--ink);
 }
 
-.about__kicker {
-  font-size: 11px;
-  font-weight: 900;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--ink-3);
-}
-
 .about__stat {
   margin-top: 20px;
   padding: 14px;
@@ -1134,14 +1126,6 @@
 
 .gate__mark {
   margin-bottom: 16px;
-}
-
-.gate__kicker {
-  font-size: 11px;
-  font-weight: 900;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: var(--ink-3);
 }
 
 .gate__title {
