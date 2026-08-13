@@ -25,12 +25,7 @@ export function Home({ onOpen, onReview, onAbout, onBack }: Props) {
 
   return (
     <div className="screen home">
-      <AppBar
-        onBack={onBack}
-        subtitle="Trigonometry 101"
-        title="Lessons"
-        progress={ratio}
-      />
+      <AppBar onBack={onBack} title="Trig" progress={ratio} />
 
       <div className="home__scroll">
         <div className="progresscard">

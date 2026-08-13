@@ -47,9 +47,7 @@ export function Splash({ onStart, onResume }: Props) {
       <div className="splash__scrim" />
 
       <div className={`splash__foot ${revealed ? 'is-in' : ''}`.trim()}>
-        <p className="splash__tagline">
-          Learn sine, cosine and tangent by dragging — not by reading.
-        </p>
+        <p className="splash__tagline">Learn sine, cosine and tangent</p>
         <button type="button" className="btn btn--primary btn--wide" onClick={onStart}>
           {started ? 'Resume' : 'Start the course'}
         </button>
