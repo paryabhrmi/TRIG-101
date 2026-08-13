@@ -5,7 +5,7 @@ import { RiveStage } from '../components/RiveStage'
 import { TOTAL_LESSONS, lessons, nextStop, slotNumber } from '../data/curriculum'
 import { useProgress } from '../lib/progress'
 import { useInstruments } from '../lib/useInstruments'
-import type { Rive } from '@rive-app/react-canvas'
+import type { Rive } from '@rive-app/react-webgl'
 import type { Lesson as LessonModel, LessonAction } from '../data/curriculum'
 
 interface Props {

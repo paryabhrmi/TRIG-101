@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
-import { Fit } from '@rive-app/react-canvas'
+import { Fit } from '@rive-app/react-webgl'
 import { RiveStage } from '../components/RiveStage'
 import { lessons } from '../data/curriculum'
 import { useProgress } from '../lib/progress'
-import type { Rive } from '@rive-app/react-canvas'
+import type { Rive } from '@rive-app/react-webgl'
 
 interface Props {
   onStart: () => void
