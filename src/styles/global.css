@@ -56,8 +56,6 @@
 
   /* Rhythm */
   --gut: 20px;
-  /* How far the bottom sheet rides up over the artwork. */
-  --sheet-overlap: 22px;
   --safe-t: env(safe-area-inset-top, 0px);
   --safe-b: env(safe-area-inset-bottom, 0px);
 

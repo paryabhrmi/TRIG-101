@@ -1,11 +1,14 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { AppBar } from '../components/AppBar'
+import { BottomSheet } from '../components/BottomSheet'
 import { Instruments } from '../components/Instruments'
 import { RiveStage } from '../components/RiveStage'
 import { TOTAL_LESSONS, lessons, nextStop, slotNumber } from '../data/curriculum'
 import { useProgress } from '../lib/progress'
 import { useInstruments } from '../lib/useInstruments'
+import { useMediaQuery } from '../lib/useViewport'
 import type { Rive } from '@rive-app/react-canvas'
+import type { SheetMetrics, SheetSnap } from '../components/BottomSheet'
 import type { Lesson as LessonModel, LessonAction } from '../data/curriculum'
 
 interface Props {
@@ -16,32 +19,87 @@ interface Props {
   onFinish: () => void
 }
 
-/** Watch what to touch → do the task → read why it happened. */
+/** Find the control → clear the task → read why it happened. */
 type Step = 'watch' | 'do' | 'learn'
+
+const STEPS: { id: Step; label: string }[] = [
+  { id: 'watch', label: 'Find it' },
+  { id: 'do', label: 'Try it' },
+  { id: 'learn', label: 'Why' },
+]
+
+/**
+ * Each step opens the sheet at the height it actually needs: finding the
+ * control wants the instruction and the first button, doing the task wants
+ * the canvas, reading wants the page. The learner can drag away from any of
+ * these — the step only sets the opening position.
+ */
+const SNAP_FOR: Record<Step, SheetSnap> = { watch: 'half', do: 'peek', learn: 'full' }
+
+/** How long a learner sits on the task before the hint offers itself. */
+const AUTO_HINT_MS = 22000
+
+/** How far the artwork tucks under the sheet's rounded corners. */
+const SHEET_TUCK_PX = 16
 
 export function LessonScreen({ lesson, onBack, onGoto, onReview, onFinish }: Props) {
   const { progress, complete } = useProgress()
   const [rive, setRive] = useState<Rive | null>(null)
   const [toggles, setToggles] = useState<Record<string, boolean>>({})
   const [step, setStep] = useState<Step>('watch')
+  const [snap, setSnap] = useState<SheetSnap>(SNAP_FOR.watch)
   const [showHint, setShowHint] = useState(false)
+  const [metrics, setMetrics] = useState<SheetMetrics>({ peek: 208, half: 380 })
+  const [barH, setBarH] = useState(61)
+
+  const barRef = useRef<HTMLDivElement>(null)
+  const isPanel = useMediaQuery('(orientation: landscape) and (max-height: 560px)')
 
   const index = lessons.indexOf(lesson)
   const alreadyDone = !!progress[lesson.id]
   const n = slotNumber(lesson.id)
-  const after = useMemo(() => nextStop(lesson.id), [lesson.id])
+  const after = nextStop(lesson.id)
 
   const { values, solved, markSolved } = useInstruments(rive, lesson, alreadyDone)
+
+  useLayoutEffect(() => {
+    const bar = barRef.current
+    if (!bar) return
+    const measure = () => setBarH(Math.ceil(bar.getBoundingClientRect().height))
+    measure()
+    const ro = new ResizeObserver(measure)
+    ro.observe(bar)
+    return () => ro.disconnect()
+  }, [])
 
   useEffect(() => {
     if (solved && !alreadyDone) complete(lesson.id)
   }, [solved, alreadyDone, complete, lesson.id])
 
+  const goStep = (next: Step) => {
+    setStep(next)
+    setSnap(SNAP_FOR[next])
+  }
+
   // Clearing the task is the cue to move on, but only while the learner is
   // still on that step — never yank the screen out from under them.
   useEffect(() => {
-    if (solved && step === 'do') setStep('learn')
+    if (solved && step === 'do') {
+      setStep('learn')
+      setSnap('full')
+    }
   }, [solved, step])
+
+  // A learner stuck on the task gets the hint brought to them: it appears in
+  // the checkpoint card and the sheet rises just enough to show it.
+  useEffect(() => {
+    if (step !== 'do' || solved || showHint || !lesson.checkpoint) return
+    const id = window.setTimeout(() => {
+      setShowHint(true)
+      setSnap((s) => (s === 'peek' ? 'half' : s))
+    }, AUTO_HINT_MS)
+    return () => window.clearTimeout(id)
+  }, [step, solved, showHint, lesson.checkpoint])
 
   const runAction = (action: LessonAction) => {
     const input = rive
@@ -59,33 +117,105 @@ export function LessonScreen({ lesson, onBack, onGoto, onReview, onFinish }: Pro
     if (action.completes) markSolved()
   }
 
-  const steps: Step[] = ['watch', 'do', 'learn']
-  const stepIndex = steps.indexOf(step)
-
   const goNext = () => {
     if (after?.kind === 'lesson') onGoto(after.id)
     else if (after?.kind === 'review') onReview(after.chapter)
     else onFinish()
   }
 
+  const stepIndex = STEPS.findIndex((s) => s.id === step)
+  const lead =
+    step === 'watch'
+      ? lesson.watch
+      : step === 'do'
+        ? (lesson.checkpoint?.goal ?? lesson.tagline)
+        : lesson.tagline
+
+  // Everything the learner needs while a finger is on the canvas lives in the
+  // peek region: tabs, the current instruction, canvas buttons, live readouts.
+  // It renders identically across steps (only the lead changes), so the stage
+  // is never resized mid-lesson.
+  const peekContent = (
+    <>
+      <div className="stepper" role="tablist" aria-label="Lesson steps">
+        {STEPS.map((s, i) => {
+          const done = s.id === 'do' ? solved : s.id === 'watch' && (stepIndex > 0 || solved)
+          return (
+            <button
+              key={s.id}
+              type="button"
+              role="tab"
+              aria-selected={s.id === step}
+              className={`stepper__tab ${s.id === step ? 'is-current' : ''} ${
+                done ? 'is-done' : ''
+              }`.trim()}
+              onClick={() => goStep(s.id)}
+            >
+              <span className="stepper__num" aria-hidden="true">
+                {done ? '✓' : i + 1}
+              </span>
+              {s.label}
+            </button>
+          )
+        })}
+      </div>
+
+      <p className="step__lead" key={step}>
+        {lead}
+      </p>
+
+      {lesson.actions && lesson.actions.length > 0 && (
+        <div className="actions">
+          {lesson.actions.map((action) => (
+            <button
+              key={action.input}
+              type="button"
+              className={`btn ${action.tone === 'ghost' ? 'btn--ghost' : 'btn--primary'} ${
+                toggles[action.input] ? 'is-on' : ''
+              }`.trim()}
+              onClick={() => runAction(action)}
+              disabled={!rive}
+            >
+              {action.label}
+            </button>
+          ))}
+        </div>
+      )}
+
+      <Instruments readouts={lesson.readouts} values={values} />
+    </>
+  )
+
   return (
     <div className={`screen lesson lesson--${lesson.stage}`}>
-      <AppBar
-        onBack={onBack}
-        subtitle={`Lesson ${n} of ${TOTAL_LESSONS}`}
-        title={lesson.title}
-        right={
-          solved ? (
-            <span className="pill pill--done">Done</span>
-          ) : (
-            <span className="pill">{String(n).padStart(2, '0')}</span>
-          )
-        }
-        progress={(index + (solved ? 1 : 0)) / lessons.length}
-      />
+      <div className="lesson__bar" ref={barRef}>
+        <AppBar
+          onBack={onBack}
+          subtitle={`Lesson ${n} of ${TOTAL_LESSONS}`}
+          title={lesson.title}
+          right={
+            solved ? (
+              <span className="pill pill--done">Done</span>
+            ) : (
+              <span className="pill">{String(n).padStart(2, '0')}</span>
+            )
+          }
+          progress={(index + (solved ? 1 : 0)) / lessons.length}
+        />
+      </div>
 
-      {/* Full-bleed stage: no card, no inset — the artwork is the backdrop. */}
-      <div className="lesson__stage">
+      {/* Full-bleed stage, laid out against the sheet's snapped stop so no
+          in-canvas control ever hides behind the sheet at rest. At `full`
+          (reading mode) the sheet covers the artwork behind its scrim, so the
+          stage keeps the half layout and nothing reflows on the way back. */}
+      <div
+        className="lesson__stage"
+        style={{
+          marginBottom: isPanel
+            ? 0
+            : Math.max(0, (snap === 'peek' ? metrics.peek : metrics.half) - SHEET_TUCK_PX),
+        }}
+      >
         <RiveStage
           key={lesson.id}
           artboard={lesson.artboard}
@@ -96,122 +226,103 @@ export function LessonScreen({ lesson, onBack, onGoto, onReview, onFinish }: Pro
         />
       </div>
 
-      <div className="sheet">
-        <nav className="steps" aria-label="Lesson steps">
-          {steps.map((s, i) => (
-            <button
-              key={s}
-              type="button"
-              className={`steps__dot ${i === stepIndex ? 'is-current' : ''} ${
-                i < stepIndex || (s === 'do' && solved) ? 'is-done' : ''
-              }`.trim()}
-              aria-current={i === stepIndex}
-              aria-label={`Step ${i + 1}: ${s}`}
-              onClick={() => setStep(s)}
-            />
-          ))}
-          <span className="steps__label">
-            {step === 'watch' ? 'Find it' : step === 'do' ? 'Try it' : 'Why it works'}
-          </span>
-        </nav>
-
-        <div className="sheet__scroll">
-          {step === 'watch' && (
-            <>
-              <p className="step__lead">{lesson.watch}</p>
-              <Instruments readouts={lesson.readouts} values={values} />
-              <div className="sheet__foot">
-                <button
-                  type="button"
-                  className="btn btn--primary btn--wide"
-                  onClick={() => setStep('do')}
-                >
-                  Got it — give me a task
-                </button>
-              </div>
-            </>
-          )}
-
-          {step === 'do' && (
-            <>
-              <p className="step__lead">
-                {lesson.checkpoint ? lesson.checkpoint.goal : lesson.tagline}
+      <BottomSheet
+        snap={snap}
+        onSnap={setSnap}
+        topInset={barH}
+        peek={peekContent}
+        onMetrics={setMetrics}
+        isStatic={isPanel}
+        resetKey={step}
+      >
+        {step === 'watch' && (
+          <>
+            <div className="prose">
+              <p className="prose__dim">
+                The canvas is the controls — drag what you see. The tiles above
+                mirror it live as you move things.
               </p>
+            </div>
+            <div className="sheet__foot">
+              <button
+                type="button"
+                className="btn btn--primary btn--wide"
+                onClick={() => goStep('do')}
+              >
+                Got it — give me the task
+              </button>
+            </div>
+          </>
+        )}
 
-              {lesson.actions && lesson.actions.length > 0 && (
-                <div className="actions">
-                  {lesson.actions.map((action) => (
-                    <button
-                      key={action.input}
-                      type="button"
-                      className={`btn ${
-                        action.tone === 'ghost' ? 'btn--ghost' : 'btn--primary'
-                      } ${toggles[action.input] ? 'is-on' : ''}`.trim()}
-                      onClick={() => runAction(action)}
-                      disabled={!rive}
-                    >
-                      {action.label}
-                    </button>
-                  ))}
-                </div>
-              )}
-
-              <Instruments readouts={lesson.readouts} values={values} />
-
-              {lesson.checkpoint && (
-                <div className="hintrow">
-                  {showHint ? (
-                    <p className="step__hint">{lesson.checkpoint.hint}</p>
-                  ) : (
-                    <button
-                      type="button"
-                      className="linkish"
-                      onClick={() => setShowHint(true)}
-                    >
-                      Need a hint?
-                    </button>
-                  )}
-                  <button
-                    type="button"
-                    className="linkish linkish--quiet"
-                    onClick={() => setStep('learn')}
-                  >
-                    Skip
-                  </button>
-                </div>
-              )}
-            </>
-          )}
-
-          {step === 'learn' && (
-            <>
-              {solved && (
-                <p className="step__win">
-                  <span aria-hidden="true">✓</span> Nice — that is the idea.
-                </p>
-              )}
-              <div className="prose">
-                {lesson.body.map((para, i) => (
-                  <p key={i}>{para}</p>
-                ))}
+        {step === 'do' && (
+          <>
+            <div className={`checkpoint ${solved ? 'is-solved' : ''}`.trim()}>
+              <div className="checkpoint__head">
+                <span className="checkpoint__badge" aria-hidden="true">
+                  {solved ? '✓' : '!'}
+                </span>
+                <span className="checkpoint__kicker">
+                  {solved ? 'Checkpoint cleared' : 'Checkpoint'}
+                </span>
               </div>
-              <div className="sheet__foot">
-                <button
-                  type="button"
-                  className="btn btn--primary btn--wide"
-                  onClick={goNext}
-                >
-                  {after?.kind === 'review'
-                    ? 'Chapter review'
-                    : after?.kind === 'lesson'
-                      ? 'Next lesson'
-                      : 'Finish the course'}
+              <p className="checkpoint__note">
+                {solved
+                  ? 'Nice — head to Why to see what just happened.'
+                  : showHint && lesson.checkpoint
+                    ? lesson.checkpoint.hint
+                    : lesson.checkpoint
+                      ? 'Watching the canvas — this clears itself the moment you get there.'
+                      : 'Use the button above — the canvas does the rest.'}
+              </p>
+              {!showHint && !solved && lesson.checkpoint && (
+                <button type="button" className="linkish" onClick={() => setShowHint(true)}>
+                  Need a hint?
                 </button>
+              )}
+            </div>
+            <div className="hintrow">
+              <button
+                type="button"
+                className="linkish linkish--quiet"
+                onClick={() => goStep('learn')}
+              >
+                Skip to the idea
+              </button>
+            </div>
+          </>
+        )}
+
+        {step === 'learn' && (
+          <>
+            {solved && (
+              <p className="step__win">
+                <span aria-hidden="true">✓</span> Nice — that is the idea.
+              </p>
+            )}
+            {lesson.formula && (
+              <div className="keyidea">
+                <span className="keyidea__kicker">Key idea</span>
+                <span className="keyidea__formula">{lesson.formula}</span>
               </div>
-            </>
-          )}
-        </div>
-      </div>
+            )}
+            <div className="prose">
+              {lesson.body.map((para, i) => (
+                <p key={i}>{para}</p>
+              ))}
+            </div>
+            <div className="sheet__foot">
+              <button type="button" className="btn btn--primary btn--wide" onClick={goNext}>
+                {after?.kind === 'review'
+                  ? 'Chapter review'
+                  : after?.kind === 'lesson'
+                    ? 'Next lesson'
+                    : 'Finish the course'}
+              </button>
+            </div>
+          </>
+        )}
+      </BottomSheet>
     </div>
   )
 }

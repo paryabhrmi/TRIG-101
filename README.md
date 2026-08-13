@@ -72,6 +72,25 @@ canvas does not look pasted into someone else's UI:
 Light-themed artboards (`Angle`, `SecretRatios`) sit on a white card; the dark
 ones blend straight into the page.
 
+### The lesson bottom sheet
+
+All textual content in a lesson lives in a real draggable bottom sheet
+(`src/components/BottomSheet.tsx`) with three snap points:
+
+- **peek** — canvas first: the grab handle, the step tabs, the current
+  instruction and the live readout strip;
+- **half** — the working set: peek plus the checkpoint card or step body;
+- **full** — reading mode: the artwork dims behind a scrim.
+
+Each lesson step opens the sheet at the height it needs (*Find it* → half,
+*Try it* → peek, *Why* → full), and the learner can drag to any stop from
+there — release velocity is projected forward to pick the landing stop, taps
+on the handle cycle through them. The Rive canvas is laid out against the
+*snapped* stop (peek or half), so every in-canvas slider stays visible at
+rest; only mid-drag does the sheet ride over the artwork, which means the
+canvas never reflows while a finger is moving. In short landscape viewports
+the same component renders as a static side panel instead.
+
 ## Rive integration notes
 
 These were calibrated against the runtime and are worth knowing before editing

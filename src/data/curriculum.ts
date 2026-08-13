@@ -62,6 +62,8 @@ export interface Lesson {
   tagline: string
   /** Step 1: what to touch. This is where the canvas is taught as a control. */
   watch: string
+  /** The lesson in one line of mathematics — shown as the Key idea card. */
+  formula?: string
   body: string[]
   readouts: Readout[]
   actions?: LessonAction[]
@@ -303,6 +305,7 @@ export const lessons: Lesson[] = [
     tagline: 'Blow the triangle up. The ratios refuse to change.',
     watch:
       'Two sliders sit under the triangle: Angle and Scale. Drag either one and watch the panel.',
+    formula: 'same angles  ⇒  same ratios',
     body: [
       'Two triangles with the same angles are one shape at two sizes. Mathematicians call them similar.',
       'Similar triangles share their side ratios exactly. That is the hinge the entire subject swings on.',
@@ -362,6 +365,7 @@ export const lessons: Lesson[] = [
     tagline: 'Three ratios, three names. That is the whole vocabulary.',
     watch:
       'One slider under the circle sets the angle. Drag it and watch all three ratios at once.',
+    formula: 'sin θ = O∕H   ·   cos θ = A∕H   ·   tan θ = O∕A',
     body: [
       'Shrink the hypotenuse to exactly 1 and the ratios stop being fractions — they become the sides themselves.',
       'sin θ is the opposite side. cos θ is the adjacent side. tan θ is one divided by the other.',
@@ -418,6 +422,7 @@ export const lessons: Lesson[] = [
     tagline: 'A degree is a convention. A radian is a measurement.',
     watch:
       'Drag the slider at the bottom. Both dials turn together — one counts degrees, one counts radii.',
+    formula: '180° = π radians  ≈  3.14 radii of arc',
     body: [
       '360 is a number inherited from Babylonian astronomers. Nothing about a circle requires it.',
       'A radian is honest: it is the angle you have turned when the arc you walked is exactly as long as the radius.',
@@ -460,6 +465,7 @@ export const lessons: Lesson[] = [
     tagline: 'Trigonometry escapes the triangle.',
     watch:
       'Press Spin it below, then watch Opp and Adj as the arm goes all the way round.',
+    formula: 'the handle sits at  (cos θ, sin θ)',
     body: [
       'Set the hypotenuse to 1 and pin it at the origin. Now the angle can keep going — past 90°, past 180°, past a full turn.',
       "The handle's height above the axis is sin θ. Its distance along the axis is cos θ. Always.",
@@ -508,6 +514,7 @@ export const lessons: Lesson[] = [
     tagline: 'A wave is a circle, walked in a straight line.',
     watch:
       'Drag the slider along the bottom to unroll the circle into the wave.',
+    formula: 'y = sin θ  —  one turn is one cycle',
     body: [
       'Keep the angle turning, and plot the height of the handle against the angle itself.',
       "The circle's vertical position, stretched out along an axis, is the sine wave. There is nothing more mysterious in it than that.",
@@ -550,6 +557,7 @@ export const lessons: Lesson[] = [
     tagline: 'Cosine is sine with a head start.',
     watch:
       'The same slider as before — but now it plots the horizontal position instead of the vertical.',
+    formula: 'cos θ = sin(θ + π∕2)',
     body: [
       'Plot the horizontal position instead of the vertical one and the cosine wave falls out.',
       'Same shape, same period. It simply starts at 1 instead of 0.',
@@ -592,6 +600,7 @@ export const lessons: Lesson[] = [
     tagline: 'The ratio that runs off the page.',
     watch:
       'Drag slowly through the first quarter turn. The interesting part is only a degree wide.',
+    formula: 'tan θ = sin θ ∕ cos θ',
     body: [
       'Tangent is sine over cosine — height divided by width.',
       'As the angle nears 90°, the width collapses toward zero while the height holds near 1. Dividing by almost nothing gives almost everything.',
@@ -638,6 +647,7 @@ export const lessons: Lesson[] = [
     tagline: 'Two dials turn one wave into every wave.',
     watch:
       'A slider for amplitude, three buttons for frequency. Try them in any order.',
+    formula: 'y = A · sin(Bθ)',
     body: [
       'y = A·sin(Bθ). A stretches the wave vertically; B squeezes it horizontally.',
       'Amplitude is how loud. Frequency is how high the note. For sound, that is not a metaphor.',
@@ -675,6 +685,7 @@ export const lessons: Lesson[] = [
     tagline: 'A pendulum knows no trigonometry. It obeys it anyway.',
     watch:
       'Press Release it below and follow the weight as it traces its path.',
+    formula: 'x(t) = A · cos(ωt)',
     body: [
       'Release the weight and track its horizontal position over time.',
       'The trace is a sine wave. So is a plucked string, an alternating current, a tide, and the brightness of one pixel in a radio signal.',

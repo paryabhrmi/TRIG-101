@@ -537,106 +537,215 @@
 }
 
 /* ===========================================================================
-   Lesson — full-bleed stage with the sheet rising over it
+   Lesson — full-bleed stage with a real bottom sheet over it
+
+   All textual content lives in the sheet; the canvas is laid out against the
+   sheet's measured peek height (set inline from React), so no in-canvas
+   control ever rests behind the sheet. Beyond peek the sheet rides OVER the
+   artwork — the canvas never reflows while dragging.
    =========================================================================== */
 
-/* The stage takes whatever the sheet does not. That is the point of the
-   stepped flow: a short step leaves more room, so the artwork grows instead
-   of the empty space. Fit.Contain never crops, so a smaller box only ever means
-   smaller artwork — never a hidden slider. The padding is the strip the sheet
-   overlaps, kept outside the canvas box. */
+.lesson__bar {
+  position: relative;
+  z-index: 5;
+  flex: 0 0 auto;
+}
+
+/* Fit.Contain never crops, so a smaller box only ever means smaller artwork —
+   never a hidden slider. The inline margin-bottom tucks the artwork a few px
+   under the sheet's rounded corners so the two read as one composition. */
 .lesson__stage {
   position: relative;
   z-index: 1;
   flex: 1 1 auto;
-  min-height: 30dvh;
+  min-height: 120px;
   width: 100%;
-  padding-bottom: var(--sheet-overlap);
   display: flex;
+  /* Moves in lockstep with the sheet when a snap changes, so the artwork and
+     the sheet read as one surface rather than two racing boxes. */
+  transition: margin-bottom 0.34s cubic-bezier(0.32, 0.72, 0, 1);
 }
 
-/* The sheet overlaps that padding strip so the two read as one composition
-   rather than two stacked boxes. It is sized by its step's content, capped so
-   the longest step still leaves the artwork usable. */
-.sheet {
-  position: relative;
+/* Dims the artwork while the sheet is up in reading mode. Opacity is driven
+   from the sheet's drag position; the transition only smooths snap changes. */
+.bsheet-scrim {
+  position: absolute;
+  inset: 0;
   z-index: 2;
-  flex: 0 1 auto;
-  min-height: 0;
-  max-height: min(56dvh, 470px);
+  background: #141a46;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.34s var(--ease);
+}
+
+.bsheet-scrim.is-active {
+  pointer-events: auto;
+}
+
+.bsheet {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: 3;
   display: flex;
   flex-direction: column;
-  margin-top: calc(-1 * var(--sheet-overlap));
   background: var(--paper);
   border-radius: var(--r-xl) var(--r-xl) 0 0;
   box-shadow: var(--lift-3);
   /* Without this, scrolled content shows through the rounded top corners. */
   overflow: hidden;
+  /* The sheet is a drag surface; its body opts back into scrolling at full. */
+  touch-action: none;
+  transition: transform 0.34s cubic-bezier(0.32, 0.72, 0, 1);
+  will-change: transform;
 }
 
-.sheet__scroll {
-  flex: 1;
+.bsheet.is-dragging {
+  transition: none;
+}
+
+.bsheet__grip {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 24px;
+  margin-bottom: 2px;
+}
+
+.bsheet__grip span {
+  width: 40px;
+  height: 5px;
+  border-radius: var(--r-pill);
+  background: var(--line-strong);
+  transition: background 0.2s var(--ease);
+}
+
+.bsheet__grip:active span {
+  background: var(--ink-3);
+}
+
+.bsheet__peek {
+  flex: 0 0 auto;
+  padding: 6px var(--gut) calc(12px + var(--safe-b));
+}
+
+.bsheet__body {
+  flex: 1 1 auto;
   min-height: 0;
+  overflow: hidden;
+  padding: 2px var(--gut) calc(26px + var(--safe-b));
+}
+
+.bsheet__body.is-open {
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
-  padding: 14px var(--gut) calc(18px + var(--safe-b));
+  touch-action: pan-y;
 }
 
 /* ---------------------------------------------------------------------------
-   Stepped lesson: find it → try it → why it works. One step at a time keeps
-   the sheet short, which is what gives the canvas its height back.
+   Stepped lesson: find it → try it → why. A labelled segmented control, so
+   the three-beat shape of every lesson is legible at a glance.
    --------------------------------------------------------------------------- */
 
-.steps {
-  flex: 0 0 auto;
+.stepper {
   display: flex;
-  align-items: center;
-  gap: 7px;
-  padding: 13px var(--gut) 0;
+  gap: 4px;
+  padding: 3px;
+  background: var(--surface);
+  border-radius: var(--r-pill);
 }
 
-.steps__dot {
-  width: 22px;
-  height: 5px;
-  padding: 0;
+.stepper__tab {
+  flex: 1 1 0;
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 34px;
+  padding: 0 6px;
+  border-radius: var(--r-pill);
+  font-size: 12.5px;
+  font-weight: 800;
+  white-space: nowrap;
+  color: var(--ink-3);
+  transition: background 0.25s var(--ease), color 0.25s var(--ease),
+    box-shadow 0.25s var(--ease);
+}
+
+.stepper__tab.is-current {
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: var(--lift-1);
+}
+
+.stepper__tab.is-done:not(.is-current) {
+  color: var(--mint);
+}
+
+.stepper__num {
+  display: grid;
+  place-items: center;
+  width: 17px;
+  height: 17px;
   border-radius: var(--r-pill);
   background: var(--line);
-  transition: background 0.25s var(--ease), width 0.25s var(--ease);
-}
-
-.steps__dot.is-done {
-  background: var(--mint);
-}
-
-.steps__dot.is-current {
-  width: 34px;
-  background: var(--blue);
-}
-
-.steps__label {
-  margin-inline-start: auto;
-  font-size: 10.5px;
+  font-size: 10px;
   font-weight: 900;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--ink-3);
+  color: var(--ink-2);
 }
 
+.stepper__tab.is-current .stepper__num {
+  background: var(--blue);
+  color: #ffffff;
+}
+
+.stepper__tab.is-done .stepper__num {
+  background: var(--mint);
+  color: #ffffff;
+}
+
+/* Reserves two lines so the peek height barely moves between steps and the
+   canvas underneath is never nudged around. */
 .step__lead {
-  font-size: 17px;
+  padding-top: 12px;
+  min-height: calc(1.45em * 2 + 12px);
+  font-size: 15.5px;
   font-weight: 800;
   line-height: 1.45;
   color: var(--ink);
   text-wrap: balance;
 }
 
-.step__hint {
-  flex: 1;
-  font-size: 13px;
-  font-weight: 600;
+/* The lesson in one line of mathematics — a navy card in the Rive file's own
+   panel language. */
+.keyidea {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding: 16px 18px;
+  border-radius: var(--r-md);
+  background: linear-gradient(160deg, #1b2266 0%, #141a46 70%);
+  box-shadow: var(--lift-1);
+}
+
+.keyidea__kicker {
+  font-size: 10.5px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--cyan);
+}
+
+.keyidea__formula {
+  font-size: 18px;
+  font-weight: 800;
   line-height: 1.5;
-  color: var(--ink-2);
+  letter-spacing: 0.01em;
+  font-variant-numeric: tabular-nums;
+  color: #ffffff;
 }
 
 .step__win {
@@ -664,8 +773,9 @@
 .hintrow {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   gap: 12px;
-  padding-top: 12px;
+  padding-top: 10px;
 }
 
 .linkish--quiet {
@@ -673,28 +783,44 @@
   color: var(--ink-3);
 }
 
+/* Canvas buttons (Spin it, Release it) live in the peek region, sized to sit
+   beside the readouts without stealing the canvas's height. */
 .actions {
   display: flex;
-  flex-wrap: wrap;
-  gap: 9px;
-  padding-top: 16px;
+  gap: 8px;
+  padding-top: 12px;
+}
+
+.actions .btn {
+  flex: 1 1 auto;
+  min-height: 44px;
+  padding: 0 16px;
+  font-size: 14px;
 }
 
 /* ---------------------------------------------------------------------------
    Readout tiles — the SOH CAH TOA cards from the Rive file: a solid accent
-   header over a tinted body.
+   header over a tinted body. One horizontally-scrolling row, so the peek
+   region keeps a fixed height no matter how many readouts a lesson has.
    --------------------------------------------------------------------------- */
 
 .instruments {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 8px;
-  padding-top: 16px;
+  margin: 0 calc(-1 * var(--gut));
+  padding: 12px var(--gut) 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.instruments::-webkit-scrollbar {
+  display: none;
 }
 
 .chip {
-  flex: 1 1 auto;
-  min-width: 96px;
+  flex: 1 0 auto;
+  min-width: 92px;
   display: flex;
   flex-direction: column;
   border-radius: var(--r-sm);
@@ -759,7 +885,7 @@
 }
 
 .checkpoint {
-  margin-top: 16px;
+  margin-top: 12px;
   padding: 15px;
   background: rgba(0, 117, 255, 0.06);
   border: 1px solid rgba(0, 117, 255, 0.22);
@@ -833,6 +959,10 @@
   font-weight: 600;
   line-height: 1.5;
   color: var(--ink-2);
+}
+
+.checkpoint .linkish {
+  padding: 8px 0 0;
 }
 
 .prose {
@@ -1298,12 +1428,6 @@
    Short viewports
    =========================================================================== */
 
-@media (max-height: 720px) {
-  .lesson__stage {
-    max-height: 52dvh;
-  }
-}
-
 @media (max-width: 360px) {
   :root {
     --gut: 16px;
@@ -1311,7 +1435,8 @@
 }
 
 /* A short, wide viewport stacked vertically leaves the artwork a tiny stamp
-   in a sea of white. Put the sheet beside it instead. */
+   in a sea of white. Put the sheet beside it as a static panel instead —
+   the component renders without drag or snaps in this mode. */
 @media (orientation: landscape) and (max-height: 560px) {
   .lesson {
     display: grid;
@@ -1319,24 +1444,32 @@
     grid-template-rows: auto 1fr;
   }
 
-  .lesson .appbar {
+  .lesson .lesson__bar {
     grid-column: 1 / -1;
   }
 
   .lesson__stage {
     grid-column: 1;
-    width: auto;
-    height: auto;
-    aspect-ratio: auto;
-    max-height: none;
-    padding: 0;
     min-height: 0;
+    margin-bottom: 0 !important;
   }
 
-  .lesson .sheet {
+  .bsheet--static {
+    position: static;
     grid-column: 2;
-    margin-top: 0;
+    min-height: 0;
+    height: auto;
+    transform: none;
+    touch-action: auto;
     border-radius: var(--r-xl) 0 0 0;
     box-shadow: -14px 0 34px -22px rgba(20, 26, 70, 0.35);
+  }
+
+  .bsheet--static .bsheet__peek {
+    padding: 14px var(--gut) 10px;
+  }
+
+  .bsheet--static .bsheet__body {
+    padding-bottom: calc(20px + var(--safe-b));
   }
 }
