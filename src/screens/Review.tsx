@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { AppBar } from '../components/AppBar'
 import { chapterById, lessonAfterReview, reviewKey } from '../data/curriculum'
+import { useI18n } from '../lib/i18n'
 import { useProgress } from '../lib/progress'
 
 interface Props {
@@ -15,6 +16,7 @@ interface Props {
  * right slider; these prove they know why it moved.
  */
 export function Review({ chapter, onBack, onGoto, onFinish }: Props) {
+  const { t, tr } = useI18n()
   const meta = chapterById(chapter)
   const questions = meta?.review ?? []
   const { complete } = useProgress()
@@ -30,12 +32,12 @@ export function Review({ chapter, onBack, onGoto, onFinish }: Props) {
   if (!meta || !q) {
     return (
       <div className="screen">
-        <AppBar onBack={onBack} title="Chapter review" />
+        <AppBar onBack={onBack} title={t('chapterReview')} />
         <div className="soon">
-          <p className="soon__tag">This chapter has no review yet.</p>
+          <p className="soon__tag">{t('noReview')}</p>
           <div className="soon__foot">
             <button type="button" className="btn btn--primary btn--wide" onClick={onBack}>
-              Back to the lessons
+              {t('backToLessons')}
             </button>
           </div>
         </div>
@@ -63,21 +65,21 @@ export function Review({ chapter, onBack, onGoto, onFinish }: Props) {
     const all = correct === questions.length
     return (
       <div className="screen">
-        <AppBar onBack={onBack} subtitle={`Chapter ${chapter}`} title="Review complete" />
+        <AppBar
+          onBack={onBack}
+          subtitle={t('chapterNo', { n: chapter })}
+          title={t('reviewComplete')}
+        />
         <div className="soon">
           <div className={`score ${all ? 'is-perfect' : ''}`.trim()}>
             <strong>
               {correct}
               <em>/{questions.length}</em>
             </strong>
-            <span>{all ? 'Every one right.' : 'Worth another look.'}</span>
+            <span>{all ? t('allRight') : t('anotherLook')}</span>
           </div>
-          <h2 className="soon__title">{meta.title}</h2>
-          <p className="soon__tag">
-            {all
-              ? 'You can explain this chapter, not just operate it. That is the difference.'
-              : 'Re-read the lesson for anything that felt shaky — the explanations are at the end of each one.'}
-          </p>
+          <h2 className="soon__title">{tr(meta.title)}</h2>
+          <p className="soon__tag">{all ? t('perfectMsg') : t('imperfectMsg')}</p>
           <div className="soon__foot">
             {nextLesson ? (
               <button
@@ -85,7 +87,7 @@ export function Review({ chapter, onBack, onGoto, onFinish }: Props) {
                 className="btn btn--primary btn--wide"
                 onClick={() => onGoto(nextLesson)}
               >
-                Start the next chapter
+                {t('startNextChapter')}
               </button>
             ) : (
               <button
@@ -93,11 +95,11 @@ export function Review({ chapter, onBack, onGoto, onFinish }: Props) {
                 className="btn btn--primary btn--wide"
                 onClick={onFinish}
               >
-                Finish the course
+                {t('finishCourse')}
               </button>
             )}
             <button type="button" className="linkish linkish--center" onClick={onBack}>
-              Back to the lessons
+              {t('backToLessons')}
             </button>
           </div>
         </div>
@@ -109,8 +111,8 @@ export function Review({ chapter, onBack, onGoto, onFinish }: Props) {
     <div className="screen">
       <AppBar
         onBack={onBack}
-        subtitle={`Chapter ${chapter} review`}
-        title={meta.title}
+        subtitle={t('chapterNReview', { n: chapter })}
+        title={tr(meta.title)}
         right={
           <span className="pill">
             {index + 1}/{questions.length}
@@ -120,7 +122,7 @@ export function Review({ chapter, onBack, onGoto, onFinish }: Props) {
       />
 
       <div className="quiz">
-        <p className="quiz__prompt">{q.prompt}</p>
+        <p className="quiz__prompt">{tr(q.prompt)}</p>
 
         <ul className="quiz__options">
           {q.options.map((opt, i) => {
@@ -135,7 +137,7 @@ export function Review({ chapter, onBack, onGoto, onFinish }: Props) {
                     ? 'is-wrong'
                     : 'is-dim'
             return (
-              <li key={opt}>
+              <li key={opt.en}>
                 <button
                   type="button"
                   className={`quiz__option ${state}`.trim()}
@@ -145,7 +147,7 @@ export function Review({ chapter, onBack, onGoto, onFinish }: Props) {
                   <span className="quiz__key" aria-hidden="true">
                     {picked === null ? String.fromCharCode(65 + i) : isAnswer ? '✓' : isPicked ? '✕' : ''}
                   </span>
-                  <span>{opt}</span>
+                  <span>{tr(opt)}</span>
                 </button>
               </li>
             )
@@ -154,10 +156,10 @@ export function Review({ chapter, onBack, onGoto, onFinish }: Props) {
 
         {picked !== null && (
           <>
-            <p className="quiz__explain">{q.explain}</p>
+            <p className="quiz__explain">{tr(q.explain)}</p>
             <div className="sheet__foot">
               <button type="button" className="btn btn--primary btn--wide" onClick={advance}>
-                {index + 1 < questions.length ? 'Next question' : 'See how you did'}
+                {index + 1 < questions.length ? t('nextQuestion') : t('seeResults')}
               </button>
             </div>
           </>

@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { useI18n } from '../lib/i18n'
 
 interface Props {
   onBack?: () => void
@@ -10,11 +11,13 @@ interface Props {
 }
 
 export function AppBar({ onBack, title, subtitle, right, progress }: Props) {
+  const { t } = useI18n()
+
   return (
     <header className="appbar appbar--light">
       <div className="appbar__row">
         {onBack ? (
-          <button type="button" className="iconbtn" onClick={onBack} aria-label="Back">
+          <button type="button" className="iconbtn" onClick={onBack} aria-label={t('back')}>
             <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
               <path
                 d="M15 5 L8 12 L15 19"

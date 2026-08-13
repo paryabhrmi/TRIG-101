@@ -17,7 +17,7 @@ the heavy lifting.
 ## The idea
 
 The course is built around one Rive file (`public/trig101.riv`, 44 artboards)
-authored by Lucid Paper Studios. Those artboards ship with their own sliders,
+authored by Lucid Paper. Those artboards ship with their own sliders,
 toggles and buttons and are fully interactive on their own.
 
 So the app does not re-implement the controls. Instead:
@@ -66,7 +66,8 @@ canvas does not look pasted into someone else's UI:
   rule, with a teal-to-navy header wash;
 - buttons reproduce the glossy silver-edged pills from the `Frequency (B)` row;
 - readout labels take accent colours the way the ratio panel colours its terms;
-- **M PLUS Rounded 1c** stands in for the file's DIN Round Pro.
+- **M PLUS Rounded 1c** stands in for the file's DIN Round Pro; **Vazirmatn**
+  carries the same rounded voice for the Persian UI.
 
 Light-themed artboards (`Angle`, `SecretRatios`) sit on a white card; the dark
 ones blend straight into the page.
@@ -153,5 +154,5 @@ server rewrites needed on Pages) · no CSS framework.
 
 ## Credits
 
-Animation and artwork: **Lucid Paper Studios**, authored in
+Animation and artwork: **Lucid Paper**, authored in
 [Rive](https://rive.app). This repository is the course shell around that file.

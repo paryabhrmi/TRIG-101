@@ -1,3 +1,4 @@
+import { useI18n } from '../lib/i18n'
 import type { Readout } from '../data/curriculum'
 
 interface Props {
@@ -12,13 +13,15 @@ interface Props {
  * header over a tinted body.
  */
 export function Instruments({ readouts, values }: Props) {
+  const { tr } = useI18n()
+
   if (!readouts.length) return null
 
   return (
     <ul className="instruments">
       {readouts.map((r, i) => (
         <li key={r.id} className={`chip chip--${r.tone}`}>
-          <span className="chip__label">{r.label}</span>
+          <span className="chip__label">{tr(r.label)}</span>
           <span className="chip__value">{values[i] ?? '—'}</span>
         </li>
       ))}

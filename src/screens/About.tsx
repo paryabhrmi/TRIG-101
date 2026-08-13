@@ -1,6 +1,7 @@
 import { AppBar } from '../components/AppBar'
 import { Mark } from '../components/Mark'
 import { TOTAL_LESSONS, lessons } from '../data/curriculum'
+import { useI18n } from '../lib/i18n'
 import { useProgress } from '../lib/progress'
 
 interface Props {
@@ -8,37 +9,32 @@ interface Props {
 }
 
 export function About({ onBack }: Props) {
+  const { t } = useI18n()
   const { progress, resetAll } = useProgress()
   const doneCount = lessons.filter((l) => progress[l.id]).length
 
   return (
     <div className="screen about">
-      <AppBar onBack={onBack} title="About this app" />
+      <AppBar onBack={onBack} title={t('aboutApp')} />
 
       <div className="about__scroll">
         <div className="about__hero">
           <Mark size={72} />
-          <h2 className="about__name">Trigonometry 101</h2>
-          <p className="about__kicker">Lucid Paper Studios</p>
+          <h2 className="about__name">{t('appName')}</h2>
+          <p className="about__kicker">{t('studio')}</p>
         </div>
 
         <div className="prose">
-          <p>
-            Fifteen interactive lessons that build one idea from the ground up: sine,
-            cosine and tangent are not formulas to memorise, they are what you see
-            when you watch a circle turn.
-          </p>
-          <p className="prose__dim">
-            Animation and artwork by Lucid Paper Studios, authored in Rive. Every
-            slider, toggle and button you touch lives inside that file; this app is
-            the course built around it, reading the artwork's own values back out as
-            live readouts.
-          </p>
+          <p>{t('aboutP1')}</p>
+          <p className="prose__dim">{t('aboutP2')}</p>
         </div>
 
         <div className="about__stat">
-          {doneCount} of {lessons.length} lessons complete · {lessons.length} of{' '}
-          {TOTAL_LESSONS} built
+          {t('aboutStat', {
+            done: doneCount,
+            ready: lessons.length,
+            total: TOTAL_LESSONS,
+          })}
         </div>
 
         {doneCount > 0 && (
@@ -46,10 +42,10 @@ export function About({ onBack }: Props) {
             type="button"
             className="linkish linkish--center linkish--warn"
             onClick={() => {
-              if (window.confirm('Clear every completed lesson?')) resetAll()
+              if (window.confirm(t('confirmReset'))) resetAll()
             }}
           >
-            Reset progress
+            {t('resetProgress')}
           </button>
         )}
         <div className="home__pad" />

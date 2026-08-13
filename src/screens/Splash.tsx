@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
 import { Fit } from '@rive-app/react-canvas'
+import { LangToggle } from '../components/LangToggle'
 import { RiveStage } from '../components/RiveStage'
 import { lessons } from '../data/curriculum'
+import { useI18n } from '../lib/i18n'
 import { useProgress } from '../lib/progress'
 import type { Rive } from '@rive-app/react-canvas'
 
@@ -12,6 +14,7 @@ interface Props {
 
 /** The title card. `Cover` is the one portrait artboard in the file. */
 export function Splash({ onStart, onResume }: Props) {
+  const { t, tr } = useI18n()
   const { progress } = useProgress()
   const [revealed, setRevealed] = useState(false)
 
@@ -46,12 +49,12 @@ export function Splash({ onStart, onResume }: Props) {
 
       <div className="splash__scrim" />
 
+      <LangToggle className="splash__lang" />
+
       <div className={`splash__foot ${revealed ? 'is-in' : ''}`.trim()}>
-        <p className="splash__tagline">
-          Learn sine, cosine and tangent by dragging — not by reading.
-        </p>
+        <p className="splash__tagline">{t('tagline')}</p>
         <button type="button" className="btn btn--primary btn--wide" onClick={onStart}>
-          {started ? 'Resume' : 'Start the course'}
+          {started ? t('resume') : t('startCourse')}
         </button>
         {started && nextUp && (
           <button
@@ -59,7 +62,10 @@ export function Splash({ onStart, onResume }: Props) {
             className="linkish linkish--center"
             onClick={() => onResume(nextUp.id)}
           >
-            Lesson {lessons.indexOf(nextUp) + 1} — {nextUp.title}
+            {t('lessonLink', {
+              n: lessons.indexOf(nextUp) + 1,
+              title: tr(nextUp.title),
+            })}
           </button>
         )}
       </div>

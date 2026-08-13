@@ -3,6 +3,7 @@ import { AppBar } from '../components/AppBar'
 import { Instruments } from '../components/Instruments'
 import { RiveStage } from '../components/RiveStage'
 import { TOTAL_LESSONS, lessons, nextStop, slotNumber } from '../data/curriculum'
+import { useI18n } from '../lib/i18n'
 import { useProgress } from '../lib/progress'
 import { useInstruments } from '../lib/useInstruments'
 import type { Rive } from '@rive-app/react-canvas'
@@ -20,6 +21,7 @@ interface Props {
 type Step = 'watch' | 'do' | 'learn'
 
 export function LessonScreen({ lesson, onBack, onGoto, onReview, onFinish }: Props) {
+  const { t, tr, lang } = useI18n()
   const { progress, complete } = useProgress()
   const [rive, setRive] = useState<Rive | null>(null)
   const [toggles, setToggles] = useState<Record<string, boolean>>({})
@@ -31,7 +33,7 @@ export function LessonScreen({ lesson, onBack, onGoto, onReview, onFinish }: Pro
   const n = slotNumber(lesson.id)
   const after = useMemo(() => nextStop(lesson.id), [lesson.id])
 
-  const { values, solved, markSolved } = useInstruments(rive, lesson, alreadyDone)
+  const { values, solved, markSolved } = useInstruments(rive, lesson, alreadyDone, lang)
 
   useEffect(() => {
     if (solved && !alreadyDone) complete(lesson.id)
@@ -72,11 +74,11 @@ export function LessonScreen({ lesson, onBack, onGoto, onReview, onFinish }: Pro
     <div className={`screen lesson lesson--${lesson.stage}`}>
       <AppBar
         onBack={onBack}
-        subtitle={`Lesson ${n} of ${TOTAL_LESSONS}`}
-        title={lesson.title}
+        subtitle={t('lessonOf', { n, total: TOTAL_LESSONS })}
+        title={tr(lesson.title)}
         right={
           solved ? (
-            <span className="pill pill--done">Done</span>
+            <span className="pill pill--done">{t('done')}</span>
           ) : (
             <span className="pill">{String(n).padStart(2, '0')}</span>
           )
@@ -97,7 +99,7 @@ export function LessonScreen({ lesson, onBack, onGoto, onReview, onFinish }: Pro
       </div>
 
       <div className="sheet">
-        <nav className="steps" aria-label="Lesson steps">
+        <nav className="steps" aria-label={t('lessonSteps')}>
           {steps.map((s, i) => (
             <button
               key={s}
@@ -106,19 +108,19 @@ export function LessonScreen({ lesson, onBack, onGoto, onReview, onFinish }: Pro
                 i < stepIndex || (s === 'do' && solved) ? 'is-done' : ''
               }`.trim()}
               aria-current={i === stepIndex}
-              aria-label={`Step ${i + 1}: ${s}`}
+              aria-label={t('stepN', { n: i + 1 })}
               onClick={() => setStep(s)}
             />
           ))}
           <span className="steps__label">
-            {step === 'watch' ? 'Find it' : step === 'do' ? 'Try it' : 'Why it works'}
+            {step === 'watch' ? t('stepFind') : step === 'do' ? t('stepTry') : t('stepWhy')}
           </span>
         </nav>
 
         <div className="sheet__scroll">
           {step === 'watch' && (
             <>
-              <p className="step__lead">{lesson.watch}</p>
+              <p className="step__lead">{tr(lesson.watch)}</p>
               <Instruments readouts={lesson.readouts} values={values} />
               <div className="sheet__foot">
                 <button
@@ -126,7 +128,7 @@ export function LessonScreen({ lesson, onBack, onGoto, onReview, onFinish }: Pro
                   className="btn btn--primary btn--wide"
                   onClick={() => setStep('do')}
                 >
-                  Got it — give me a task
+                  {t('giveTask')}
                 </button>
               </div>
             </>
@@ -135,7 +137,7 @@ export function LessonScreen({ lesson, onBack, onGoto, onReview, onFinish }: Pro
           {step === 'do' && (
             <>
               <p className="step__lead">
-                {lesson.checkpoint ? lesson.checkpoint.goal : lesson.tagline}
+                {lesson.checkpoint ? tr(lesson.checkpoint.goal) : tr(lesson.tagline)}
               </p>
 
               {lesson.actions && lesson.actions.length > 0 && (
@@ -150,7 +152,7 @@ export function LessonScreen({ lesson, onBack, onGoto, onReview, onFinish }: Pro
                       onClick={() => runAction(action)}
                       disabled={!rive}
                     >
-                      {action.label}
+                      {tr(action.label)}
                     </button>
                   ))}
                 </div>
@@ -161,14 +163,14 @@ export function LessonScreen({ lesson, onBack, onGoto, onReview, onFinish }: Pro
               {lesson.checkpoint && (
                 <div className="hintrow">
                   {showHint ? (
-                    <p className="step__hint">{lesson.checkpoint.hint}</p>
+                    <p className="step__hint">{tr(lesson.checkpoint.hint)}</p>
                   ) : (
                     <button
                       type="button"
                       className="linkish"
                       onClick={() => setShowHint(true)}
                     >
-                      Need a hint?
+                      {t('needHint')}
                     </button>
                   )}
                   <button
@@ -176,7 +178,7 @@ export function LessonScreen({ lesson, onBack, onGoto, onReview, onFinish }: Pro
                     className="linkish linkish--quiet"
                     onClick={() => setStep('learn')}
                   >
-                    Skip
+                    {t('skip')}
                   </button>
                 </div>
               )}
@@ -187,12 +189,12 @@ export function LessonScreen({ lesson, onBack, onGoto, onReview, onFinish }: Pro
             <>
               {solved && (
                 <p className="step__win">
-                  <span aria-hidden="true">✓</span> Nice — that is the idea.
+                  <span aria-hidden="true">✓</span> {t('nice')}
                 </p>
               )}
               <div className="prose">
                 {lesson.body.map((para, i) => (
-                  <p key={i}>{para}</p>
+                  <p key={i}>{tr(para)}</p>
                 ))}
               </div>
               <div className="sheet__foot">
@@ -202,10 +204,10 @@ export function LessonScreen({ lesson, onBack, onGoto, onReview, onFinish }: Pro
                   onClick={goNext}
                 >
                   {after?.kind === 'review'
-                    ? 'Chapter review'
+                    ? t('chapterReview')
                     : after?.kind === 'lesson'
-                      ? 'Next lesson'
-                      : 'Finish the course'}
+                      ? t('nextLesson')
+                      : t('finishCourse')}
                 </button>
               </div>
             </>

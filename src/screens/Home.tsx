@@ -1,4 +1,5 @@
 import { AppBar } from '../components/AppBar'
+import { LangToggle } from '../components/LangToggle'
 import {
   TOTAL_LESSONS,
   chapters,
@@ -7,6 +8,7 @@ import {
   slotNumber,
   upcoming,
 } from '../data/curriculum'
+import { useI18n } from '../lib/i18n'
 import { useProgress } from '../lib/progress'
 
 interface Props {
@@ -18,6 +20,7 @@ interface Props {
 
 /** The course index: fifteen slots, ten playable, one visible thread. */
 export function Home({ onOpen, onReview, onAbout, onBack }: Props) {
+  const { t, tr } = useI18n()
   const { progress } = useProgress()
 
   const doneCount = lessons.filter((l) => progress[l.id]).length
@@ -27,8 +30,9 @@ export function Home({ onOpen, onReview, onAbout, onBack }: Props) {
     <div className="screen home">
       <AppBar
         onBack={onBack}
-        subtitle="Trigonometry 101"
-        title="Lessons"
+        subtitle={t('appName')}
+        title={t('lessons')}
+        right={<LangToggle />}
         progress={ratio}
       />
 
@@ -40,9 +44,11 @@ export function Home({ onOpen, onReview, onAbout, onBack }: Props) {
               <em>/{lessons.length}</em>
             </span>
             <span className="progresscard__label">
-              lessons complete
+              {t('lessonsComplete')}
               <br />
-              <small>{lessons.length} of {TOTAL_LESSONS} built so far</small>
+              <small>
+                {t('builtSoFar', { ready: lessons.length, total: TOTAL_LESSONS })}
+              </small>
             </span>
           </div>
           <div className="progresscard__track" aria-hidden="true">
@@ -61,9 +67,9 @@ export function Home({ onOpen, onReview, onAbout, onBack }: Props) {
           return (
             <section key={chapter.id} className="chapter">
               <div className="chapter__head">
-                <span className="chapter__no">Chapter {chapter.id}</span>
-                <h2 className="chapter__title">{chapter.title}</h2>
-                <p className="chapter__blurb">{chapter.blurb}</p>
+                <span className="chapter__no">{t('chapterNo', { n: chapter.id })}</span>
+                <h2 className="chapter__title">{tr(chapter.title)}</h2>
+                <p className="chapter__blurb">{tr(chapter.blurb)}</p>
               </div>
 
               <ul className="lesslist">
@@ -80,8 +86,8 @@ export function Home({ onOpen, onReview, onAbout, onBack }: Props) {
                           {done ? '✓' : String(slotNumber(lesson.id)).padStart(2, '0')}
                         </span>
                         <span className="lesscard__text">
-                          <span className="lesscard__title">{lesson.title}</span>
-                          <span className="lesscard__tag">{lesson.tagline}</span>
+                          <span className="lesscard__title">{tr(lesson.title)}</span>
+                          <span className="lesscard__tag">{tr(lesson.tagline)}</span>
                         </span>
                         <span className="lesscard__go" aria-hidden="true">
                           <svg viewBox="0 0 24 24" width="18" height="18">
@@ -113,9 +119,9 @@ export function Home({ onOpen, onReview, onAbout, onBack }: Props) {
                         {progress[reviewKey(chapter.id)] ? '✓' : '?'}
                       </span>
                       <span className="lesscard__text">
-                        <span className="lesscard__title">Chapter review</span>
+                        <span className="lesscard__title">{t('chapterReview')}</span>
                         <span className="lesscard__tag">
-                          {chapter.review.length} questions on everything above.
+                          {t('reviewTag', { n: chapter.review.length })}
                         </span>
                       </span>
                       <span className="lesscard__go" aria-hidden="true">
@@ -145,10 +151,10 @@ export function Home({ onOpen, onReview, onAbout, onBack }: Props) {
                         {String(slotNumber(lesson.id)).padStart(2, '0')}
                       </span>
                       <span className="lesscard__text">
-                        <span className="lesscard__title">{lesson.title}</span>
-                        <span className="lesscard__tag">{lesson.tagline}</span>
+                        <span className="lesscard__title">{tr(lesson.title)}</span>
+                        <span className="lesscard__tag">{tr(lesson.tagline)}</span>
                       </span>
-                      <span className="lesscard__soon">Soon</span>
+                      <span className="lesscard__soon">{t('soon')}</span>
                     </button>
                   </li>
                 ))}
@@ -158,7 +164,7 @@ export function Home({ onOpen, onReview, onAbout, onBack }: Props) {
         })}
 
         <button type="button" className="linkish linkish--center" onClick={onAbout}>
-          About this app
+          {t('aboutApp')}
         </button>
         <div className="home__pad" />
       </div>

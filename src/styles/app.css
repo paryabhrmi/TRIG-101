@@ -1340,3 +1340,82 @@
     box-shadow: -14px 0 34px -22px rgba(20, 26, 70, 0.35);
   }
 }
+
+/* ---------------------------------------------------------------------------
+   Bilingual: language toggle + Persian (RTL)
+   --------------------------------------------------------------------------- */
+
+.langbtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 32px;
+  padding: 4px 14px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--line-strong);
+  background: var(--paper);
+  color: var(--ink-2);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+  box-shadow: var(--lift-1);
+  transition: transform 0.15s var(--ease);
+}
+
+.langbtn:active {
+  transform: scale(0.96);
+}
+
+/* The splash has no app bar, so the switch floats over the artwork.
+   Physical offsets, not inset-inline-end: the legacy-browser build strips
+   logical properties, so RTL flips them by hand below. */
+.splash__lang {
+  position: absolute;
+  top: calc(var(--safe-t) + 14px);
+  right: 16px;
+  z-index: 4;
+}
+
+.gate__lang {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  z-index: 4;
+}
+
+[dir='rtl'] .splash__lang {
+  right: auto;
+  left: 16px;
+}
+
+[dir='rtl'] .gate__lang {
+  right: auto;
+  left: 18px;
+}
+
+/* Vazirmatn carries the rounded voice into Arabic script. */
+:root[dir='rtl'] {
+  --font-ui: 'Vazirmatn', 'M PLUS Rounded 1c', 'Nunito', ui-rounded,
+    system-ui, -apple-system, 'Segoe UI', Tahoma, sans-serif;
+}
+
+/* Chevrons point "forward" — and forward is left in RTL. */
+[dir='rtl'] .iconbtn svg,
+[dir='rtl'] .lesscard__go svg {
+  transform: scaleX(-1);
+}
+
+/* Progress fills grow from the reading edge. */
+[dir='rtl'] .appbar__fill,
+[dir='rtl'] .progresscard__fill {
+  transform-origin: right center;
+}
+
+/* Numbers and math stay left-to-right islands inside Persian copy. */
+.chip__value,
+.quiz__key,
+.progresscard__num,
+.pill,
+.score strong {
+  unicode-bidi: plaintext;
+}

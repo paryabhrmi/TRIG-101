@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { Rive } from '@rive-app/react-canvas'
 import type { Lesson, Sample } from '../data/curriculum'
+import type { Lang } from './i18n'
 
 /** How often the readouts refresh. Fast enough to feel live, slow enough
  *  that dragging a slider does not fight React for the main thread. */
@@ -31,6 +32,7 @@ export function useInstruments(
   rive: Rive | null,
   lesson: Lesson,
   alreadyDone: boolean,
+  lang: Lang,
 ): Instruments {
   const [values, setValues] = useState<string[]>(() => lesson.readouts.map(() => '—'))
   const [solved, setSolved] = useState(alreadyDone)
@@ -41,6 +43,9 @@ export function useInstruments(
   lessonRef.current = lesson
   const solvedRef = useRef(solved)
   solvedRef.current = solved
+  // Textual readouts follow the UI language; the next tick picks it up.
+  const langRef = useRef(lang)
+  langRef.current = lang
 
   useEffect(() => {
     setSolved(alreadyDone)
@@ -104,7 +109,7 @@ export function useInstruments(
       if (current.readouts.length) {
         const next = current.readouts.map((r) => {
           try {
-            return r.value(sample)
+            return r.value(sample, langRef.current)
           } catch {
             return '—'
           }
