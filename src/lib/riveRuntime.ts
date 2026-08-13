@@ -1,6 +1,6 @@
-import { RuntimeLoader } from '@rive-app/react-canvas'
+import { RuntimeLoader } from '@rive-app/react-webgl'
 // Vite fingerprints this and rewrites the URL for the deployed base path.
-import riveWasmUrl from '@rive-app/canvas/rive.wasm?url'
+import riveWasmUrl from '@rive-app/webgl/rive.wasm?url'
 
 /**
  * Serve the Rive WASM from our own origin.

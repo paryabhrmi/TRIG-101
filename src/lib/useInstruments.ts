@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import type { Rive } from '@rive-app/react-canvas'
+import type { Rive } from '@rive-app/react-webgl'
 import type { Lesson, Sample } from '../data/curriculum'
 
 /** How often the readouts refresh. Fast enough to feel live, slow enough
