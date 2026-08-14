@@ -296,16 +296,18 @@
   flex: none;
 }
 
-/* The cover is a white blueprint, so the scrim fades to paper. */
+/* The cover is a white blueprint, so the scrim fades to paper. It only has
+   to seat the tagline and button — starting it below the wordmark keeps the
+   artwork at full strength. */
 .splash__scrim {
   position: absolute;
   inset: 0;
   pointer-events: none;
   background: linear-gradient(
     180deg,
-    transparent 30%,
-    rgba(255, 255, 255, 0.72) 58%,
-    #ffffff 82%
+    transparent 66%,
+    rgba(255, 255, 255, 0.72) 80%,
+    #ffffff 92%
   );
 }
 
