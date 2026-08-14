@@ -324,7 +324,36 @@
 
 /* ===========================================================================
    Home
+   A solid blue banner up top, then one rounded card per chapter: keycap
+   lesson numbers, hairline dividers, and the review row filled with the
+   chapter's own colour. Each chapter sets --ch / --ch-deep inline.
    =========================================================================== */
+
+.homebar {
+  flex: 0 0 auto;
+  position: relative;
+  z-index: 3;
+  padding: calc(var(--safe-t) + 16px) var(--gut) 12px;
+  background: #55aaee;
+  border-bottom: 5px solid #3f88c9;
+}
+
+.homebar__title {
+  font-size: 19px;
+  font-weight: 900;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  line-height: 1.2;
+  color: #ffffff;
+}
+
+.homebar__sub {
+  display: block;
+  margin-top: 2px;
+  font-size: 15px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.92);
+}
 
 .home__scroll,
 .about__scroll {
@@ -342,188 +371,92 @@
   height: calc(28px + var(--safe-b));
 }
 
-.progresscard {
-  margin-top: 18px;
-  padding: 18px;
-  background: var(--paper);
-  border: 1px solid var(--line);
-  border-radius: var(--r-lg);
-  box-shadow: var(--lift-1);
-}
-
-.progresscard__row {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
-
-.progresscard__num {
-  font-size: 38px;
-  font-weight: 900;
-  line-height: 1;
-  color: var(--ink);
-}
-
-.progresscard__num em {
-  font-style: normal;
-  font-size: 20px;
-  font-weight: 800;
-  color: var(--ink-3);
-}
-
-.progresscard__label {
-  font-size: 13.5px;
-  font-weight: 800;
-  line-height: 1.35;
-  color: var(--ink-2);
-}
-
-.progresscard__label small {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--ink-3);
-}
-
-.progresscard__track {
-  margin-top: 14px;
-  height: 8px;
-  border-radius: var(--r-pill);
-  background: var(--surface);
-  overflow: hidden;
-}
-
-.progresscard__fill {
-  height: 100%;
-  transform-origin: left center;
-  border-radius: var(--r-pill);
-  background: linear-gradient(90deg, var(--cyan), var(--blue));
-  transition: transform 0.5s var(--ease);
-}
-
 .chapter {
-  padding-top: 26px;
+  padding-top: 30px;
 }
 
 .chapter__head {
-  padding: 0 2px 12px;
+  padding: 0 2px 14px;
 }
 
 .chapter__no {
-  font-size: 11px;
-  font-weight: 900;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--blue);
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--ch-deep);
 }
 
 .chapter__title {
-  margin-top: 3px;
-  font-size: 22px;
+  margin-top: 2px;
+  font-size: 26px;
   font-weight: 900;
   letter-spacing: -0.01em;
-  color: var(--ink);
+  color: var(--ch);
 }
 
-.chapter__blurb {
-  margin-top: 3px;
-  font-size: 13.5px;
-  font-weight: 600;
-  color: var(--ink-3);
+.chgroup {
+  background: var(--paper);
+  border: 2px solid var(--line-strong);
+  border-radius: 18px;
+  overflow: hidden;
 }
 
-.lesslist {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+.chgroup li + li {
+  border-top: 2px solid var(--line);
 }
 
-.lesscard {
+.chrow {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 16px;
   width: 100%;
-  padding: 15px;
+  padding: 12px 14px;
   text-align: start;
   background: var(--paper);
-  border: 1px solid var(--line);
-  border-radius: var(--r-md);
-  box-shadow: var(--lift-1);
-  transition: transform 0.16s var(--ease), box-shadow 0.2s var(--ease),
-    border-color 0.2s var(--ease);
+  transition: background 0.15s var(--ease);
 }
 
-.lesscard:active {
-  transform: scale(0.985);
-  box-shadow: var(--lift-2);
-}
-
-.lesscard.is-done {
-  border-color: rgba(33, 181, 115, 0.35);
-}
-
-.lesscard.is-soon {
+.chrow:active {
   background: var(--paper-2);
-  border-style: dashed;
-  box-shadow: none;
 }
 
-.lesscard__no {
+/* The keycap: a rounded square with a thicker bottom edge, number in the
+   chapter's colour. */
+.chrow__key {
   flex: 0 0 auto;
   display: grid;
   place-items: center;
-  width: 36px;
-  height: 36px;
-  border-radius: var(--r-pill);
-  background: var(--surface);
-  font-size: 13px;
+  width: 46px;
+  height: 44px;
+  border-radius: 13px;
+  background: var(--paper-2);
+  border: 2px solid var(--line-strong);
+  border-bottom-width: 4px;
+  font-size: 16px;
   font-weight: 900;
   font-variant-numeric: tabular-nums;
-  color: var(--ink-2);
+  color: var(--ch);
 }
 
-.lesscard.is-done .lesscard__no {
-  background: rgba(33, 181, 115, 0.14);
-  color: var(--mint);
-  font-size: 16px;
-}
-
-.lesscard.is-soon .lesscard__no {
-  color: var(--ink-3);
-}
-
-.lesscard__text {
+.chrow__title {
   flex: 1;
   min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.lesscard__title {
-  font-size: 15.5px;
+  font-size: 17px;
   font-weight: 800;
   color: var(--ink);
 }
 
-.lesscard.is-soon .lesscard__title {
-  color: var(--ink-2);
+.chrow.is-done .chrow__key {
+  background: var(--ch);
+  border-color: rgba(0, 0, 0, 0.14);
+  color: #ffffff;
 }
 
-.lesscard__tag {
-  font-size: 12.5px;
-  font-weight: 600;
-  line-height: 1.4;
+.chrow.is-soon .chrow__key,
+.chrow.is-soon .chrow__title {
   color: var(--ink-3);
 }
 
-.lesscard__go {
-  flex: 0 0 auto;
-  display: grid;
-  place-items: center;
-  color: var(--ink-3);
-}
-
-.lesscard__soon {
+.chrow__soon {
   flex: 0 0 auto;
   padding: 4px 10px;
   border-radius: var(--r-pill);
@@ -534,6 +467,26 @@
   letter-spacing: 0.07em;
   text-transform: uppercase;
   white-space: nowrap;
+}
+
+/* The review row fills with the chapter colour and goes white-on-colour. */
+.chrow--review,
+.chrow--review:active {
+  background: var(--ch);
+}
+
+.chrow--review:active {
+  filter: brightness(1.06);
+}
+
+.chrow--review .chrow__key {
+  background: rgba(255, 255, 255, 0.24);
+  border-color: rgba(0, 0, 0, 0.14);
+  color: #ffffff;
+}
+
+.chrow--review .chrow__title {
+  color: #ffffff;
 }
 
 /* ===========================================================================
@@ -988,17 +941,6 @@
   font-size: 13px;
   font-weight: 800;
   color: var(--ink-3);
-}
-
-.lesscard--review {
-  border-style: solid;
-  border-color: rgba(0, 117, 255, 0.28);
-  background: rgba(0, 117, 255, 0.04);
-}
-
-.lesscard--review .lesscard__no {
-  background: rgba(0, 117, 255, 0.12);
-  color: var(--blue);
 }
 
 /* ===========================================================================
