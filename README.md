@@ -67,7 +67,8 @@ canvas does not look pasted into someone else's UI:
   rule, with a teal-to-navy header wash;
 - buttons reproduce the glossy silver-edged pills from the `Frequency (B)` row;
 - readout labels take accent colours the way the ratio panel colours its terms;
-- **M PLUS Rounded 1c** stands in for the file's DIN Round Pro.
+- **DIN Round Pro** is self-hosted (woff2 in `src/assets/fonts/`, declared in
+  `src/styles/fonts.css`).
 
 Light-themed artboards (`Angle`, `SecretRatios`) sit on a white card; the dark
 ones blend straight into the page.

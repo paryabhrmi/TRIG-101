@@ -1,0 +1,46 @@
+/* ===========================================================================
+   DIN Round Pro — the design system's typeface, self-hosted.
+   Licensed FSI FontShop faces (see ../assets/fonts/COPYRIGHT.txt); the woff2
+   files were converted from the supplied OpenType originals. The Light cut
+   reports 350 but is declared at 300 so every stack weight has one owner.
+   =========================================================================== */
+
+@font-face {
+  font-family: 'DIN Round Pro';
+  src: url('../assets/fonts/dinroundpro_light.woff2') format('woff2');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'DIN Round Pro';
+  src: url('../assets/fonts/dinroundpro.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'DIN Round Pro';
+  src: url('../assets/fonts/dinroundpro_medi.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'DIN Round Pro';
+  src: url('../assets/fonts/dinroundpro_bold.woff2') format('woff2');
+  font-weight: 600 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'DIN Round Pro';
+  src: url('../assets/fonts/dinroundpro_black.woff2') format('woff2');
+  font-weight: 800 900;
+  font-style: normal;
+  font-display: swap;
+}

@@ -97,10 +97,10 @@
   --safe-t: env(safe-area-inset-top, 0px);
   --safe-b: env(safe-area-inset-bottom, 0px);
 
-  /* Type — DIN Round Pro is the file's font; M PLUS Rounded 1c is the
-     closest geometric rounded face available for free on the web. */
-  --font-ui: 'M PLUS Rounded 1c', 'Nunito', ui-rounded, 'SF Pro Rounded',
-    system-ui, -apple-system, 'Segoe UI', sans-serif;
+  /* Type — DIN Round Pro, self-hosted (see fonts.css). The rounded system
+     faces stand in for the instant before the woff2 arrives. */
+  --font-ui: 'DIN Round Pro', ui-rounded, 'SF Pro Rounded', system-ui,
+    -apple-system, 'Segoe UI', sans-serif;
 
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
 }

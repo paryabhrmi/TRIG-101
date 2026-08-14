@@ -6,8 +6,10 @@ below are implemented as CSS custom properties in `src/styles/global.css`
 
 ## Type — DIN Round Pro
 
-The shipped app substitutes **M PLUS Rounded 1c** (loaded in `index.html`)
-for DIN Round Pro, which is not freely licensable.
+DIN Round Pro ships with the app, self-hosted as woff2 in
+`src/assets/fonts/` and declared in `src/styles/fonts.css` (Light 300,
+Regular 400, Medium 500, Bold 600–700, Black 800–900). The faces are
+licensed FSI FontShop material — see `src/assets/fonts/COPYRIGHT.txt`.
 
 | Role                    | Weight | Size |
 | ----------------------- | ------ | ---- |
