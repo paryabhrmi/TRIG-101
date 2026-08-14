@@ -35,10 +35,10 @@ export function Splash({ onStart, onResume }: Props) {
       <RiveStage
         artboard="Cover"
         stateMachine="State Machine 1"
-        stage="navy"
+        stage="paper"
         bindViewModel={false}
         // The cover is 810×1440; Cover-fit would crop the wordmark on a
-        // narrower phone, and the artboard's navy matches the screen anyway.
+        // narrower phone, and the artboard's paper matches the screen anyway.
         fit={Fit.Contain}
         className="splash__art"
         onReady={play}

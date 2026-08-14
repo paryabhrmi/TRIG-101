@@ -296,7 +296,7 @@
   flex: none;
 }
 
-/* The cover inverts to a white blueprint, so the scrim fades to paper. */
+/* The cover is a white blueprint, so the scrim fades to paper. */
 .splash__scrim {
   position: absolute;
   inset: 0;
