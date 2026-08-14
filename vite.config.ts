@@ -2,10 +2,11 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import legacy from '@vitejs/plugin-legacy'
 
-// The app is published to GitHub Pages at https://<user>.github.io/TRIG-101/,
-// so every asset URL needs that prefix. Local dev keeps the plain root.
-export default defineConfig(({ command }) => ({
-  base: command === 'build' ? '/TRIG-101/' : '/',
+// The app ships to two hosts: Vercel serves it at the domain root, and
+// GitHub Pages serves it under /TRIG-101/. The Pages workflow sets BASE_PATH
+// for its build; every other build — Vercel, local — keeps the plain root.
+export default defineConfig(() => ({
+  base: process.env.BASE_PATH ?? '/',
   plugins: [
     react(),
     // A browser with no ES-module support skips the module script entirely and

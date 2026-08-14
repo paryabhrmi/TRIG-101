@@ -1,4 +1,3 @@
-import type { CSSProperties } from 'react'
 import { chapters, lessons, reviewKey, upcoming } from '../data/curriculum'
 import { useProgress } from '../lib/progress'
 
@@ -8,26 +7,19 @@ interface Props {
   onAbout: () => void
 }
 
-/**
- * Per-chapter accent, game-style: the light shade fills the review row and
- * the lesson numbers; the deep shade carries the "Chapter N" kicker.
- */
-const ACCENTS: Record<number, { main: string; deep: string }> = {
-  1: { main: '#55aaee', deep: '#28517e' },
-  2: { main: '#e0a03d', deep: '#94660f' },
-  3: { main: '#21b573', deep: '#0f6b44' },
-  4: { main: '#9a63cc', deep: '#5d3585' },
-}
+/** Each chapter owns one accent; they cycle in course order. */
+const TONES = ['blue', 'amber', 'green', 'violet'] as const
+const tone = (chapterId: number) => TONES[(chapterId - 1) % TONES.length]
 
-/** The course index: one rounded card per chapter, review row at the bottom. */
+/** The course index: a flat banner, then one grouped card per chapter. */
 export function Home({ onOpen, onReview, onAbout }: Props) {
   const { progress } = useProgress()
 
   return (
     <div className="screen home">
-      <header className="homebar">
-        <h1 className="homebar__title">Trigonometry101</h1>
-        <span className="homebar__sub">Lessons</span>
+      <header className="duohead">
+        <h1 className="duohead__title">Trigonometry 101</h1>
+        <p className="duohead__sub">Lessons</p>
       </header>
 
       <div className="home__scroll">
@@ -36,36 +28,28 @@ export function Home({ onOpen, onReview, onAbout }: Props) {
           const soon = upcoming.filter((l) => l.chapter === chapter.id)
           if (!ready.length && !soon.length) return null
 
-          const accent = ACCENTS[chapter.id] ?? ACCENTS[1]
-          const reviewDone = !!progress[reviewKey(chapter.id)]
-
           return (
             <section
               key={chapter.id}
-              className="chapter"
-              style={
-                { '--ch': accent.main, '--ch-deep': accent.deep } as CSSProperties
-              }
+              className={`chapter chapter--${tone(chapter.id)}`}
             >
-              <div className="chapter__head">
-                <span className="chapter__no">Chapter {chapter.id}</span>
-                <h2 className="chapter__title">{chapter.title}</h2>
-              </div>
+              <span className="chapter__no">Chapter {chapter.id}</span>
+              <h2 className="chapter__title">{chapter.title}</h2>
 
-              <ul className="chgroup">
+              <ul className="group">
                 {ready.map((lesson, i) => {
                   const done = !!progress[lesson.id]
                   return (
                     <li key={lesson.id}>
                       <button
                         type="button"
-                        className={`chrow ${done ? 'is-done' : ''}`.trim()}
+                        className={`row ${done ? 'is-done' : ''}`.trim()}
                         onClick={() => onOpen(lesson.id)}
                       >
-                        <span className="chrow__key" aria-hidden="true">
+                        <span className="row__key" aria-hidden="true">
                           {done ? '✓' : String(i + 1).padStart(2, '0')}
                         </span>
-                        <span className="chrow__title">{lesson.title}</span>
+                        <span className="row__title">{lesson.title}</span>
                       </button>
                     </li>
                   )
@@ -75,14 +59,14 @@ export function Home({ onOpen, onReview, onAbout }: Props) {
                   <li key={lesson.id}>
                     <button
                       type="button"
-                      className="chrow is-soon"
+                      className="row is-soon"
                       onClick={() => onOpen(lesson.id)}
                     >
-                      <span className="chrow__key" aria-hidden="true">
+                      <span className="row__key" aria-hidden="true">
                         {String(ready.length + i + 1).padStart(2, '0')}
                       </span>
-                      <span className="chrow__title">{lesson.title}</span>
-                      <span className="chrow__soon">Soon</span>
+                      <span className="row__title">{lesson.title}</span>
+                      <span className="row__soon">Soon</span>
                     </button>
                   </li>
                 ))}
@@ -91,15 +75,13 @@ export function Home({ onOpen, onReview, onAbout }: Props) {
                   <li>
                     <button
                       type="button"
-                      className={`chrow chrow--review ${
-                        reviewDone ? 'is-done' : ''
-                      }`.trim()}
+                      className="row row--review"
                       onClick={() => onReview(chapter.id)}
                     >
-                      <span className="chrow__key" aria-hidden="true">
-                        {reviewDone ? '✓' : '?'}
+                      <span className="row__key" aria-hidden="true">
+                        {progress[reviewKey(chapter.id)] ? '✓' : '?'}
                       </span>
-                      <span className="chrow__title">Chapter review</span>
+                      <span className="row__title">Chapter review</span>
                     </button>
                   </li>
                 ) : null}

@@ -13,9 +13,8 @@
 }
 
 /* ===========================================================================
-   App bar
-   In a lesson the bar floats directly on the artwork, so the canvas can run
-   edge to edge instead of sitting in a box below a solid strip.
+   App bar — a flat, saturated banner with a hard darker bottom edge, so it
+   reads as one chunky game piece rather than a translucent strip.
    =========================================================================== */
 
 .appbar {
@@ -26,10 +25,8 @@
 }
 
 .appbar--light {
-  background: rgba(255, 255, 255, 0.88);
-  border-bottom: 1px solid var(--line);
-  backdrop-filter: saturate(180%) blur(16px);
-  -webkit-backdrop-filter: saturate(180%) blur(16px);
+  background: var(--duo-blue);
+  border-bottom: 4px solid var(--duo-blue-dark);
 }
 
 .appbar__row {
@@ -53,14 +50,14 @@
   font-weight: 800;
   letter-spacing: 0.09em;
   text-transform: uppercase;
-  color: var(--ink-3);
+  color: rgba(255, 255, 255, 0.85);
 }
 
 .appbar__title {
   font-size: 17px;
-  font-weight: 800;
+  font-weight: 900;
   line-height: 1.2;
-  color: var(--ink);
+  color: #ffffff;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -73,15 +70,28 @@
   gap: 8px;
 }
 
+/* On the blue banner the pills go glassy white. */
+.appbar .pill {
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.4);
+  color: #ffffff;
+}
+
+.appbar .pill--done {
+  background: #ffffff;
+  border-color: #ffffff;
+  color: var(--duo-green-dark);
+}
+
 .appbar__track {
-  height: 3px;
-  background: var(--line);
+  height: 4px;
+  background: var(--duo-blue-dark);
 }
 
 .appbar__fill {
   height: 100%;
   transform-origin: left center;
-  background: linear-gradient(90deg, var(--cyan), var(--blue));
+  background: #ffffff;
   transition: transform 0.45s var(--ease);
 }
 
@@ -91,11 +101,10 @@
   place-items: center;
   width: 40px;
   height: 40px;
-  border-radius: var(--r-pill);
-  background: var(--paper);
-  border: 1px solid var(--line);
-  color: var(--ink);
-  box-shadow: var(--lift-1);
+  border-radius: var(--r-md);
+  background: rgba(255, 255, 255, 0.14);
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  color: #ffffff;
   transition: transform 0.18s var(--ease), background 0.18s var(--ease);
 }
 
@@ -142,43 +151,46 @@
    Buttons
    =========================================================================== */
 
+/* Every button is a flat fill riding on a hard darker edge; pressing it sinks
+   the fill into the edge instead of dimming or scaling. */
 .btn {
+  --edge: var(--duo-line);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
   min-height: 50px;
   padding: 0 22px;
-  border-radius: 8px;
+  border-radius: var(--r-md);
   font-size: 15px;
-  font-weight: 800;
-  transition: transform 0.16s var(--ease), box-shadow 0.2s var(--ease),
-    filter 0.2s var(--ease), opacity 0.2s var(--ease);
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  box-shadow: 0 4px 0 var(--edge);
+  transition: transform 0.12s var(--ease), box-shadow 0.12s var(--ease),
+    opacity 0.2s var(--ease);
 }
 
 .btn--primary {
+  --edge: var(--duo-blue-dark);
   color: #ffffff;
-  background: linear-gradient(180deg, #2b8cff 0%, var(--blue) 100%);
-  box-shadow: 0 1px 1px rgba(255, 255, 255, 0.4) inset,
-    0 6px 18px -8px rgba(0, 117, 255, 0.9);
+  background: var(--duo-blue);
 }
 
 .btn--primary.is-on {
-  background: linear-gradient(180deg, #34cd8b 0%, var(--mint) 100%);
-  box-shadow: 0 1px 1px rgba(255, 255, 255, 0.4) inset,
-    0 6px 18px -8px rgba(33, 181, 115, 0.9);
+  --edge: var(--duo-green-dark);
+  background: var(--duo-green);
 }
 
 .btn--ghost {
-  color: var(--ink);
+  color: var(--duo-blue);
   background: var(--paper);
-  border: 1px solid var(--line-strong);
-  box-shadow: var(--lift-1);
+  border: 2px solid var(--duo-line);
 }
 
 .btn:active {
-  transform: scale(0.975);
-  filter: brightness(1.04);
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 var(--edge);
 }
 
 .btn:disabled {
@@ -195,7 +207,9 @@
   padding: 8px 4px;
   font-size: 13.5px;
   font-weight: 800;
-  color: var(--blue);
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--duo-blue-dark);
 }
 
 .linkish--center {
@@ -324,36 +338,7 @@
 
 /* ===========================================================================
    Home
-   A solid blue banner up top, then one rounded card per chapter: keycap
-   lesson numbers, hairline dividers, and the review row filled with the
-   chapter's own colour. Each chapter sets --ch / --ch-deep inline.
    =========================================================================== */
-
-.homebar {
-  flex: 0 0 auto;
-  position: relative;
-  z-index: 3;
-  padding: calc(var(--safe-t) + 16px) var(--gut) 12px;
-  background: #55aaee;
-  border-bottom: 5px solid #3f88c9;
-}
-
-.homebar__title {
-  font-size: 19px;
-  font-weight: 900;
-  letter-spacing: 0.03em;
-  text-transform: uppercase;
-  line-height: 1.2;
-  color: #ffffff;
-}
-
-.homebar__sub {
-  display: block;
-  margin-top: 2px;
-  font-size: 15px;
-  font-weight: 700;
-  color: rgba(255, 255, 255, 0.92);
-}
 
 .home__scroll,
 .about__scroll {
@@ -371,73 +356,117 @@
   height: calc(28px + var(--safe-b));
 }
 
+/* The home banner: flat blue, bold white wordmark, hard darker bottom edge. */
+.duohead {
+  position: relative;
+  z-index: 3;
+  flex: 0 0 auto;
+  padding: calc(var(--safe-t) + 16px) var(--gut) 14px;
+  background: var(--duo-blue);
+  border-bottom: 5px solid var(--duo-blue-dark);
+}
+
+.duohead__title {
+  font-size: 21px;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: #ffffff;
+}
+
+.duohead__sub {
+  margin-top: 2px;
+  font-size: 16px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+/* Each chapter carries its accent as a pair of custom properties; everything
+   inside — headline, number keys, the review row — reads from them. */
 .chapter {
   padding-top: 30px;
 }
 
-.chapter__head {
-  padding: 0 2px 14px;
+.chapter--blue {
+  --tone: var(--duo-blue);
+  --tone-dark: var(--duo-blue-dark);
+}
+
+.chapter--amber {
+  --tone: var(--duo-amber);
+  --tone-dark: var(--duo-amber-dark);
+}
+
+.chapter--green {
+  --tone: var(--duo-green);
+  --tone-dark: var(--duo-green-dark);
+}
+
+.chapter--violet {
+  --tone: var(--duo-violet);
+  --tone-dark: var(--duo-violet-dark);
 }
 
 .chapter__no {
-  font-size: 14px;
+  display: block;
+  font-size: 15px;
   font-weight: 800;
-  color: var(--ch-deep);
+  color: var(--tone-dark);
 }
 
 .chapter__title {
-  margin-top: 2px;
+  margin-top: 1px;
   font-size: 26px;
   font-weight: 900;
   letter-spacing: -0.01em;
-  color: var(--ch);
+  color: var(--tone);
 }
 
-.chgroup {
+/* One card per chapter: rows divided by hairlines, review row filling the
+   rounded bottom because the card clips its children. */
+.group {
+  margin-top: 14px;
   background: var(--paper);
-  border: 2px solid var(--line-strong);
+  border: 2px solid var(--duo-line);
   border-radius: 18px;
   overflow: hidden;
 }
 
-.chgroup li + li {
-  border-top: 2px solid var(--line);
+.group li + li .row {
+  border-top: 2px solid var(--duo-line);
 }
 
-.chrow {
+.row {
   display: flex;
   align-items: center;
   gap: 16px;
   width: 100%;
-  padding: 12px 14px;
+  padding: 13px 16px;
   text-align: start;
-  background: var(--paper);
   transition: background 0.15s var(--ease);
 }
 
-.chrow:active {
+.row:active {
   background: var(--paper-2);
 }
 
-/* The keycap: a rounded square with a thicker bottom edge, number in the
-   chapter's colour. */
-.chrow__key {
+.row__key {
   flex: 0 0 auto;
   display: grid;
   place-items: center;
-  width: 46px;
+  width: 44px;
   height: 44px;
-  border-radius: 13px;
-  background: var(--paper-2);
-  border: 2px solid var(--line-strong);
+  border-radius: 14px;
+  background: var(--duo-key);
+  border: 2px solid var(--duo-line);
   border-bottom-width: 4px;
   font-size: 16px;
   font-weight: 900;
   font-variant-numeric: tabular-nums;
-  color: var(--ch);
+  color: var(--tone);
 }
 
-.chrow__title {
+.row__title {
   flex: 1;
   min-width: 0;
   font-size: 17px;
@@ -445,18 +474,19 @@
   color: var(--ink);
 }
 
-.chrow.is-done .chrow__key {
-  background: var(--ch);
-  border-color: rgba(0, 0, 0, 0.14);
-  color: #ffffff;
+.row.is-done .row__key {
+  color: var(--duo-green-dark);
 }
 
-.chrow.is-soon .chrow__key,
-.chrow.is-soon .chrow__title {
+.row.is-soon .row__key {
   color: var(--ink-3);
 }
 
-.chrow__soon {
+.row.is-soon .row__title {
+  color: var(--ink-2);
+}
+
+.row__soon {
   flex: 0 0 auto;
   padding: 4px 10px;
   border-radius: var(--r-pill);
@@ -469,23 +499,23 @@
   white-space: nowrap;
 }
 
-/* The review row fills with the chapter colour and goes white-on-colour. */
-.chrow--review,
-.chrow--review:active {
-  background: var(--ch);
+/* The review row is the chapter's accent, edge to edge. */
+.row--review {
+  background: var(--tone);
 }
 
-.chrow--review:active {
-  filter: brightness(1.06);
+.row--review:active {
+  background: var(--tone-dark);
 }
 
-.chrow--review .chrow__key {
+.row--review .row__key {
   background: rgba(255, 255, 255, 0.24);
-  border-color: rgba(0, 0, 0, 0.14);
+  border-color: rgba(255, 255, 255, 0.42);
+  border-bottom-color: rgba(0, 0, 0, 0.16);
   color: #ffffff;
 }
 
-.chrow--review .chrow__title {
+.row--review .row__title {
   color: #ffffff;
 }
 
@@ -846,54 +876,61 @@
   align-items: center;
   gap: 12px;
   width: 100%;
-  padding: 15px;
+  padding: 14px 15px;
   text-align: start;
   font-size: 15px;
   font-weight: 700;
   line-height: 1.4;
   color: var(--ink);
   background: var(--paper);
-  border: 1px solid var(--line-strong);
-  border-radius: var(--r-md);
-  box-shadow: var(--lift-1);
+  border: 2px solid var(--duo-line);
+  border-radius: 16px;
+  box-shadow: 0 3px 0 var(--duo-line);
   transition: transform 0.14s var(--ease), border-color 0.2s var(--ease),
-    background 0.2s var(--ease), opacity 0.2s var(--ease);
+    background 0.2s var(--ease), opacity 0.2s var(--ease),
+    box-shadow 0.14s var(--ease);
 }
 
 .quiz__option:active {
-  transform: scale(0.985);
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 var(--duo-line);
 }
 
 .quiz__key {
   flex: 0 0 auto;
   display: grid;
   place-items: center;
-  width: 28px;
-  height: 28px;
-  border-radius: var(--r-pill);
-  background: var(--surface);
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: var(--duo-key);
+  border: 2px solid var(--duo-line);
   font-size: 12px;
   font-weight: 900;
   color: var(--ink-2);
 }
 
 .quiz__option.is-right {
-  background: rgba(33, 181, 115, 0.08);
-  border-color: rgba(33, 181, 115, 0.5);
+  background: rgba(88, 204, 2, 0.09);
+  border-color: rgba(88, 204, 2, 0.55);
+  box-shadow: 0 3px 0 rgba(88, 204, 2, 0.55);
 }
 
 .quiz__option.is-right .quiz__key {
-  background: var(--mint);
+  background: var(--duo-green);
+  border-color: var(--duo-green-dark);
   color: #ffffff;
 }
 
 .quiz__option.is-wrong {
   background: rgba(255, 77, 106, 0.07);
   border-color: rgba(255, 77, 106, 0.45);
+  box-shadow: 0 3px 0 rgba(255, 77, 106, 0.45);
 }
 
 .quiz__option.is-wrong .quiz__key {
   background: var(--rose);
+  border-color: #d63c55;
   color: #ffffff;
 }
 
