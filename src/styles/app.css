@@ -32,6 +32,57 @@
   -webkit-backdrop-filter: saturate(180%) blur(16px);
 }
 
+/* Solid blue design-system header: Black-24 title over Medium-20 subtitle,
+   closed off by a 4px deep-blue bottom edge (the progress track doubles as
+   that edge when a progress value is passed). */
+.appbar--brand {
+  background: var(--ds-blue-base);
+  border-bottom: 4px solid var(--ds-blue-deep);
+}
+
+.appbar--brand:has(.appbar__track) {
+  border-bottom: 0;
+}
+
+.appbar--brand .appbar__row {
+  padding: 12px 12px 16px;
+}
+
+.appbar--brand .appbar__titles {
+  /* The design stacks the big title above the subtitle. */
+  flex-direction: column-reverse;
+}
+
+.appbar--brand .appbar__title {
+  font-size: 24px;
+  font-weight: 900;
+  color: #ffffff;
+}
+
+.appbar--brand .appbar__sub {
+  font-size: 20px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  text-transform: none;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.appbar--brand .iconbtn {
+  background: none;
+  border-color: rgba(255, 255, 255, 0.35);
+  box-shadow: none;
+  color: #ffffff;
+}
+
+.appbar--brand .appbar__track {
+  height: 4px;
+  background: var(--ds-blue-deep);
+}
+
+.appbar--brand .appbar__fill {
+  background: rgba(255, 255, 255, 0.9);
+}
+
 .appbar__row {
   display: flex;
   align-items: center;
@@ -142,6 +193,10 @@
    Buttons
    =========================================================================== */
 
+/* Main button, straight from the design system: fill over a darker bezel —
+   1px top / 2px sides / 4px bottom of the ramp's dark step — on a 16px
+   radius. Pressing swaps the fill to the dark step and settles the bezel to
+   an even 2px, so the button visibly sinks. */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -149,36 +204,47 @@
   gap: 8px;
   min-height: 50px;
   padding: 0 22px;
-  border-radius: 8px;
+  border-radius: var(--ds-radius);
   font-size: 15px;
-  font-weight: 800;
-  transition: transform 0.16s var(--ease), box-shadow 0.2s var(--ease),
-    filter 0.2s var(--ease), opacity 0.2s var(--ease);
+  font-weight: 900;
+  border: solid transparent;
+  border-width: 1px 2px 4px;
+  transition: transform 0.16s var(--ease), background 0.16s var(--ease),
+    border 0.16s var(--ease), opacity 0.2s var(--ease);
 }
 
 .btn--primary {
   color: #ffffff;
-  background: linear-gradient(180deg, #2b8cff 0%, var(--blue) 100%);
-  box-shadow: 0 1px 1px rgba(255, 255, 255, 0.4) inset,
-    0 6px 18px -8px rgba(0, 117, 255, 0.9);
+  background: var(--ds-blue-base);
+  border-color: var(--ds-blue-dark);
 }
 
 .btn--primary.is-on {
-  background: linear-gradient(180deg, #34cd8b 0%, var(--mint) 100%);
-  box-shadow: 0 1px 1px rgba(255, 255, 255, 0.4) inset,
-    0 6px 18px -8px rgba(33, 181, 115, 0.9);
+  background: var(--mint);
+  border-color: #178a56;
 }
 
 .btn--ghost {
-  color: var(--ink);
+  color: var(--ds-gray-900);
   background: var(--paper);
-  border: 1px solid var(--line-strong);
-  box-shadow: var(--lift-1);
+  border-color: var(--ds-gray-200);
 }
 
 .btn:active {
-  transform: scale(0.975);
-  filter: brightness(1.04);
+  border-width: 2px;
+  transform: translateY(2px);
+}
+
+.btn--primary:active {
+  background: var(--ds-blue-dark);
+}
+
+.btn--primary.is-on:active {
+  background: #178a56;
+}
+
+.btn--ghost:active {
+  background: var(--ds-gray-100);
 }
 
 .btn:disabled {
@@ -338,17 +404,21 @@
   padding: 4px var(--gut) 0;
 }
 
+/* The design system sets the screen gutter at 24. */
+.home__scroll {
+  padding-inline: 24px;
+}
+
 .home__pad {
   height: calc(28px + var(--safe-b));
 }
 
 .progresscard {
-  margin-top: 18px;
-  padding: 18px;
+  margin-top: 24px;
+  padding: 16px;
   background: var(--paper);
-  border: 1px solid var(--line);
-  border-radius: var(--r-lg);
-  box-shadow: var(--lift-1);
+  border: 2px solid var(--ds-gray-200);
+  border-radius: var(--ds-radius);
 }
 
 .progresscard__row {
@@ -388,7 +458,8 @@
   margin-top: 14px;
   height: 8px;
   border-radius: var(--r-pill);
-  background: var(--surface);
+  background: var(--ds-gray-100);
+  border: 1px solid var(--ds-gray-200);
   overflow: hidden;
 }
 
@@ -396,99 +467,131 @@
   height: 100%;
   transform-origin: left center;
   border-radius: var(--r-pill);
-  background: linear-gradient(90deg, var(--cyan), var(--blue));
+  background: var(--ds-blue-base);
   transition: transform 0.5s var(--ease);
 }
 
+/* ---------------------------------------------------------------------------
+   Chapters — design-system list. Each chapter picks a four-step accent ramp;
+   everything below reads from these four custom properties.
+   --------------------------------------------------------------------------- */
+
+.chapter,
+.chapter[data-accent='blue'] {
+  --ch-light: var(--ds-blue-light);
+  --ch-base: var(--ds-blue-base);
+  --ch-dark: var(--ds-blue-dark);
+  --ch-deep: var(--ds-blue-deep);
+}
+
+.chapter[data-accent='gold'] {
+  --ch-light: var(--ds-gold-light);
+  --ch-base: var(--ds-gold-base);
+  --ch-dark: var(--ds-gold-dark);
+  --ch-deep: var(--ds-gold-deep);
+}
+
+.chapter[data-accent='violet'] {
+  --ch-light: var(--ds-violet-light);
+  --ch-base: var(--ds-violet-base);
+  --ch-dark: var(--ds-violet-dark);
+  --ch-deep: var(--ds-violet-deep);
+}
+
+.chapter[data-accent='red'] {
+  --ch-light: var(--ds-red-light);
+  --ch-base: var(--ds-red-base);
+  --ch-dark: var(--ds-red-dark);
+  --ch-deep: var(--ds-red-deep);
+}
+
 .chapter {
-  padding-top: 26px;
+  padding-top: 32px;
 }
 
 .chapter__head {
-  padding: 0 2px 12px;
+  padding: 0 2px 8px;
 }
 
 .chapter__no {
-  font-size: 11px;
+  font-size: 16px;
   font-weight: 900;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--blue);
+  color: var(--ch-deep);
 }
 
 .chapter__title {
-  margin-top: 3px;
-  font-size: 22px;
+  margin-top: 2px;
+  font-size: 24px;
   font-weight: 900;
   letter-spacing: -0.01em;
-  color: var(--ink);
+  color: var(--ch-light);
 }
 
 .chapter__blurb {
   margin-top: 3px;
   font-size: 13.5px;
   font-weight: 600;
-  color: var(--ink-3);
+  color: var(--ds-gray-600);
 }
 
+/* One card per chapter: 16px corners, 2px hairline, rows split by 1px. */
 .lesslist {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  background: var(--paper);
+  border: 2px solid var(--ds-gray-200);
+  border-radius: var(--ds-radius);
+  overflow: hidden;
+}
+
+.lesslist li + li {
+  border-top: 1px solid var(--ds-gray-200);
 }
 
 .lesscard {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 16px;
   width: 100%;
-  padding: 15px;
+  padding: 16px;
   text-align: start;
   background: var(--paper);
-  border: 1px solid var(--line);
-  border-radius: var(--r-md);
-  box-shadow: var(--lift-1);
-  transition: transform 0.16s var(--ease), box-shadow 0.2s var(--ease),
-    border-color 0.2s var(--ease);
+  transition: background 0.16s var(--ease);
 }
 
 .lesscard:active {
-  transform: scale(0.985);
-  box-shadow: var(--lift-2);
-}
-
-.lesscard.is-done {
-  border-color: rgba(33, 181, 115, 0.35);
+  background: var(--ds-gray-100);
 }
 
 .lesscard.is-soon {
-  background: var(--paper-2);
-  border-style: dashed;
-  box-shadow: none;
+  background: var(--ds-gray-100);
 }
 
+/* The number badge: a 16px-radius tile with a 2px stroke that thickens to
+   4px along the bottom, so the tile reads as a physical key. */
 .lesscard__no {
   flex: 0 0 auto;
   display: grid;
   place-items: center;
-  width: 36px;
-  height: 36px;
-  border-radius: var(--r-pill);
-  background: var(--surface);
-  font-size: 13px;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--ds-radius);
+  background: var(--ds-gray-100);
+  border: 2px solid var(--ds-gray-400);
+  border-bottom-width: 4px;
+  font-size: 20px;
   font-weight: 900;
   font-variant-numeric: tabular-nums;
-  color: var(--ink-2);
+  color: var(--ch-base);
 }
 
 .lesscard.is-done .lesscard__no {
-  background: rgba(33, 181, 115, 0.14);
   color: var(--mint);
-  font-size: 16px;
 }
 
 .lesscard.is-soon .lesscard__no {
-  color: var(--ink-3);
+  background: var(--paper);
+  color: var(--ds-gray-400);
 }
 
 .lesscard__text {
@@ -500,27 +603,27 @@
 }
 
 .lesscard__title {
-  font-size: 15.5px;
-  font-weight: 800;
-  color: var(--ink);
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--ds-gray-900);
 }
 
 .lesscard.is-soon .lesscard__title {
-  color: var(--ink-2);
+  color: var(--ds-gray-600);
 }
 
 .lesscard__tag {
   font-size: 12.5px;
   font-weight: 600;
   line-height: 1.4;
-  color: var(--ink-3);
+  color: var(--ds-gray-600);
 }
 
 .lesscard__go {
   flex: 0 0 auto;
   display: grid;
   place-items: center;
-  color: var(--ink-3);
+  color: var(--ds-gray-400);
 }
 
 .lesscard__soon {
@@ -990,15 +1093,38 @@
   color: var(--ink-3);
 }
 
+/* The review row fills with the chapter's base colour; its badge takes the
+   light step over a dark 4px bottom stroke, mirroring the main button. */
 .lesscard--review {
-  border-style: solid;
-  border-color: rgba(0, 117, 255, 0.28);
-  background: rgba(0, 117, 255, 0.04);
+  background: var(--ch-base);
+}
+
+.lesscard--review:active {
+  background: var(--ch-dark);
 }
 
 .lesscard--review .lesscard__no {
-  background: rgba(0, 117, 255, 0.12);
-  color: var(--blue);
+  background: var(--ch-light);
+  border-color: var(--ch-dark);
+  color: #ffffff;
+}
+
+.lesscard--review .lesscard__title {
+  font-size: 20px;
+  font-weight: 900;
+  color: #ffffff;
+}
+
+.lesscard--review .lesscard__tag {
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.lesscard--review .lesscard__go {
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.lesscard--review.is-done .lesscard__no {
+  color: #ffffff;
 }
 
 /* ===========================================================================

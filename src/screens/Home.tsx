@@ -25,7 +25,13 @@ export function Home({ onOpen, onReview, onAbout, onBack }: Props) {
 
   return (
     <div className="screen home">
-      <AppBar onBack={onBack} title="Trig" progress={ratio} />
+      <AppBar
+        onBack={onBack}
+        tone="brand"
+        title="TRIGONOMETRY101"
+        subtitle="Lessons"
+        progress={ratio}
+      />
 
       <div className="home__scroll">
         <div className="progresscard">
@@ -54,7 +60,7 @@ export function Home({ onOpen, onReview, onAbout, onBack }: Props) {
           if (!ready.length && !soon.length) return null
 
           return (
-            <section key={chapter.id} className="chapter">
+            <section key={chapter.id} className="chapter" data-accent={chapter.accent}>
               <div className="chapter__head">
                 <span className="chapter__no">Chapter {chapter.id}</span>
                 <h2 className="chapter__title">{chapter.title}</h2>

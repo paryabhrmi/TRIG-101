@@ -94,10 +94,14 @@ export interface Question {
   explain: string
 }
 
+/** Accent ramp a chapter draws its header, numbers and review row from. */
+export type ChapterAccent = 'blue' | 'gold' | 'violet' | 'red'
+
 export interface Chapter {
   id: number
   title: string
   blurb: string
+  accent: ChapterAccent
   /**
    * Checkpoints prove the learner moved a slider; these prove they understood
    * why. Placed at the end of a chapter so a question can span several
@@ -131,6 +135,7 @@ export const chapters: Chapter[] = [
     id: 1,
     title: 'The Right Triangle',
     blurb: 'Where the ratios come from.',
+    accent: 'blue',
     review: [
       {
         prompt:
@@ -165,6 +170,7 @@ export const chapters: Chapter[] = [
     id: 2,
     title: 'The Circle',
     blurb: 'Where the triangle stops being enough.',
+    accent: 'gold',
     review: [
       {
         prompt: 'One radian is the angle you have turned when…',
@@ -197,6 +203,7 @@ export const chapters: Chapter[] = [
     id: 3,
     title: 'The Wave',
     blurb: 'Where trigonometry meets the real world.',
+    accent: 'violet',
     review: [
       {
         prompt: 'After how much angle does the sine wave repeat exactly?',
@@ -235,6 +242,7 @@ export const chapters: Chapter[] = [
     id: 4,
     title: 'Coming Next',
     blurb: 'Planned lessons — artboards still to be authored.',
+    accent: 'red',
   },
 ]
 

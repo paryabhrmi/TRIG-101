@@ -7,11 +7,13 @@ interface Props {
   right?: ReactNode
   /** 0–1. Renders the hairline course progress bar under the bar. */
   progress?: number
+  /** 'brand' is the solid blue header from the design system. */
+  tone?: 'light' | 'brand'
 }
 
-export function AppBar({ onBack, title, subtitle, right, progress }: Props) {
+export function AppBar({ onBack, title, subtitle, right, progress, tone = 'light' }: Props) {
   return (
-    <header className="appbar appbar--light">
+    <header className={`appbar appbar--${tone}`}>
       <div className="appbar__row">
         {onBack ? (
           <button type="button" className="iconbtn" onClick={onBack} aria-label="Back">

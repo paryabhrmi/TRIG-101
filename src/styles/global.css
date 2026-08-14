@@ -42,6 +42,42 @@
   /* Tints for accent-backed surfaces (the Rive formula rows). */
   --tint: 0.1;
 
+  /* -------------------------------------------------------------------------
+     Design-system tokens — from docs/trigDesignSystem.pdf.
+     Four-step accent ramps (light → base → dark → deep) plus a gray scale.
+     light: chapter titles & review badges · base: fills & lesson numbers ·
+     dark: pressed fills & bottom strokes · deep: chapter labels.
+     ------------------------------------------------------------------------- */
+
+  --ds-gray-900: #4b4b4b;
+  --ds-gray-600: #777777;
+  --ds-gray-400: #afafaf;
+  --ds-gray-200: #e5e5e5;
+  --ds-gray-100: #f7f7f7;
+
+  --ds-blue-light: #55bff9;
+  --ds-blue-base: #2baff7;
+  --ds-blue-dark: #228cc6;
+  --ds-blue-deep: #1a6994;
+
+  --ds-gold-light: #eda733;
+  --ds-gold-base: #e89100;
+  --ds-gold-dark: #ba7400;
+  --ds-gold-deep: #8b5700;
+
+  --ds-violet-light: #9d70c6;
+  --ds-violet-base: #854db8;
+  --ds-violet-dark: #6a3d93;
+  --ds-violet-deep: #4f2e6e;
+
+  --ds-red-light: #ff6f6f;
+  --ds-red-base: #ff4b4b;
+  --ds-red-dark: #cc3c3c;
+  --ds-red-deep: #992d2d;
+
+  /* One radius everywhere: cards, badges and buttons all sit on 16. */
+  --ds-radius: 16px;
+
   /* Shape */
   --r-sm: 10px;
   --r-md: 14px;
