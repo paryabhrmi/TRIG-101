@@ -45,8 +45,13 @@ jobs:
   deploy:
     needs: build
     runs-on: ubuntu-latest
+    # Not the conventional `github-pages` environment: that one was created
+    # when Pages was first enabled from the original MVP branch, and its
+    # protection rules only allow that branch — rejecting deploys from main.
+    # A fresh environment carries no branch policy, and deploy-pages accepts
+    # any environment name.
     environment:
-      name: github-pages
+      name: pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - id: deployment
