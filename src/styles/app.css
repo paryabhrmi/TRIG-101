@@ -666,81 +666,62 @@
 }
 
 /* ---------------------------------------------------------------------------
-   Readout tiles — the SOH CAH TOA cards from the Rive file: a solid accent
-   header over a tinted body.
+   Readout tiles — quiet mirrors of the canvas. The artwork above is already
+   saturated, so the tiles stay neutral and carry their accent only in the
+   label, which is what ties a tile to its coloured side on the canvas.
    --------------------------------------------------------------------------- */
 
 .instruments {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(112px, 1fr));
   gap: 8px;
-  padding-top: 16px;
+  padding-top: 14px;
 }
 
 .chip {
-  flex: 1 1 auto;
-  min-width: 96px;
   display: flex;
   flex-direction: column;
+  gap: 3px;
+  padding: 9px 12px 10px;
   border-radius: var(--r-sm);
-  overflow: hidden;
-  background: var(--surface);
+  background: var(--paper-2);
+  border: 1px solid var(--line);
 }
 
 .chip__label {
-  padding: 5px 10px;
   font-size: 10.5px;
   font-weight: 900;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: #ffffff;
   white-space: nowrap;
 }
 
 .chip__value {
-  padding: 7px 10px 9px;
-  font-size: 19px;
+  font-size: 18px;
   font-weight: 800;
   font-variant-numeric: tabular-nums;
   line-height: 1.1;
   color: var(--ink);
 }
 
+/* Accents darkened where the raw artwork colour is too pale for small text. */
 .chip--blue .chip__label {
-  background: var(--blue);
-}
-.chip--blue .chip__value {
-  background: rgba(0, 117, 255, var(--tint));
+  color: var(--blue);
 }
 .chip--cyan .chip__label {
-  background: var(--cyan);
-}
-.chip--cyan .chip__value {
-  background: rgba(43, 175, 247, var(--tint));
+  color: #0e8fd6;
 }
 .chip--amber .chip__label {
-  background: #e89100;
-}
-.chip--amber .chip__value {
-  background: rgba(254, 175, 54, 0.16);
+  color: #b57708;
 }
 .chip--violet .chip__label {
-  background: var(--violet);
-}
-.chip--violet .chip__value {
-  background: rgba(133, 77, 184, var(--tint));
+  color: var(--violet);
 }
 .chip--mint .chip__label {
-  background: var(--mint);
-}
-.chip--mint .chip__value {
-  background: rgba(33, 181, 115, var(--tint));
+  color: #189a63;
 }
 .chip--rose .chip__label {
-  background: var(--rose);
-}
-.chip--rose .chip__value {
-  background: rgba(255, 77, 106, var(--tint));
+  color: #e13a57;
 }
 
 .checkpoint {

@@ -74,13 +74,7 @@ export function LessonScreen({ lesson, onBack, onGoto, onReview, onFinish }: Pro
         onBack={onBack}
         subtitle={`Lesson ${n} of ${TOTAL_LESSONS}`}
         title={lesson.title}
-        right={
-          solved ? (
-            <span className="pill pill--done">Done</span>
-          ) : (
-            <span className="pill">{String(n).padStart(2, '0')}</span>
-          )
-        }
+        right={solved ? <span className="pill pill--done">Done</span> : undefined}
         progress={(index + (solved ? 1 : 0)) / lessons.length}
       />
 
