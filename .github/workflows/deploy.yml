@@ -56,15 +56,28 @@ jobs:
     steps:
       # The Pages site was first enabled from the original MVP branch, and
       # GitHub only accepts deployments from the branch stored as the site's
-      # source. Repoint it at the branch actually deploying. The runner's
-      # token has `pages: write`, which this endpoint accepts.
+      # source. Try repointing the site at this branch; if the token may not
+      # update it, recreate the site, which records a fresh source.
       - name: Allow Pages deployments from this branch
+        env:
+          API: https://api.github.com/repos/${{ github.repository }}/pages
+          AUTH: 'Authorization: Bearer ${{ github.token }}'
         run: |
-          curl -sf -X PUT \
-            -H "Authorization: Bearer ${{ github.token }}" \
-            -H "Accept: application/vnd.github+json" \
-            "https://api.github.com/repos/${{ github.repository }}/pages" \
-            -d "{\"build_type\":\"workflow\",\"source\":{\"branch\":\"${GITHUB_REF_NAME}\",\"path\":\"/\"}}"
+          put=$(curl -s -o put.json -w '%{http_code}' -X PUT -H "$AUTH" \
+            -H "Accept: application/vnd.github+json" "$API" \
+            -d "{\"build_type\":\"workflow\",\"source\":{\"branch\":\"${GITHUB_REF_NAME}\",\"path\":\"/\"}}")
+          echo "PUT $put"; cat put.json || true
+          if [ "$put" = "200" ] || [ "$put" = "204" ]; then exit 0; fi
+
+          del=$(curl -s -o del.json -w '%{http_code}' -X DELETE -H "$AUTH" \
+            -H "Accept: application/vnd.github+json" "$API")
+          echo "DELETE $del"; cat del.json || true
+
+          post=$(curl -s -o post.json -w '%{http_code}' -X POST -H "$AUTH" \
+            -H "Accept: application/vnd.github+json" "$API" \
+            -d '{"build_type":"workflow"}')
+          echo "POST $post"; cat post.json || true
+          [ "$post" = "201" ] || [ "$post" = "409" ]
 
       - id: deployment
         uses: actions/deploy-pages@v4
