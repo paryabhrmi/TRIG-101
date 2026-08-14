@@ -21,7 +21,6 @@ function Course() {
           onOpen={(id) => navigate({ name: 'lesson', id })}
           onReview={(chapter) => navigate({ name: 'review', chapter })}
           onAbout={() => navigate({ name: 'about' })}
-          onBack={() => navigate({ name: 'splash' })}
         />
       )
 

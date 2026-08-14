@@ -13,9 +13,8 @@
 }
 
 /* ===========================================================================
-   App bar
-   In a lesson the bar floats directly on the artwork, so the canvas can run
-   edge to edge instead of sitting in a box below a solid strip.
+   App bar — a flat, saturated banner with a hard darker bottom edge, so it
+   reads as one chunky game piece rather than a translucent strip.
    =========================================================================== */
 
 .appbar {
@@ -26,10 +25,8 @@
 }
 
 .appbar--light {
-  background: rgba(255, 255, 255, 0.88);
-  border-bottom: 1px solid var(--line);
-  backdrop-filter: saturate(180%) blur(16px);
-  -webkit-backdrop-filter: saturate(180%) blur(16px);
+  background: var(--duo-blue);
+  border-bottom: 4px solid var(--duo-blue-dark);
 }
 
 .appbar__row {
@@ -53,14 +50,14 @@
   font-weight: 800;
   letter-spacing: 0.09em;
   text-transform: uppercase;
-  color: var(--ink-3);
+  color: rgba(255, 255, 255, 0.85);
 }
 
 .appbar__title {
   font-size: 17px;
-  font-weight: 800;
+  font-weight: 900;
   line-height: 1.2;
-  color: var(--ink);
+  color: #ffffff;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -73,15 +70,28 @@
   gap: 8px;
 }
 
+/* On the blue banner the pills go glassy white. */
+.appbar .pill {
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.4);
+  color: #ffffff;
+}
+
+.appbar .pill--done {
+  background: #ffffff;
+  border-color: #ffffff;
+  color: var(--duo-green-dark);
+}
+
 .appbar__track {
-  height: 3px;
-  background: var(--line);
+  height: 4px;
+  background: var(--duo-blue-dark);
 }
 
 .appbar__fill {
   height: 100%;
   transform-origin: left center;
-  background: linear-gradient(90deg, var(--cyan), var(--blue));
+  background: #ffffff;
   transition: transform 0.45s var(--ease);
 }
 
@@ -91,11 +101,10 @@
   place-items: center;
   width: 40px;
   height: 40px;
-  border-radius: var(--r-pill);
-  background: var(--paper);
-  border: 1px solid var(--line);
-  color: var(--ink);
-  box-shadow: var(--lift-1);
+  border-radius: var(--r-md);
+  background: rgba(255, 255, 255, 0.14);
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  color: #ffffff;
   transition: transform 0.18s var(--ease), background 0.18s var(--ease);
 }
 
@@ -142,43 +151,46 @@
    Buttons
    =========================================================================== */
 
+/* Every button is a flat fill riding on a hard darker edge; pressing it sinks
+   the fill into the edge instead of dimming or scaling. */
 .btn {
+  --edge: var(--duo-line);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
   min-height: 50px;
   padding: 0 22px;
-  border-radius: 8px;
+  border-radius: var(--r-md);
   font-size: 15px;
-  font-weight: 800;
-  transition: transform 0.16s var(--ease), box-shadow 0.2s var(--ease),
-    filter 0.2s var(--ease), opacity 0.2s var(--ease);
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  box-shadow: 0 4px 0 var(--edge);
+  transition: transform 0.12s var(--ease), box-shadow 0.12s var(--ease),
+    opacity 0.2s var(--ease);
 }
 
 .btn--primary {
+  --edge: var(--duo-blue-dark);
   color: #ffffff;
-  background: linear-gradient(180deg, #2b8cff 0%, var(--blue) 100%);
-  box-shadow: 0 1px 1px rgba(255, 255, 255, 0.4) inset,
-    0 6px 18px -8px rgba(0, 117, 255, 0.9);
+  background: var(--duo-blue);
 }
 
 .btn--primary.is-on {
-  background: linear-gradient(180deg, #34cd8b 0%, var(--mint) 100%);
-  box-shadow: 0 1px 1px rgba(255, 255, 255, 0.4) inset,
-    0 6px 18px -8px rgba(33, 181, 115, 0.9);
+  --edge: var(--duo-green-dark);
+  background: var(--duo-green);
 }
 
 .btn--ghost {
-  color: var(--ink);
+  color: var(--duo-blue);
   background: var(--paper);
-  border: 1px solid var(--line-strong);
-  box-shadow: var(--lift-1);
+  border: 2px solid var(--duo-line);
 }
 
 .btn:active {
-  transform: scale(0.975);
-  filter: brightness(1.04);
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 var(--edge);
 }
 
 .btn:disabled {
@@ -195,7 +207,9 @@
   padding: 8px 4px;
   font-size: 13.5px;
   font-weight: 800;
-  color: var(--blue);
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--duo-blue-dark);
 }
 
 .linkish--center {
@@ -342,188 +356,137 @@
   height: calc(28px + var(--safe-b));
 }
 
-.progresscard {
-  margin-top: 18px;
-  padding: 18px;
-  background: var(--paper);
-  border: 1px solid var(--line);
-  border-radius: var(--r-lg);
-  box-shadow: var(--lift-1);
+/* The home banner: flat blue, bold white wordmark, hard darker bottom edge. */
+.duohead {
+  position: relative;
+  z-index: 3;
+  flex: 0 0 auto;
+  padding: calc(var(--safe-t) + 16px) var(--gut) 14px;
+  background: var(--duo-blue);
+  border-bottom: 5px solid var(--duo-blue-dark);
 }
 
-.progresscard__row {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
-
-.progresscard__num {
-  font-size: 38px;
+.duohead__title {
+  font-size: 21px;
   font-weight: 900;
-  line-height: 1;
-  color: var(--ink);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: #ffffff;
 }
 
-.progresscard__num em {
-  font-style: normal;
-  font-size: 20px;
-  font-weight: 800;
-  color: var(--ink-3);
+.duohead__sub {
+  margin-top: 2px;
+  font-size: 16px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.95);
 }
 
-.progresscard__label {
-  font-size: 13.5px;
-  font-weight: 800;
-  line-height: 1.35;
-  color: var(--ink-2);
-}
-
-.progresscard__label small {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--ink-3);
-}
-
-.progresscard__track {
-  margin-top: 14px;
-  height: 8px;
-  border-radius: var(--r-pill);
-  background: var(--surface);
-  overflow: hidden;
-}
-
-.progresscard__fill {
-  height: 100%;
-  transform-origin: left center;
-  border-radius: var(--r-pill);
-  background: linear-gradient(90deg, var(--cyan), var(--blue));
-  transition: transform 0.5s var(--ease);
-}
-
+/* Each chapter carries its accent as a pair of custom properties; everything
+   inside — headline, number keys, the review row — reads from them. */
 .chapter {
-  padding-top: 26px;
+  padding-top: 30px;
 }
 
-.chapter__head {
-  padding: 0 2px 12px;
+.chapter--blue {
+  --tone: var(--duo-blue);
+  --tone-dark: var(--duo-blue-dark);
+}
+
+.chapter--amber {
+  --tone: var(--duo-amber);
+  --tone-dark: var(--duo-amber-dark);
+}
+
+.chapter--green {
+  --tone: var(--duo-green);
+  --tone-dark: var(--duo-green-dark);
+}
+
+.chapter--violet {
+  --tone: var(--duo-violet);
+  --tone-dark: var(--duo-violet-dark);
 }
 
 .chapter__no {
-  font-size: 11px;
-  font-weight: 900;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--blue);
+  display: block;
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--tone-dark);
 }
 
 .chapter__title {
-  margin-top: 3px;
-  font-size: 22px;
+  margin-top: 1px;
+  font-size: 26px;
   font-weight: 900;
   letter-spacing: -0.01em;
-  color: var(--ink);
+  color: var(--tone);
 }
 
-.chapter__blurb {
-  margin-top: 3px;
-  font-size: 13.5px;
-  font-weight: 600;
-  color: var(--ink-3);
+/* One card per chapter: rows divided by hairlines, review row filling the
+   rounded bottom because the card clips its children. */
+.group {
+  margin-top: 14px;
+  background: var(--paper);
+  border: 2px solid var(--duo-line);
+  border-radius: 18px;
+  overflow: hidden;
 }
 
-.lesslist {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+.group li + li .row {
+  border-top: 2px solid var(--duo-line);
 }
 
-.lesscard {
+.row {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 16px;
   width: 100%;
-  padding: 15px;
+  padding: 13px 16px;
   text-align: start;
-  background: var(--paper);
-  border: 1px solid var(--line);
-  border-radius: var(--r-md);
-  box-shadow: var(--lift-1);
-  transition: transform 0.16s var(--ease), box-shadow 0.2s var(--ease),
-    border-color 0.2s var(--ease);
+  transition: background 0.15s var(--ease);
 }
 
-.lesscard:active {
-  transform: scale(0.985);
-  box-shadow: var(--lift-2);
-}
-
-.lesscard.is-done {
-  border-color: rgba(33, 181, 115, 0.35);
-}
-
-.lesscard.is-soon {
+.row:active {
   background: var(--paper-2);
-  border-style: dashed;
-  box-shadow: none;
 }
 
-.lesscard__no {
+.row__key {
   flex: 0 0 auto;
   display: grid;
   place-items: center;
-  width: 36px;
-  height: 36px;
-  border-radius: var(--r-pill);
-  background: var(--surface);
-  font-size: 13px;
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: var(--duo-key);
+  border: 2px solid var(--duo-line);
+  border-bottom-width: 4px;
+  font-size: 16px;
   font-weight: 900;
   font-variant-numeric: tabular-nums;
-  color: var(--ink-2);
+  color: var(--tone);
 }
 
-.lesscard.is-done .lesscard__no {
-  background: rgba(33, 181, 115, 0.14);
-  color: var(--mint);
-  font-size: 16px;
-}
-
-.lesscard.is-soon .lesscard__no {
-  color: var(--ink-3);
-}
-
-.lesscard__text {
+.row__title {
   flex: 1;
   min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.lesscard__title {
-  font-size: 15.5px;
+  font-size: 17px;
   font-weight: 800;
   color: var(--ink);
 }
 
-.lesscard.is-soon .lesscard__title {
+.row.is-done .row__key {
+  color: var(--duo-green-dark);
+}
+
+.row.is-soon .row__key {
+  color: var(--ink-3);
+}
+
+.row.is-soon .row__title {
   color: var(--ink-2);
 }
 
-.lesscard__tag {
-  font-size: 12.5px;
-  font-weight: 600;
-  line-height: 1.4;
-  color: var(--ink-3);
-}
-
-.lesscard__go {
-  flex: 0 0 auto;
-  display: grid;
-  place-items: center;
-  color: var(--ink-3);
-}
-
-.lesscard__soon {
+.row__soon {
   flex: 0 0 auto;
   padding: 4px 10px;
   border-radius: var(--r-pill);
@@ -534,6 +497,26 @@
   letter-spacing: 0.07em;
   text-transform: uppercase;
   white-space: nowrap;
+}
+
+/* The review row is the chapter's accent, edge to edge. */
+.row--review {
+  background: var(--tone);
+}
+
+.row--review:active {
+  background: var(--tone-dark);
+}
+
+.row--review .row__key {
+  background: rgba(255, 255, 255, 0.24);
+  border-color: rgba(255, 255, 255, 0.42);
+  border-bottom-color: rgba(0, 0, 0, 0.16);
+  color: #ffffff;
+}
+
+.row--review .row__title {
+  color: #ffffff;
 }
 
 /* ===========================================================================
@@ -893,54 +876,61 @@
   align-items: center;
   gap: 12px;
   width: 100%;
-  padding: 15px;
+  padding: 14px 15px;
   text-align: start;
   font-size: 15px;
   font-weight: 700;
   line-height: 1.4;
   color: var(--ink);
   background: var(--paper);
-  border: 1px solid var(--line-strong);
-  border-radius: var(--r-md);
-  box-shadow: var(--lift-1);
+  border: 2px solid var(--duo-line);
+  border-radius: 16px;
+  box-shadow: 0 3px 0 var(--duo-line);
   transition: transform 0.14s var(--ease), border-color 0.2s var(--ease),
-    background 0.2s var(--ease), opacity 0.2s var(--ease);
+    background 0.2s var(--ease), opacity 0.2s var(--ease),
+    box-shadow 0.14s var(--ease);
 }
 
 .quiz__option:active {
-  transform: scale(0.985);
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 var(--duo-line);
 }
 
 .quiz__key {
   flex: 0 0 auto;
   display: grid;
   place-items: center;
-  width: 28px;
-  height: 28px;
-  border-radius: var(--r-pill);
-  background: var(--surface);
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: var(--duo-key);
+  border: 2px solid var(--duo-line);
   font-size: 12px;
   font-weight: 900;
   color: var(--ink-2);
 }
 
 .quiz__option.is-right {
-  background: rgba(33, 181, 115, 0.08);
-  border-color: rgba(33, 181, 115, 0.5);
+  background: rgba(88, 204, 2, 0.09);
+  border-color: rgba(88, 204, 2, 0.55);
+  box-shadow: 0 3px 0 rgba(88, 204, 2, 0.55);
 }
 
 .quiz__option.is-right .quiz__key {
-  background: var(--mint);
+  background: var(--duo-green);
+  border-color: var(--duo-green-dark);
   color: #ffffff;
 }
 
 .quiz__option.is-wrong {
   background: rgba(255, 77, 106, 0.07);
   border-color: rgba(255, 77, 106, 0.45);
+  box-shadow: 0 3px 0 rgba(255, 77, 106, 0.45);
 }
 
 .quiz__option.is-wrong .quiz__key {
   background: var(--rose);
+  border-color: #d63c55;
   color: #ffffff;
 }
 
@@ -988,17 +978,6 @@
   font-size: 13px;
   font-weight: 800;
   color: var(--ink-3);
-}
-
-.lesscard--review {
-  border-style: solid;
-  border-color: rgba(0, 117, 255, 0.28);
-  background: rgba(0, 117, 255, 0.04);
-}
-
-.lesscard--review .lesscard__no {
-  background: rgba(0, 117, 255, 0.12);
-  color: var(--blue);
 }
 
 /* ===========================================================================
