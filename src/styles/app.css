@@ -541,8 +541,10 @@
 }
 
 /* The sheet overlaps that padding strip so the two read as one composition
-   rather than two stacked boxes. It is sized by its step's content, capped so
-   the longest step still leaves the artwork usable. */
+   rather than two stacked boxes. It starts as a slim peek — the instruction
+   and its button — and opens on demand for readouts and explanation, so the
+   artwork keeps the screen by default. It is sized by its step's content,
+   capped so the longest step still leaves the artwork usable. */
 .sheet {
   position: relative;
   z-index: 2;
@@ -565,7 +567,44 @@
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
-  padding: 14px var(--gut) calc(18px + var(--safe-b));
+  padding: 12px var(--gut) calc(18px + var(--safe-b));
+}
+
+/* The universal bottom-sheet affordance: a grabber that toggles the sheet. */
+.sheet__grab {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  padding: 9px 0 1px;
+}
+
+.sheet__handle {
+  width: 44px;
+  height: 5px;
+  border-radius: var(--r-pill);
+  background: var(--line-strong);
+  transition: background 0.2s var(--ease);
+}
+
+.sheet__grab:active .sheet__handle {
+  background: var(--ink-3);
+}
+
+/* Detail content slides in as the sheet opens instead of just appearing. */
+.sheet__detail {
+  animation: detail-in 0.3s var(--ease);
+}
+
+@keyframes detail-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 /* ---------------------------------------------------------------------------
@@ -578,7 +617,7 @@
   display: flex;
   align-items: center;
   gap: 7px;
-  padding: 13px var(--gut) 0;
+  padding: 6px var(--gut) 0;
 }
 
 .steps__dot {
@@ -606,6 +645,28 @@
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--ink-3);
+}
+
+/* The step label doubling as the details toggle; the chevron flips over. */
+.steps__more {
+  margin-inline-start: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 0 4px 8px;
+  font-size: 10.5px;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.steps__more svg {
+  transition: transform 0.25s var(--ease);
+}
+
+.steps__more[aria-expanded='true'] svg {
+  transform: rotate(180deg);
 }
 
 .step__lead {

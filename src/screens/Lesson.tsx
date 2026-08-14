@@ -25,6 +25,9 @@ export function LessonScreen({ lesson, onBack, onGoto, onReview, onFinish }: Pro
   const [toggles, setToggles] = useState<Record<string, boolean>>({})
   const [step, setStep] = useState<Step>('watch')
   const [showHint, setShowHint] = useState(false)
+  // The sheet starts as a slim peek — one instruction and its button — so the
+  // artwork owns the screen. Opening it is how the learner asks for more.
+  const [open, setOpen] = useState(false)
 
   const index = lessons.indexOf(lesson)
   const alreadyDone = !!progress[lesson.id]
@@ -42,6 +45,11 @@ export function LessonScreen({ lesson, onBack, onGoto, onReview, onFinish }: Pro
   useEffect(() => {
     if (solved && step === 'do') setStep('learn')
   }, [solved, step])
+
+  // The learn step is nothing but explanation, so the sheet opens itself.
+  useEffect(() => {
+    if (step === 'learn') setOpen(true)
+  }, [step])
 
   const runAction = (action: LessonAction) => {
     const input = rive
@@ -90,7 +98,17 @@ export function LessonScreen({ lesson, onBack, onGoto, onReview, onFinish }: Pro
         />
       </div>
 
-      <div className="sheet">
+      <div className={`sheet ${open ? 'is-open' : ''}`.trim()}>
+        <button
+          type="button"
+          className="sheet__grab"
+          onClick={() => setOpen((o) => !o)}
+          aria-expanded={open}
+          aria-label={open ? 'Hide details' : 'More details'}
+        >
+          <span className="sheet__handle" aria-hidden="true" />
+        </button>
+
         <nav className="steps" aria-label="Lesson steps">
           {steps.map((s, i) => (
             <button
@@ -104,16 +122,39 @@ export function LessonScreen({ lesson, onBack, onGoto, onReview, onFinish }: Pro
               onClick={() => setStep(s)}
             />
           ))}
-          <span className="steps__label">
-            {step === 'watch' ? 'Find it' : step === 'do' ? 'Try it' : 'Why it works'}
-          </span>
+          {step === 'learn' ? (
+            <span className="steps__label">Why it works</span>
+          ) : (
+            <button
+              type="button"
+              className="steps__more"
+              onClick={() => setOpen((o) => !o)}
+              aria-expanded={open}
+            >
+              {step === 'watch' ? 'Find it' : 'Try it'}
+              <svg viewBox="0 0 12 12" width="11" height="11" aria-hidden="true">
+                <path
+                  d="M2.5 7.5 L6 4 L9.5 7.5"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </button>
+          )}
         </nav>
 
         <div className="sheet__scroll">
           {step === 'watch' && (
             <>
               <p className="step__lead">{lesson.watch}</p>
-              <Instruments readouts={lesson.readouts} values={values} />
+              {open && (
+                <div className="sheet__detail">
+                  <Instruments readouts={lesson.readouts} values={values} />
+                </div>
+              )}
               <div className="sheet__foot">
                 <button
                   type="button"
@@ -150,7 +191,11 @@ export function LessonScreen({ lesson, onBack, onGoto, onReview, onFinish }: Pro
                 </div>
               )}
 
-              <Instruments readouts={lesson.readouts} values={values} />
+              {open && (
+                <div className="sheet__detail">
+                  <Instruments readouts={lesson.readouts} values={values} />
+                </div>
+              )}
 
               {lesson.checkpoint && (
                 <div className="hintrow">
