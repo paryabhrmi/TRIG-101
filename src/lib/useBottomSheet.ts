@@ -35,6 +35,7 @@ function safeAreaBottom(el: HTMLElement) {
 
 export function useBottomSheet(open: boolean, setOpen: (open: boolean) => void) {
   const sheetRef = useRef<HTMLDivElement>(null)
+  const scrimRef = useRef<HTMLDivElement>(null)
   const [dragging, setDragging] = useState(false)
 
   const drag = useRef<{
@@ -111,6 +112,12 @@ export function useBottomSheet(open: boolean, setOpen: (open: boolean) => void) 
     // Dragging up (negative delta) grows the sheet; dragging down shrinks it.
     const next = Math.min(d.open, Math.max(d.peek, d.startHeight - delta))
     el.style.height = `${next}px`
+
+    // The backdrop darkens in lockstep with how open the sheet is, not just
+    // at the two endpoints — that's what makes a mid-drag feel connected to
+    // the sheet instead of the scrim just snapping in afterwards.
+    const scrim = scrimRef.current
+    if (scrim) scrim.style.opacity = String((next - d.peek) / (d.open - d.peek))
   }, [])
 
   const onPointerUp = useCallback(
@@ -138,12 +145,14 @@ export function useBottomSheet(open: boolean, setOpen: (open: boolean) => void) 
       }, 300)
 
       // Animate to the exact target in px so the motion is continuous with
-      // the drag that just ended, then hand height back to the CSS class
-      // once the transition settles so a later resize keeps tracking it.
+      // the drag that just ended, then hand both back to their CSS classes
+      // once the transition settles so a later resize keeps tracking them.
       el.style.height = `${shouldOpen ? d.open : d.peek}px`
+      if (scrimRef.current) scrimRef.current.style.opacity = shouldOpen ? '1' : '0'
       setOpen(shouldOpen)
       window.setTimeout(() => {
         if (sheetRef.current) sheetRef.current.style.height = ''
+        if (scrimRef.current) scrimRef.current.style.opacity = ''
       }, 380)
     },
     [setOpen],
@@ -161,10 +170,16 @@ export function useBottomSheet(open: boolean, setOpen: (open: boolean) => void) 
     setOpen(!open)
   }, [open, setOpen])
 
+  // Tapping the dimmed backdrop is the expected way to back out of the open
+  // sheet without hunting for the handle.
+  const collapse = useCallback(() => setOpen(false), [setOpen])
+
   return {
     sheetRef,
+    scrimRef,
     dragging,
     toggle,
+    collapse,
     dragHandleProps: {
       onPointerDown,
       onPointerMove,
