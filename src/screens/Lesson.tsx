@@ -140,40 +140,44 @@ export function LessonScreen({ lesson, onBack, onGoto, onReview, onFinish }: Pro
         </button>
 
         <nav className="steps" aria-label="Lesson steps">
-          {steps.map((s, i) => (
-            <button
-              key={s}
-              type="button"
-              className={`steps__dot ${i === stepIndex ? 'is-current' : ''} ${
-                i < stepIndex || (s === 'do' && solved) ? 'is-done' : ''
-              }`.trim()}
-              aria-current={i === stepIndex}
-              aria-label={`Step ${i + 1}: ${s}`}
-              onClick={() => setStep(s)}
-            />
-          ))}
-          {step === 'learn' ? (
-            <span className="steps__label">Why it works</span>
-          ) : (
-            <button
-              type="button"
-              className="steps__more"
-              onClick={() => setOpen((o) => !o)}
-              aria-expanded={open}
-            >
-              {step === 'watch' ? 'Find it' : 'Try it'}
-              <svg viewBox="0 0 12 12" width="11" height="11" aria-hidden="true">
-                <path
-                  d="M2.5 7.5 L6 4 L9.5 7.5"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </button>
-          )}
+          {steps.map((s, i) => {
+            const current = i === stepIndex
+            const doneStep = i < stepIndex || (s === 'do' && solved)
+            const name = s === 'watch' ? 'Find it' : s === 'do' ? 'Try it' : 'Why it works'
+            return (
+              <button
+                key={s}
+                type="button"
+                className={`steps__seg ${current ? 'is-current' : ''} ${
+                  doneStep ? 'is-done' : ''
+                }`.trim()}
+                aria-current={current}
+                aria-label={`Step ${i + 1}: ${name}`}
+                onClick={() => setStep(s)}
+              >
+                <span className="steps__dot" aria-hidden="true" />
+                {current && <span className="steps__name">{name}</span>}
+              </button>
+            )
+          })}
+          <button
+            type="button"
+            className="steps__more"
+            onClick={() => setOpen((o) => !o)}
+            aria-expanded={open}
+            aria-label={open ? 'Hide details' : 'More details'}
+          >
+            <svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true">
+              <path
+                d="M2.5 7.5 L6 4 L9.5 7.5"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </button>
         </nav>
 
         <div className="sheet__scroll">
