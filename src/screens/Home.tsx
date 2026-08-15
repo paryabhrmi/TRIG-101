@@ -15,6 +15,10 @@ const tone = (chapterId: number) => TONES[(chapterId - 1) % TONES.length]
 export function Home({ onOpen, onReview, onAbout }: Props) {
   const { progress } = useProgress()
 
+  // The one lesson the course would hand you next — flagged so the index
+  // always answers "where do I go?" at a glance.
+  const nextUp = lessons.find((l) => !progress[l.id])?.id
+
   return (
     <div className="screen home">
       <header className="duohead">
@@ -39,17 +43,21 @@ export function Home({ onOpen, onReview, onAbout }: Props) {
               <ul className="group">
                 {ready.map((lesson, i) => {
                   const done = !!progress[lesson.id]
+                  const isNext = lesson.id === nextUp
                   return (
                     <li key={lesson.id}>
                       <button
                         type="button"
-                        className={`row ${done ? 'is-done' : ''}`.trim()}
+                        className={`row ${done ? 'is-done' : ''} ${
+                          isNext ? 'row--next' : ''
+                        }`.trim()}
                         onClick={() => onOpen(lesson.id)}
                       >
                         <span className="row__key" aria-hidden="true">
                           {done ? '✓' : String(i + 1).padStart(2, '0')}
                         </span>
                         <span className="row__title">{lesson.title}</span>
+                        {isNext && <span className="row__next">Start</span>}
                       </button>
                     </li>
                   )

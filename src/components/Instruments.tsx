@@ -8,8 +8,8 @@ interface Props {
 /**
  * The live numeric mirror of whatever the learner is dragging on the canvas.
  *
- * Each tile copies the SOH CAH TOA cards in the Rive file: a solid accent
- * header over a tinted body.
+ * The tiles stay visually quiet — the accent lives only in the label, which
+ * matches it to the coloured side it mirrors on the canvas above.
  */
 export function Instruments({ readouts, values }: Props) {
   if (!readouts.length) return null
