@@ -3,6 +3,7 @@ import { AppBar } from '../components/AppBar'
 import { Instruments } from '../components/Instruments'
 import { RiveStage } from '../components/RiveStage'
 import { TOTAL_LESSONS, lessons, nextStop, slotNumber } from '../data/curriculum'
+import { useBottomSheet } from '../lib/useBottomSheet'
 import { useProgress } from '../lib/progress'
 import { useInstruments } from '../lib/useInstruments'
 import type { Rive } from '@rive-app/react-webgl'
@@ -33,6 +34,7 @@ export function LessonScreen({ lesson, onBack, onGoto, onReview, onFinish }: Pro
   // except where the instructions point at the readouts themselves.
   const [open, setOpen] = useState(!!lesson.detailFirst)
   const [celebrate, setCelebrate] = useState(false)
+  const { sheetRef, dragging, toggle, dragHandleProps } = useBottomSheet(open, setOpen)
 
   const index = lessons.indexOf(lesson)
   const alreadyDone = !!progress[lesson.id]
@@ -93,6 +95,13 @@ export function LessonScreen({ lesson, onBack, onGoto, onReview, onFinish }: Pro
   const steps: Step[] = ['watch', 'do', 'learn']
   const stepIndex = steps.indexOf(step)
 
+  // Each step starts reading from the top; leftover scroll from the previous
+  // step would leave the lead sentence hidden above the fold.
+  const scrollRef = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    scrollRef.current?.scrollTo({ top: 0 })
+  }, [step])
+
   const goNext = () => {
     if (after?.kind === 'lesson') onGoto(after.id)
     else if (after?.kind === 'review') onReview(after.chapter)
@@ -128,13 +137,17 @@ export function LessonScreen({ lesson, onBack, onGoto, onReview, onFinish }: Pro
         )}
       </div>
 
-      <div className={`sheet ${open ? 'is-open' : ''}`.trim()}>
+      <div
+        ref={sheetRef}
+        className={`sheet ${open ? 'is-open' : ''} ${dragging ? 'is-dragging' : ''}`.trim()}
+      >
         <button
           type="button"
           className="sheet__grab"
-          onClick={() => setOpen((o) => !o)}
+          onClick={toggle}
           aria-expanded={open}
           aria-label={open ? 'Hide details' : 'More details'}
+          {...dragHandleProps}
         >
           <span className="sheet__handle" aria-hidden="true" />
         </button>
@@ -180,23 +193,15 @@ export function LessonScreen({ lesson, onBack, onGoto, onReview, onFinish }: Pro
           </button>
         </nav>
 
-        <div className="sheet__scroll">
+        <div className="sheet__scroll" ref={scrollRef}>
           {step === 'watch' && (
             <>
               <p className="step__lead">{lesson.watch}</p>
-              {open && (
-                <div className="sheet__detail">
-                  <Instruments readouts={lesson.readouts} values={values} />
-                </div>
-              )}
-              <div className="sheet__foot">
-                <button
-                  type="button"
-                  className="btn btn--primary btn--wide"
-                  onClick={() => setStep('do')}
-                >
-                  Got it — give me a task
-                </button>
+              {/* Always in the tree: closed, it peeks below the fold (and is
+                  reachable by scroll); open, the extra height reveals it. The
+                  toggle therefore always has a visible effect. */}
+              <div className="sheet__detail">
+                <Instruments readouts={lesson.readouts} values={values} />
               </div>
             </>
           )}
@@ -225,34 +230,9 @@ export function LessonScreen({ lesson, onBack, onGoto, onReview, onFinish }: Pro
                 </div>
               )}
 
-              {open && (
-                <div className="sheet__detail">
-                  <Instruments readouts={lesson.readouts} values={values} />
-                </div>
-              )}
-
-              {lesson.checkpoint && (
-                <div className="hintrow">
-                  {showHint ? (
-                    <p className="step__hint">{lesson.checkpoint.hint}</p>
-                  ) : (
-                    <button
-                      type="button"
-                      className="linkish"
-                      onClick={() => setShowHint(true)}
-                    >
-                      Need a hint?
-                    </button>
-                  )}
-                  <button
-                    type="button"
-                    className="linkish linkish--quiet"
-                    onClick={() => setStep('learn')}
-                  >
-                    Skip
-                  </button>
-                </div>
-              )}
+              <div className="sheet__detail">
+                <Instruments readouts={lesson.readouts} values={values} />
+              </div>
             </>
           )}
 
@@ -268,22 +248,64 @@ export function LessonScreen({ lesson, onBack, onGoto, onReview, onFinish }: Pro
                   <p key={i}>{para}</p>
                 ))}
               </div>
-              <div className="sheet__foot">
-                <button
-                  type="button"
-                  className="btn btn--primary btn--wide"
-                  onClick={goNext}
-                >
-                  {after?.kind === 'review'
-                    ? 'Chapter review'
-                    : after?.kind === 'lesson'
-                      ? 'Next lesson'
-                      : 'Finish the course'}
-                </button>
-              </div>
             </>
           )}
         </div>
+
+        {/* Footers live outside the scroll area so the step's one call to
+            action is always on screen, whatever the scroll position. */}
+        {step === 'watch' && (
+          <div className="sheet__foot sheet__foot--pinned">
+            <button
+              type="button"
+              className="btn btn--primary btn--wide"
+              onClick={() => setStep('do')}
+            >
+              Got it — give me a task
+            </button>
+          </div>
+        )}
+
+        {step === 'do' && lesson.checkpoint && (
+          <div className="sheet__foot sheet__foot--pinned">
+            <div className="hintrow">
+              {showHint ? (
+                <p className="step__hint">{lesson.checkpoint.hint}</p>
+              ) : (
+                <button
+                  type="button"
+                  className="linkish"
+                  onClick={() => setShowHint(true)}
+                >
+                  Need a hint?
+                </button>
+              )}
+              <button
+                type="button"
+                className="linkish linkish--quiet"
+                onClick={() => setStep('learn')}
+              >
+                Skip
+              </button>
+            </div>
+          </div>
+        )}
+
+        {step === 'learn' && (
+          <div className="sheet__foot sheet__foot--pinned">
+            <button
+              type="button"
+              className="btn btn--primary btn--wide"
+              onClick={goNext}
+            >
+              {after?.kind === 'review'
+                ? 'Chapter review'
+                : after?.kind === 'lesson'
+                  ? 'Next lesson'
+                  : 'Finish the course'}
+            </button>
+          </div>
+        )}
       </div>
     </div>
   )

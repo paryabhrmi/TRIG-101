@@ -562,11 +562,11 @@
    Lesson — full-bleed stage with the sheet rising over it
    =========================================================================== */
 
-/* The stage takes whatever the sheet does not. That is the point of the
-   stepped flow: a short step leaves more room, so the artwork grows instead
-   of the empty space. Fit.Contain never crops, so a smaller box only ever means
-   smaller artwork — never a hidden slider. The padding is the strip the sheet
-   overlaps, kept outside the canvas box. */
+/* The stage fills every pixel below the AppBar, always — the sheet floats
+   over it as a separate layer (see below), so nothing the sheet does ever
+   feeds back into the stage's box size. The artwork's frame is therefore
+   fixed for the lifetime of the screen: opening, closing, or dragging the
+   sheet never resizes or repositions the Rive canvas underneath it. */
 .lesson__stage {
   position: relative;
   z-index: 1;
@@ -577,25 +577,38 @@
   display: flex;
 }
 
-/* The sheet overlaps that padding strip so the two read as one composition
-   rather than two stacked boxes. It starts as a slim peek — the instruction
-   and its button — and opens on demand for readouts and explanation, so the
-   artwork keeps the screen by default. It is sized by its step's content,
-   capped so the longest step still leaves the artwork usable. */
+/* A true overlay sheet, positioned against the screen rather than sized by
+   flex layout — the standard native pattern (iOS/Android/Maps), and the
+   only way to guarantee the stage above never reacts to it. It is
+   bottom-anchored, so growing it only ever moves its own top edge; it
+   snaps between a slim peek and an open height, both reachable by drag as
+   well as tap, and settles with a spring-like ease rather than a linear one.
+   `--sheet-peek-h` / `--sheet-open-h` are computed in JS off the live
+   viewport (see useBottomSheet) so drag math and the CSS agree exactly;
+   the px fallback only matters before that first effect runs. */
 .sheet {
-  position: relative;
+  position: absolute;
   z-index: 2;
-  flex: 0 1 auto;
-  min-height: 0;
-  max-height: min(56dvh, 470px);
+  inset: auto 0 0 0;
+  height: var(--sheet-peek-h, 240px);
   display: flex;
   flex-direction: column;
-  margin-top: calc(-1 * var(--sheet-overlap));
   background: var(--paper);
   border-radius: var(--r-xl) var(--r-xl) 0 0;
   box-shadow: var(--lift-3);
   /* Without this, scrolled content shows through the rounded top corners. */
   overflow: hidden;
+  transition: height 0.38s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.sheet.is-open {
+  height: var(--sheet-open-h, 440px);
+}
+
+/* Mid-drag the sheet tracks the pointer directly (inline height, set in
+   JS) — a CSS transition fighting that input would feel laggy. */
+.sheet.is-dragging {
+  transition: none;
 }
 
 .sheet__scroll {
@@ -604,16 +617,24 @@
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
-  padding: 12px var(--gut) calc(20px + var(--safe-b));
+  touch-action: pan-y;
+  padding: 12px var(--gut) 16px;
 }
 
-/* The universal bottom-sheet affordance: a grabber that toggles the sheet. */
+/* A step with no pinned footer lets the scroll area own the safe area. */
+.sheet__scroll:last-child {
+  padding-bottom: calc(20px + var(--safe-b));
+}
+
+/* The universal bottom-sheet affordance: a grabber that toggles the sheet
+   on tap and resizes it on drag. */
 .sheet__grab {
   flex: 0 0 auto;
   display: grid;
   place-items: center;
   width: 100%;
   padding: 8px 0 2px;
+  touch-action: none;
 }
 
 .sheet__handle {
@@ -631,6 +652,13 @@
 /* Detail content slides in as the sheet opens instead of just appearing. */
 .sheet__detail {
   animation: detail-in 0.3s var(--ease);
+}
+
+/* Peeked, the sheet shows only its lead line and pinned action — the
+   readouts stay for the open state, so the grab/chevron always has a real,
+   visible reveal to perform instead of an ambiguous scroll-to-find. */
+.sheet:not(.is-open) .sheet__detail {
+  display: none;
 }
 
 @keyframes detail-in {
@@ -989,6 +1017,20 @@
 
 .sheet__foot {
   padding-top: 20px;
+}
+
+/* Pinned variant: sits after the scroll area so the step's call to action
+   never leaves the screen. The hairline separates it from content sliding
+   underneath without adding visual weight. */
+.sheet__foot--pinned {
+  flex: 0 0 auto;
+  padding: 12px var(--gut) calc(16px + var(--safe-b));
+  border-top: 1px solid var(--line);
+  background: var(--paper);
+}
+
+.sheet__foot--pinned .hintrow {
+  padding-top: 0;
 }
 
 /* ===========================================================================
@@ -1462,9 +1504,13 @@
     min-height: 0;
   }
 
-  .lesson .sheet {
+  .lesson .sheet,
+  .lesson .sheet.is-open {
+    /* A side panel is a normal grid cell, not a floating overlay — the
+       peek/open drag is a portrait affair. */
+    position: static;
     grid-column: 2;
-    margin-top: 0;
+    height: auto;
     border-radius: var(--r-xl) 0 0 0;
     box-shadow: -14px 0 34px -22px rgba(20, 26, 70, 0.35);
   }
