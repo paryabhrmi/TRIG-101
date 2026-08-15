@@ -501,6 +501,43 @@
   white-space: nowrap;
 }
 
+/* The next lesson wears the chapter accent and a Start tag, so the index
+   always answers "where do I go?" without reading every row. */
+.row--next .row__key {
+  background: var(--tone);
+  border-color: var(--tone-dark);
+  color: #ffffff;
+}
+
+.row__next {
+  flex: 0 0 auto;
+  padding: 4px 10px;
+  border-radius: var(--r-pill);
+  background: var(--tone);
+  box-shadow: 0 2px 0 var(--tone-dark);
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  animation: next-nudge 2.2s var(--ease) infinite;
+}
+
+@keyframes next-nudge {
+  0%,
+  70%,
+  100% {
+    transform: none;
+  }
+  78% {
+    transform: translateY(-2px);
+  }
+  86% {
+    transform: translateY(1px);
+  }
+}
+
 /* The review row is the chapter's accent, edge to edge. */
 .row--review {
   background: var(--tone);
@@ -608,6 +645,119 @@
 }
 
 /* ---------------------------------------------------------------------------
+   Solve burst — a dozen accent-coloured flecks thrown from where the sheet
+   meets the artwork, once, the moment a checkpoint is first cracked.
+   --------------------------------------------------------------------------- */
+
+.burst {
+  position: absolute;
+  left: 50%;
+  bottom: calc(var(--sheet-overlap) + 10px);
+  z-index: 2;
+  pointer-events: none;
+}
+
+.burst i {
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  border-radius: 2px;
+  opacity: 0;
+  /* var(--ease) front-loads so hard the flecks die in ~200ms; a plain
+     ease-out keeps them airborne long enough to register. */
+  animation: burst-fly 1.1s ease-out forwards;
+}
+
+@keyframes burst-fly {
+  0% {
+    opacity: 1;
+    transform: translate(0, 0) rotate(0deg) scale(1);
+  }
+  65% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--fx), var(--fy)) rotate(240deg) scale(0.5);
+  }
+}
+
+.burst i:nth-child(6n + 1) {
+  background: var(--blue);
+}
+.burst i:nth-child(6n + 2) {
+  background: var(--amber);
+}
+.burst i:nth-child(6n + 3) {
+  background: var(--mint);
+}
+.burst i:nth-child(6n + 4) {
+  background: var(--rose);
+}
+.burst i:nth-child(6n + 5) {
+  background: var(--violet);
+}
+.burst i:nth-child(6n + 6) {
+  background: var(--cyan);
+}
+
+.burst i:nth-child(1) {
+  --fx: -120px;
+  --fy: -150px;
+}
+.burst i:nth-child(2) {
+  --fx: -80px;
+  --fy: -210px;
+}
+.burst i:nth-child(3) {
+  --fx: -40px;
+  --fy: -170px;
+  animation-delay: 0.05s;
+}
+.burst i:nth-child(4) {
+  --fx: 0px;
+  --fy: -230px;
+}
+.burst i:nth-child(5) {
+  --fx: 40px;
+  --fy: -180px;
+  animation-delay: 0.07s;
+}
+.burst i:nth-child(6) {
+  --fx: 85px;
+  --fy: -215px;
+}
+.burst i:nth-child(7) {
+  --fx: 125px;
+  --fy: -150px;
+  animation-delay: 0.04s;
+}
+.burst i:nth-child(8) {
+  --fx: -150px;
+  --fy: -90px;
+}
+.burst i:nth-child(9) {
+  --fx: 155px;
+  --fy: -85px;
+  animation-delay: 0.06s;
+}
+.burst i:nth-child(10) {
+  --fx: -60px;
+  --fy: -120px;
+  animation-delay: 0.09s;
+}
+.burst i:nth-child(11) {
+  --fx: 60px;
+  --fy: -125px;
+  animation-delay: 0.03s;
+}
+.burst i:nth-child(12) {
+  --fx: 0px;
+  --fy: -160px;
+  animation-delay: 0.11s;
+}
+
+/* ---------------------------------------------------------------------------
    Stepped lesson: find it → try it → why it works. One step at a time keeps
    the sheet short, which is what gives the canvas its height back.
    --------------------------------------------------------------------------- */
@@ -683,6 +833,8 @@
   font-weight: 600;
   line-height: 1.5;
   color: var(--ink-2);
+  /* Hints can appear unasked (stuck detection), so they ease in. */
+  animation: detail-in 0.3s var(--ease);
 }
 
 .step__win {
