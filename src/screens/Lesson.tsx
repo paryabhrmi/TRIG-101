@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { AppBar } from '../components/AppBar'
 import { Instruments } from '../components/Instruments'
 import { RiveStage } from '../components/RiveStage'
@@ -19,12 +19,20 @@ interface Props {
 /** Watch what to touch → do the task → read why it happened. */
 type Step = 'watch' | 'do' | 'learn'
 
+/** How long the task step may sit unsolved before the hint offers itself. */
+const STUCK_MS = 20_000
+
 export function LessonScreen({ lesson, onBack, onGoto, onReview, onFinish }: Props) {
   const { progress, complete } = useProgress()
   const [rive, setRive] = useState<Rive | null>(null)
   const [toggles, setToggles] = useState<Record<string, boolean>>({})
   const [step, setStep] = useState<Step>('watch')
   const [showHint, setShowHint] = useState(false)
+  // The sheet starts as a slim peek — one instruction and its button — so the
+  // artwork owns the screen. Opening it is how the learner asks for more,
+  // except where the instructions point at the readouts themselves.
+  const [open, setOpen] = useState(!!lesson.detailFirst)
+  const [celebrate, setCelebrate] = useState(false)
 
   const index = lessons.indexOf(lesson)
   const alreadyDone = !!progress[lesson.id]
@@ -42,6 +50,29 @@ export function LessonScreen({ lesson, onBack, onGoto, onReview, onFinish }: Pro
   useEffect(() => {
     if (solved && step === 'do') setStep('learn')
   }, [solved, step])
+
+  // The learn step is nothing but explanation, so the sheet opens itself.
+  useEffect(() => {
+    if (step === 'learn') setOpen(true)
+  }, [step])
+
+  // A learner who sits on the task without progress should not have to admit
+  // defeat to get help — after a while the hint surfaces on its own.
+  useEffect(() => {
+    if (step !== 'do' || solved || showHint || !lesson.checkpoint) return
+    const id = window.setTimeout(() => setShowHint(true), STUCK_MS)
+    return () => window.clearTimeout(id)
+  }, [step, solved, showHint, lesson.checkpoint])
+
+  // One short burst the first time this lesson is cracked — never on revisit.
+  const celebratedRef = useRef(alreadyDone)
+  useEffect(() => {
+    if (!solved || celebratedRef.current) return
+    celebratedRef.current = true
+    setCelebrate(true)
+    const id = window.setTimeout(() => setCelebrate(false), 1400)
+    return () => window.clearTimeout(id)
+  }, [solved])
 
   const runAction = (action: LessonAction) => {
     const input = rive
@@ -74,13 +105,7 @@ export function LessonScreen({ lesson, onBack, onGoto, onReview, onFinish }: Pro
         onBack={onBack}
         subtitle={`Lesson ${n} of ${TOTAL_LESSONS}`}
         title={lesson.title}
-        right={
-          solved ? (
-            <span className="pill pill--done">Done</span>
-          ) : (
-            <span className="pill">{String(n).padStart(2, '0')}</span>
-          )
-        }
+        right={solved ? <span className="pill pill--done">Done</span> : undefined}
         progress={(index + (solved ? 1 : 0)) / lessons.length}
       />
 
@@ -94,32 +119,76 @@ export function LessonScreen({ lesson, onBack, onGoto, onReview, onFinish }: Pro
           bindViewModel={lesson.bindViewModel}
           onReady={setRive}
         />
+        {celebrate && (
+          <div className="burst" aria-hidden="true">
+            {Array.from({ length: 12 }, (_, i) => (
+              <i key={i} />
+            ))}
+          </div>
+        )}
       </div>
 
-      <div className="sheet">
+      <div className={`sheet ${open ? 'is-open' : ''}`.trim()}>
+        <button
+          type="button"
+          className="sheet__grab"
+          onClick={() => setOpen((o) => !o)}
+          aria-expanded={open}
+          aria-label={open ? 'Hide details' : 'More details'}
+        >
+          <span className="sheet__handle" aria-hidden="true" />
+        </button>
+
         <nav className="steps" aria-label="Lesson steps">
-          {steps.map((s, i) => (
-            <button
-              key={s}
-              type="button"
-              className={`steps__dot ${i === stepIndex ? 'is-current' : ''} ${
-                i < stepIndex || (s === 'do' && solved) ? 'is-done' : ''
-              }`.trim()}
-              aria-current={i === stepIndex}
-              aria-label={`Step ${i + 1}: ${s}`}
-              onClick={() => setStep(s)}
-            />
-          ))}
-          <span className="steps__label">
-            {step === 'watch' ? 'Find it' : step === 'do' ? 'Try it' : 'Why it works'}
-          </span>
+          {steps.map((s, i) => {
+            const current = i === stepIndex
+            const doneStep = i < stepIndex || (s === 'do' && solved)
+            const name = s === 'watch' ? 'Find it' : s === 'do' ? 'Try it' : 'Why it works'
+            return (
+              <button
+                key={s}
+                type="button"
+                className={`steps__seg ${current ? 'is-current' : ''} ${
+                  doneStep ? 'is-done' : ''
+                }`.trim()}
+                aria-current={current}
+                aria-label={`Step ${i + 1}: ${name}`}
+                onClick={() => setStep(s)}
+              >
+                <span className="steps__dot" aria-hidden="true" />
+                {current && <span className="steps__name">{name}</span>}
+              </button>
+            )
+          })}
+          <button
+            type="button"
+            className="steps__more"
+            onClick={() => setOpen((o) => !o)}
+            aria-expanded={open}
+            aria-label={open ? 'Hide details' : 'More details'}
+          >
+            <svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true">
+              <path
+                d="M2.5 7.5 L6 4 L9.5 7.5"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </button>
         </nav>
 
         <div className="sheet__scroll">
           {step === 'watch' && (
             <>
               <p className="step__lead">{lesson.watch}</p>
-              <Instruments readouts={lesson.readouts} values={values} />
+              {open && (
+                <div className="sheet__detail">
+                  <Instruments readouts={lesson.readouts} values={values} />
+                </div>
+              )}
               <div className="sheet__foot">
                 <button
                   type="button"
@@ -156,7 +225,11 @@ export function LessonScreen({ lesson, onBack, onGoto, onReview, onFinish }: Pro
                 </div>
               )}
 
-              <Instruments readouts={lesson.readouts} values={values} />
+              {open && (
+                <div className="sheet__detail">
+                  <Instruments readouts={lesson.readouts} values={values} />
+                </div>
+              )}
 
               {lesson.checkpoint && (
                 <div className="hintrow">
