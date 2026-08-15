@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { AppBar } from '../components/AppBar'
 import { Instruments } from '../components/Instruments'
 import { RiveStage } from '../components/RiveStage'
@@ -19,6 +19,9 @@ interface Props {
 /** Watch what to touch → do the task → read why it happened. */
 type Step = 'watch' | 'do' | 'learn'
 
+/** How long the task step may sit unsolved before the hint offers itself. */
+const STUCK_MS = 20_000
+
 export function LessonScreen({ lesson, onBack, onGoto, onReview, onFinish }: Props) {
   const { progress, complete } = useProgress()
   const [rive, setRive] = useState<Rive | null>(null)
@@ -26,8 +29,10 @@ export function LessonScreen({ lesson, onBack, onGoto, onReview, onFinish }: Pro
   const [step, setStep] = useState<Step>('watch')
   const [showHint, setShowHint] = useState(false)
   // The sheet starts as a slim peek — one instruction and its button — so the
-  // artwork owns the screen. Opening it is how the learner asks for more.
-  const [open, setOpen] = useState(false)
+  // artwork owns the screen. Opening it is how the learner asks for more,
+  // except where the instructions point at the readouts themselves.
+  const [open, setOpen] = useState(!!lesson.detailFirst)
+  const [celebrate, setCelebrate] = useState(false)
 
   const index = lessons.indexOf(lesson)
   const alreadyDone = !!progress[lesson.id]
@@ -50,6 +55,24 @@ export function LessonScreen({ lesson, onBack, onGoto, onReview, onFinish }: Pro
   useEffect(() => {
     if (step === 'learn') setOpen(true)
   }, [step])
+
+  // A learner who sits on the task without progress should not have to admit
+  // defeat to get help — after a while the hint surfaces on its own.
+  useEffect(() => {
+    if (step !== 'do' || solved || showHint || !lesson.checkpoint) return
+    const id = window.setTimeout(() => setShowHint(true), STUCK_MS)
+    return () => window.clearTimeout(id)
+  }, [step, solved, showHint, lesson.checkpoint])
+
+  // One short burst the first time this lesson is cracked — never on revisit.
+  const celebratedRef = useRef(alreadyDone)
+  useEffect(() => {
+    if (!solved || celebratedRef.current) return
+    celebratedRef.current = true
+    setCelebrate(true)
+    const id = window.setTimeout(() => setCelebrate(false), 1400)
+    return () => window.clearTimeout(id)
+  }, [solved])
 
   const runAction = (action: LessonAction) => {
     const input = rive
@@ -96,6 +119,13 @@ export function LessonScreen({ lesson, onBack, onGoto, onReview, onFinish }: Pro
           bindViewModel={lesson.bindViewModel}
           onReady={setRive}
         />
+        {celebrate && (
+          <div className="burst" aria-hidden="true">
+            {Array.from({ length: 12 }, (_, i) => (
+              <i key={i} />
+            ))}
+          </div>
+        )}
       </div>
 
       <div className={`sheet ${open ? 'is-open' : ''}`.trim()}>

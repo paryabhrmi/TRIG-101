@@ -68,6 +68,12 @@ export interface Lesson {
   checkpoint?: Checkpoint
   /** Boolean state-machine inputs to mirror into `Sample.b`. */
   watchInputs?: string[]
+  /**
+   * Open the sheet's detail pane from the start. Set on lessons whose
+   * instructions point at the readout panel — hiding what the text refers to
+   * would break the link between instruction and referent.
+   */
+  detailFirst?: boolean
 }
 
 /**
@@ -92,6 +98,8 @@ export interface Question {
   answer: number
   /** Shown after answering, right or wrong. Teaches, never just confirms. */
   explain: string
+  /** The lesson to revisit when this is missed — remediation in one tap. */
+  lesson?: string
 }
 
 export interface Chapter {
@@ -139,6 +147,7 @@ export const chapters: Chapter[] = [
         answer: 1,
         explain:
           'Sine is opposite over hypotenuse. The opposite side is 4, and the hypotenuse — always the longest — is 5.',
+        lesson: 'soh-cah-toa',
       },
       {
         prompt: 'You double the length of every side. What happens to cos θ?',
@@ -146,6 +155,7 @@ export const chapters: Chapter[] = [
         answer: 2,
         explain:
           'Both sides in the ratio grew by the same factor, so the fraction is untouched. Ratios track shape, not size.',
+        lesson: 'ratio',
       },
       {
         prompt: 'Why does tan θ have no value at exactly 90°?',
@@ -158,6 +168,7 @@ export const chapters: Chapter[] = [
         answer: 1,
         explain:
           'tan θ is opposite ÷ adjacent. At 90° the adjacent side has collapsed to nothing, and the division is undefined.',
+        lesson: 'soh-cah-toa',
       },
     ],
   },
@@ -177,6 +188,7 @@ export const chapters: Chapter[] = [
         answer: 1,
         explain:
           'That is the whole definition, and it is why a half turn is π radians: a little over three radii laid around the rim.',
+        lesson: 'radians',
       },
       {
         prompt: 'At which of these angles is cos θ negative?',
@@ -184,12 +196,14 @@ export const chapters: Chapter[] = [
         answer: 3,
         explain:
           'Past 90° the adjacent side points backwards, so cosine goes negative — a reading a right triangle cannot produce.',
+        lesson: 'unit-circle',
       },
       {
         prompt: 'A half turn is how many radians?',
         options: ['π/2', 'π', '2π', '180'],
         answer: 1,
         explain: 'A full turn is 2π, so half of it is π — roughly 3.14 radians.',
+        lesson: 'radians',
       },
     ],
   },
@@ -204,6 +218,7 @@ export const chapters: Chapter[] = [
         answer: 2,
         explain:
           'One full turn of the circle is one full cycle of the wave. That repeat is what periodic means.',
+        lesson: 'sine-wave',
       },
       {
         prompt: 'In y = A·sin(Bθ), what does raising B do?',
@@ -216,6 +231,7 @@ export const chapters: Chapter[] = [
         answer: 1,
         explain:
           'A sets the height, B sets how many cycles fit. Louder versus higher-pitched, if the wave is a sound.',
+        lesson: 'amplitude-frequency',
       },
       {
         prompt: 'How does the cosine wave differ from the sine wave?',
@@ -228,6 +244,7 @@ export const chapters: Chapter[] = [
         answer: 2,
         explain:
           'Same shape, same period, started a quarter turn early: cos θ = sin(θ + π/2). That offset is a phase shift.',
+        lesson: 'cosine-wave',
       },
     ],
   },
@@ -299,6 +316,8 @@ export const lessons: Lesson[] = [
     stage: 'paper',
     bindViewModel: true,
     chapter: 1,
+    // "Watch the panel" refers to the ratio readouts — keep them in view.
+    detailFirst: true,
     title: 'Shape, not size',
     tagline: 'Blow the triangle up. The ratios refuse to change.',
     watch:
@@ -414,6 +433,8 @@ export const lessons: Lesson[] = [
     stage: 'paper',
     bindViewModel: true,
     chapter: 2,
+    // The checkpoint asks for "the radian readout" — it must be visible.
+    detailFirst: true,
     title: 'Radians',
     tagline: 'A degree is a convention. A radian is a measurement.',
     watch:
@@ -456,6 +477,8 @@ export const lessons: Lesson[] = [
     stage: 'navy',
     bindViewModel: true,
     chapter: 2,
+    // "Watch Opp and Adj" and the checkpoint's "Adj readout" live in the panel.
+    detailFirst: true,
     title: 'The unit circle',
     tagline: 'Trigonometry escapes the triangle.',
     watch:
