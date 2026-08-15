@@ -562,21 +562,40 @@
    Lesson — full-bleed stage with the sheet rising over it
    =========================================================================== */
 
-/* The interactive frame is fixed, and that is the whole point: the artboards
-   carry their own sliders and toggles, so a stage that resized with the sheet
-   would rescale and re-place every control under the learner's finger. The
-   stage takes what the dock leaves, and because the dock is a constant strip,
-   what it leaves never changes — same frame in every lesson, on every step,
-   open or closed. The padding is the strip the sheet overlaps, kept outside
-   the canvas box. */
+/* The region between the app bar and the sheet: the frame, then the gap that
+   runs down to the sheet. It holds the frame at the top and lets the slack
+   fall below it, so that run is the same length in every lesson. */
 .lesson__stage {
   position: relative;
   z-index: 1;
   flex: 1 1 auto;
-  min-height: 30dvh;
+  min-height: 0;
   width: 100%;
-  padding-bottom: var(--sheet-overlap);
-  display: flex;
+  display: grid;
+  align-items: start;
+  justify-items: center;
+  padding-bottom: var(--frame-gap);
+  /* Makes this region a size container, which is what lets the frame below
+     take the smaller of its two sides and come out actually square. */
+  container-type: size;
+}
+
+/* The frame itself: one square. Nine of the ten artboards are authored square
+   and the tenth is within 8% of it, so a square is the shape they all fill —
+   which makes the artwork land at the same size, in the same place, in every
+   lesson. It is the largest square the region allows: the height drives it,
+   and max-width pulls both sides back in on a narrow screen.
+
+   Fixed matters here beyond tidiness: the artboards carry their own sliders
+   and toggles, so a frame that changed with the sheet would rescale and
+   re-place every control under the learner's finger. */
+.lesson__stage .stage {
+  flex: none;
+  /* The largest square the region allows: cqmin is the smaller of the two
+     sides, so this is width-bound on a tall screen and height-bound on a
+     short one, and square either way. */
+  width: 100cqmin;
+  height: 100cqmin;
 }
 
 /* The reserved strip. It is always this tall, so the sheet growing or
@@ -589,29 +608,34 @@
   min-height: 0;
   display: flex;
   align-items: flex-end;
-  margin-top: calc(-1 * var(--sheet-overlap));
   pointer-events: none;
 }
 
-/* The sheet overlaps that padding strip so the two read as one composition
-   rather than two stacked boxes. It starts as a slim peek — the instruction
-   and its button — and opens on demand for readouts and explanation, so the
-   artwork keeps the screen by default. It is sized by its step's content and
-   can never outgrow the dock. */
+/* The sheet has two heights and only two: a peek that shows the instruction
+   and its action, and open, which is the whole dock. Both are measured from
+   the dock rather than from the step's own text — a sheet sized by its content
+   would put its top edge somewhere different in every lesson, which is the
+   one thing the run between frame and sheet must not do. Longer steps scroll
+   inside it instead of pushing it taller. */
 .sheet {
   position: relative;
-  flex: 0 1 auto;
+  flex: 0 0 auto;
   width: 100%;
   min-height: 0;
-  max-height: 100%;
+  height: min(272px, 78%);
   display: flex;
   flex-direction: column;
   background: var(--paper);
   border-radius: var(--r-xl) var(--r-xl) 0 0;
   box-shadow: var(--lift-3);
   pointer-events: auto;
+  transition: height 0.32s var(--ease);
   /* Without this, scrolled content shows through the rounded top corners. */
   overflow: hidden;
+}
+
+.sheet.is-open {
+  height: 100%;
 }
 
 .sheet__scroll {
@@ -668,7 +692,7 @@
 .burst {
   position: absolute;
   left: 50%;
-  bottom: calc(var(--sheet-overlap) + 10px);
+  bottom: calc(var(--frame-gap) + 10px);
   z-index: 2;
   pointer-events: none;
 }
@@ -1474,22 +1498,20 @@
     grid-column: 1 / -1;
   }
 
+  /* Side by side there is no run down to a sheet below, so the frame simply
+     centres in its column — still square, still the same in every lesson. */
   .lesson__stage {
     grid-column: 1;
-    width: auto;
-    height: auto;
-    aspect-ratio: auto;
-    max-height: none;
+    align-items: center;
     padding: 0;
     min-height: 0;
   }
 
-  /* Side by side, the column itself is the reserved strip, so the dock stops
-     reserving height and simply fills its column. */
+  /* The column itself is the reserved strip here, so the dock stops reserving
+     height and simply fills it. */
   .lesson__dock {
     grid-column: 2;
     flex: 1 1 auto;
-    margin-top: 0;
   }
 
   .lesson .sheet {
