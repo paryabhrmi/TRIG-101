@@ -386,36 +386,11 @@ export const lessons: Lesson[] = [
       'sin θ is the opposite side. cos θ is the adjacent side. tan θ is one divided by the other.',
       'Sweep from 0° to 90° and watch sine climb while cosine falls. At the very end tangent gives up entirely.',
     ],
-    readouts: [
-      {
-        id: 'theta',
-        label: 'Angle',
-        tone: 'cyan',
-        value: (s) => `${fixed(num(s, 'AngleControl'), 1)}°`,
-      },
-      {
-        id: 'sin',
-        label: 'sin θ',
-        tone: 'blue',
-        value: (s) => fixed(num(s, 'OppSR'), 3),
-      },
-      {
-        id: 'cos',
-        label: 'cos θ',
-        tone: 'amber',
-        value: (s) => fixed(num(s, 'AdjSR'), 3),
-      },
-      {
-        id: 'tan',
-        label: 'tan θ',
-        tone: 'rose',
-        value: (s) => {
-          const cos = num(s, 'AdjSR')
-          if (Math.abs(cos) < 1e-4) return '∞'
-          return fixed(num(s, 'OppSR') / cos, 3)
-        },
-      },
-    ],
+    // `SecretRatios` already draws its own SOH CAH TOA panel — angle, sin,
+    // cos and tan all live on the canvas itself. Mirroring them again in the
+    // sheet would just be the same four numbers twice, so this lesson has no
+    // readouts of its own.
+    readouts: [],
     checkpoint: {
       // The artboard opens at 45°, where sine and cosine already match — so
       // "find where they are equal" would award itself. Aim somewhere else.
