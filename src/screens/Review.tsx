@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { AppBar } from '../components/AppBar'
-import { chapterById, lessonAfterReview, reviewKey } from '../data/curriculum'
+import { chapterById, lessonAfterReview, lessonById, reviewKey } from '../data/curriculum'
 import { useProgress } from '../lib/progress'
 
 interface Props {
@@ -26,6 +26,9 @@ export function Review({ chapter, onBack, onGoto, onFinish }: Props) {
 
   const q = questions[index]
   const nextLesson = lessonAfterReview(chapter)
+  // The tick on the home screen means "understood", so it has to be earned:
+  // one miss is allowed, more than that asks for another round.
+  const passMark = Math.max(1, questions.length - 1)
 
   if (!meta || !q) {
     return (
@@ -55,12 +58,20 @@ export function Review({ chapter, onBack, onGoto, onFinish }: Props) {
       setPicked(null)
       return
     }
-    complete(reviewKey(chapter))
+    if (correct >= passMark) complete(reviewKey(chapter))
     setDone(true)
+  }
+
+  const retry = () => {
+    setIndex(0)
+    setPicked(null)
+    setCorrect(0)
+    setDone(false)
   }
 
   if (done) {
     const all = correct === questions.length
+    const passed = correct >= passMark
     return (
       <div className="screen">
         <AppBar onBack={onBack} subtitle={`Chapter ${chapter}`} title="Review complete" />
@@ -70,16 +81,28 @@ export function Review({ chapter, onBack, onGoto, onFinish }: Props) {
               {correct}
               <em>/{questions.length}</em>
             </strong>
-            <span>{all ? 'Every one right.' : 'Worth another look.'}</span>
+            <span>
+              {all
+                ? 'Every one right.'
+                : passed
+                  ? 'Worth another look.'
+                  : 'Not yet — one more round.'}
+            </span>
           </div>
           <h2 className="soon__title">{meta.title}</h2>
           <p className="soon__tag">
             {all
               ? 'You can explain this chapter, not just operate it. That is the difference.'
-              : 'Re-read the lesson for anything that felt shaky — the explanations are at the end of each one.'}
+              : passed
+                ? 'Re-read the lesson for anything that felt shaky — the explanations are at the end of each one.'
+                : `The ideas have not settled yet. Revisit the lessons the wrong answers pointed at, then try again — ${passMark} of ${questions.length} passes.`}
           </p>
           <div className="soon__foot">
-            {nextLesson ? (
+            {!passed ? (
+              <button type="button" className="btn btn--primary btn--wide" onClick={retry}>
+                Try again
+              </button>
+            ) : nextLesson ? (
               <button
                 type="button"
                 className="btn btn--primary btn--wide"
@@ -155,6 +178,15 @@ export function Review({ chapter, onBack, onGoto, onFinish }: Props) {
         {picked !== null && (
           <>
             <p className="quiz__explain">{q.explain}</p>
+            {picked !== q.answer && q.lesson && lessonById(q.lesson) && (
+              <button
+                type="button"
+                className="linkish"
+                onClick={() => onGoto(q.lesson!)}
+              >
+                Revisit: {lessonById(q.lesson)!.title}
+              </button>
+            )}
             <div className="sheet__foot">
               <button type="button" className="btn btn--primary btn--wide" onClick={advance}>
                 {index + 1 < questions.length ? 'Next question' : 'See how you did'}
