@@ -62,6 +62,15 @@ export function LessonScreen({ lesson, onBack, onGoto, onReview, onFinish }: Pro
     if (step === 'learn') setOpen(true)
   }, [step])
 
+  // The sheet is a fixed strip now, so a long step scrolls inside it instead
+  // of growing. Every change of step or of the details starts that scroll at
+  // the top — otherwise the previous step's offset carries over and clips the
+  // new instruction right where the learner reads it.
+  const scrollRef = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    scrollRef.current?.scrollTo({ top: 0 })
+  }, [step, open])
+
   // Lessons whose instructions point at the readouts still need the sheet
   // open on the watch step — but only after the artwork has had its beat,
   // so this makes the same first impression every other lesson does before
@@ -144,161 +153,165 @@ export function LessonScreen({ lesson, onBack, onGoto, onReview, onFinish }: Pro
         )}
       </div>
 
-      <div className={`sheet ${open ? 'is-open' : ''}`.trim()}>
-        <button
-          type="button"
-          className="sheet__grab"
-          onClick={() => setOpen((o) => !o)}
-          aria-expanded={open}
-          aria-label={open ? 'Hide details' : 'More details'}
-        >
-          <span className="sheet__handle" aria-hidden="true" />
-        </button>
-
-        <nav className="steps" aria-label="Lesson steps">
-          {steps.map((s, i) => {
-            const current = i === stepIndex
-            const doneStep = i < stepIndex || (s === 'do' && solved)
-            const name = s === 'watch' ? 'Find it' : s === 'do' ? 'Try it' : 'Why it works'
-            return (
-              <button
-                key={s}
-                type="button"
-                className={`steps__seg ${current ? 'is-current' : ''} ${
-                  doneStep ? 'is-done' : ''
-                }`.trim()}
-                aria-current={current}
-                aria-label={`Step ${i + 1}: ${name}`}
-                onClick={() => setStep(s)}
-              >
-                <span className="steps__dot" aria-hidden="true" />
-                {current && <span className="steps__name">{name}</span>}
-              </button>
-            )
-          })}
+      {/* The dock reserves the sheet's strip whether or not the sheet fills
+          it, so the stage above keeps one fixed size all lesson long. */}
+      <div className="lesson__dock">
+        <div className={`sheet ${open ? 'is-open' : ''}`.trim()}>
           <button
             type="button"
-            className="steps__more"
+            className="sheet__grab"
             onClick={() => setOpen((o) => !o)}
             aria-expanded={open}
             aria-label={open ? 'Hide details' : 'More details'}
           >
-            <svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true">
-              <path
-                d="M2.5 7.5 L6 4 L9.5 7.5"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
+            <span className="sheet__handle" aria-hidden="true" />
           </button>
-        </nav>
 
-        <div className="sheet__scroll">
-          {step === 'watch' && (
-            <>
-              <p className="step__lead">{lesson.watch}</p>
-              {open && (
-                <div className="sheet__detail">
-                  <Instruments readouts={lesson.readouts} values={values} />
-                </div>
-              )}
-              <div className="sheet__foot">
+          <nav className="steps" aria-label="Lesson steps">
+            {steps.map((s, i) => {
+              const current = i === stepIndex
+              const doneStep = i < stepIndex || (s === 'do' && solved)
+              const name = s === 'watch' ? 'Find it' : s === 'do' ? 'Try it' : 'Why it works'
+              return (
                 <button
+                  key={s}
                   type="button"
-                  className="btn btn--primary btn--wide"
-                  onClick={() => setStep('do')}
+                  className={`steps__seg ${current ? 'is-current' : ''} ${
+                    doneStep ? 'is-done' : ''
+                  }`.trim()}
+                  aria-current={current}
+                  aria-label={`Step ${i + 1}: ${name}`}
+                  onClick={() => setStep(s)}
                 >
-                  Got it — give me a task
+                  <span className="steps__dot" aria-hidden="true" />
+                  {current && <span className="steps__name">{name}</span>}
                 </button>
-              </div>
-            </>
-          )}
+              )
+            })}
+            <button
+              type="button"
+              className="steps__more"
+              onClick={() => setOpen((o) => !o)}
+              aria-expanded={open}
+              aria-label={open ? 'Hide details' : 'More details'}
+            >
+              <svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true">
+                <path
+                  d="M2.5 7.5 L6 4 L9.5 7.5"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </button>
+          </nav>
 
-          {step === 'do' && (
-            <>
-              <p className="step__lead">
-                {lesson.checkpoint ? lesson.checkpoint.goal : lesson.tagline}
-              </p>
-
-              {lesson.actions && lesson.actions.length > 0 && (
-                <div className="actions">
-                  {lesson.actions.map((action) => (
-                    <button
-                      key={action.input}
-                      type="button"
-                      className={`btn ${
-                        action.tone === 'ghost' ? 'btn--ghost' : 'btn--primary'
-                      } ${toggles[action.input] ? 'is-on' : ''}`.trim()}
-                      onClick={() => runAction(action)}
-                      disabled={!rive}
-                    >
-                      {action.label}
-                    </button>
-                  ))}
-                </div>
-              )}
-
-              {open && (
-                <div className="sheet__detail">
-                  <Instruments readouts={lesson.readouts} values={values} />
-                </div>
-              )}
-
-              {lesson.checkpoint && (
-                <div className="hintrow">
-                  {showHint ? (
-                    <p className="step__hint">{lesson.checkpoint.hint}</p>
-                  ) : (
-                    <button
-                      type="button"
-                      className="linkish"
-                      onClick={() => setShowHint(true)}
-                    >
-                      Need a hint?
-                    </button>
-                  )}
+          <div className="sheet__scroll" ref={scrollRef}>
+            {step === 'watch' && (
+              <>
+                <p className="step__lead">{lesson.watch}</p>
+                {open && (
+                  <div className="sheet__detail">
+                    <Instruments readouts={lesson.readouts} values={values} />
+                  </div>
+                )}
+                <div className="sheet__foot">
                   <button
                     type="button"
-                    className="linkish linkish--quiet"
-                    onClick={() => setStep('learn')}
+                    className="btn btn--primary btn--wide"
+                    onClick={() => setStep('do')}
                   >
-                    Skip
+                    Got it — give me a task
                   </button>
                 </div>
-              )}
-            </>
-          )}
+              </>
+            )}
 
-          {step === 'learn' && (
-            <>
-              {solved && (
-                <p className="step__win">
-                  <span aria-hidden="true">✓</span> Nice — that is the idea.
+            {step === 'do' && (
+              <>
+                <p className="step__lead">
+                  {lesson.checkpoint ? lesson.checkpoint.goal : lesson.tagline}
                 </p>
-              )}
-              <div className="prose">
-                {lesson.body.map((para, i) => (
-                  <p key={i}>{para}</p>
-                ))}
-              </div>
-              <div className="sheet__foot">
-                <button
-                  type="button"
-                  className="btn btn--primary btn--wide"
-                  onClick={goNext}
-                >
-                  {after?.kind === 'review'
-                    ? 'Chapter review'
-                    : after?.kind === 'lesson'
-                      ? 'Next lesson'
-                      : 'Finish the course'}
-                </button>
-              </div>
-            </>
-          )}
+
+                {lesson.actions && lesson.actions.length > 0 && (
+                  <div className="actions">
+                    {lesson.actions.map((action) => (
+                      <button
+                        key={action.input}
+                        type="button"
+                        className={`btn ${
+                          action.tone === 'ghost' ? 'btn--ghost' : 'btn--primary'
+                        } ${toggles[action.input] ? 'is-on' : ''}`.trim()}
+                        onClick={() => runAction(action)}
+                        disabled={!rive}
+                      >
+                        {action.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {open && (
+                  <div className="sheet__detail">
+                    <Instruments readouts={lesson.readouts} values={values} />
+                  </div>
+                )}
+
+                {lesson.checkpoint && (
+                  <div className="hintrow">
+                    {showHint ? (
+                      <p className="step__hint">{lesson.checkpoint.hint}</p>
+                    ) : (
+                      <button
+                        type="button"
+                        className="linkish"
+                        onClick={() => setShowHint(true)}
+                      >
+                        Need a hint?
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      className="linkish linkish--quiet"
+                      onClick={() => setStep('learn')}
+                    >
+                      Skip
+                    </button>
+                  </div>
+                )}
+              </>
+            )}
+
+            {step === 'learn' && (
+              <>
+                {solved && (
+                  <p className="step__win">
+                    <span aria-hidden="true">✓</span> Nice — that is the idea.
+                  </p>
+                )}
+                <div className="prose">
+                  {lesson.body.map((para, i) => (
+                    <p key={i}>{para}</p>
+                  ))}
+                </div>
+                <div className="sheet__foot">
+                  <button
+                    type="button"
+                    className="btn btn--primary btn--wide"
+                    onClick={goNext}
+                  >
+                    {after?.kind === 'review'
+                      ? 'Chapter review'
+                      : after?.kind === 'lesson'
+                        ? 'Next lesson'
+                        : 'Finish the course'}
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
         </div>
       </div>
     </div>

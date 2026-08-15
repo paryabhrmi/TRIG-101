@@ -71,6 +71,12 @@
   --gut: 20px;
   /* How far the bottom sheet rides up over the artwork. */
   --sheet-overlap: 24px;
+  /* The strip reserved for the sheet, whether or not it is open. Reserving it
+     up front is what keeps the interactive frame a fixed size: the stage takes
+     what is left, and what is left never changes. Kept as tight as the sheet's
+     tallest step can bear — it scrolls, the artwork cannot — so the frame above
+     stays as large as possible. */
+  --dock-h: min(46dvh, 380px);
   --safe-t: env(safe-area-inset-top, 0px);
   --safe-b: env(safe-area-inset-bottom, 0px);
 
