@@ -22,21 +22,16 @@ type Step = 'watch' | 'do' | 'learn'
 /** How long the task step may sit unsolved before the hint offers itself. */
 const STUCK_MS = 20_000
 
-/** Give the artwork its first impression before the sheet claims attention. */
-const DETAIL_FIRST_DELAY_MS = 900
-
 export function LessonScreen({ lesson, onBack, onGoto, onReview, onFinish }: Props) {
   const { progress, complete } = useProgress()
   const [rive, setRive] = useState<Rive | null>(null)
   const [toggles, setToggles] = useState<Record<string, boolean>>({})
   const [step, setStep] = useState<Step>('watch')
   const [showHint, setShowHint] = useState(false)
-  // Every lesson starts the same way: sheet closed, artwork owning the
-  // screen, so the animation makes its impression before anything competes
-  // for attention. Opening it is how the learner asks for more — except
-  // where the instructions point at the readouts themselves, which still
-  // opens itself, just on a short delay (see the effect below) instead of
-  // beating the artwork onto the screen.
+  // Every lesson starts the same way and there are no exceptions: the frame
+  // makes its impression first, with the sheet at its peek. Opening it is how
+  // the learner asks for more. Lessons used to be able to open it themselves
+  // on arrival, which made those few start unlike all the others.
   const [open, setOpen] = useState(false)
   const [celebrate, setCelebrate] = useState(false)
 
@@ -70,16 +65,6 @@ export function LessonScreen({ lesson, onBack, onGoto, onReview, onFinish }: Pro
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: 0 })
   }, [step, open])
-
-  // Lessons whose instructions point at the readouts still need the sheet
-  // open on the watch step — but only after the artwork has had its beat,
-  // so this makes the same first impression every other lesson does before
-  // the sheet rises. Cancelled if the learner moves on before it fires.
-  useEffect(() => {
-    if (!lesson.detailFirst || step !== 'watch') return
-    const id = window.setTimeout(() => setOpen(true), DETAIL_FIRST_DELAY_MS)
-    return () => window.clearTimeout(id)
-  }, [lesson.detailFirst, step])
 
   // A learner who sits on the task without progress should not have to admit
   // defeat to get help — after a while the hint surfaces on its own.

@@ -68,12 +68,6 @@ export interface Lesson {
   checkpoint?: Checkpoint
   /** Boolean state-machine inputs to mirror into `Sample.b`. */
   watchInputs?: string[]
-  /**
-   * Open the sheet's detail pane from the start. Set on lessons whose
-   * instructions point at the readout panel — hiding what the text refers to
-   * would break the link between instruction and referent.
-   */
-  detailFirst?: boolean
 }
 
 /**
@@ -316,8 +310,6 @@ export const lessons: Lesson[] = [
     stage: 'paper',
     bindViewModel: true,
     chapter: 1,
-    // "Watch the panel" refers to the ratio readouts — keep them in view.
-    detailFirst: true,
     title: 'Shape, not size',
     tagline: 'Blow the triangle up. The ratios refuse to change.',
     watch:
@@ -433,8 +425,6 @@ export const lessons: Lesson[] = [
     stage: 'paper',
     bindViewModel: true,
     chapter: 2,
-    // The checkpoint asks for "the radian readout" — it must be visible.
-    detailFirst: true,
     title: 'Radians',
     tagline: 'A degree is a convention. A radian is a measurement.',
     watch:
@@ -477,8 +467,6 @@ export const lessons: Lesson[] = [
     stage: 'navy',
     bindViewModel: true,
     chapter: 2,
-    // "Watch Opp and Adj" and the checkpoint's "Adj readout" live in the panel.
-    detailFirst: true,
     title: 'The unit circle',
     tagline: 'Trigonometry escapes the triangle.',
     watch:
