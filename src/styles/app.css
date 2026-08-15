@@ -862,14 +862,25 @@
   white-space: nowrap;
 }
 
-/* The details toggle: one chevron, flipping over as the sheet opens. */
+/* The details toggle: a filled pill so it reads as its own tappable
+   control (matching the current-step pill's fill), not a bare glyph
+   floating with no boundary — the chevron inside still flips as the sheet
+   opens. */
 .steps__more {
   margin-inline-start: auto;
   display: grid;
   place-items: center;
-  width: 40px;
+  width: 36px;
   height: 36px;
-  color: var(--ink-3);
+  border-radius: var(--r-pill);
+  background: var(--surface);
+  color: var(--ink-2);
+  transition: background 0.2s var(--ease), transform 0.15s var(--ease);
+}
+
+.steps__more:active {
+  background: var(--line);
+  transform: scale(0.94);
 }
 
 .steps__more svg {
