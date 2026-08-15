@@ -34,7 +34,10 @@ export function LessonScreen({ lesson, onBack, onGoto, onReview, onFinish }: Pro
   // except where the instructions point at the readouts themselves.
   const [open, setOpen] = useState(!!lesson.detailFirst)
   const [celebrate, setCelebrate] = useState(false)
-  const { sheetRef, dragging, toggle, dragHandleProps } = useBottomSheet(open, setOpen)
+  const { sheetRef, scrimRef, dragging, toggle, collapse, dragHandleProps } = useBottomSheet(
+    open,
+    setOpen,
+  )
 
   const index = lessons.indexOf(lesson)
   const alreadyDone = !!progress[lesson.id]
@@ -136,6 +139,16 @@ export function LessonScreen({ lesson, onBack, onGoto, onReview, onFinish }: Pro
           </div>
         )}
       </div>
+
+      {/* Dims the artwork as the sheet opens — the read that the panel has
+          become its own floating layer, not just a taller footer. Tapping
+          it is the same "back out" gesture as tapping the handle. */}
+      <div
+        ref={scrimRef}
+        className={`sheet__scrim ${open ? 'is-open' : ''}`.trim()}
+        onClick={collapse}
+        aria-hidden="true"
+      />
 
       <div
         ref={sheetRef}
