@@ -15,7 +15,11 @@ const OPEN_MAX = 470
 const OPEN_VH = 0.58
 
 /** A flick faster than this (px/ms) snaps by direction, ignoring position. */
-const FLICK_VELOCITY = 0.5
+const FLICK_VELOCITY = 0.35
+/** Velocity is measured over this trailing window, not sample-to-sample —
+ * a single noisy interval (common right as a finger lifts off) would
+ * otherwise decide the whole gesture. */
+const VELOCITY_WINDOW_MS = 80
 
 function metrics(safeBottom: number) {
   const vh = window.visualViewport?.height ?? window.innerHeight
@@ -39,9 +43,8 @@ export function useBottomSheet(open: boolean, setOpen: (open: boolean) => void) 
     peek: number
     open: number
     moved: boolean
-    lastY: number
-    lastT: number
-    velocity: number
+    /** Trailing (time, y) samples for the windowed velocity estimate. */
+    history: { t: number; y: number }[]
   } | null>(null)
 
   // A mouse/touch drag still fires a native `click` on release even though
@@ -78,9 +81,7 @@ export function useBottomSheet(open: boolean, setOpen: (open: boolean) => void) 
         peek,
         open: openH,
         moved: false,
-        lastY: e.clientY,
-        lastT: e.timeStamp,
-        velocity: 0,
+        history: [{ t: e.timeStamp, y: e.clientY }],
       }
       // Captured immediately, not once a move threshold is crossed: a fast
       // drag's very first move can already land past the handle's small hit
@@ -102,10 +103,10 @@ export function useBottomSheet(open: boolean, setOpen: (open: boolean) => void) 
       setDragging(true)
     }
 
-    const dt = e.timeStamp - d.lastT
-    if (dt > 0) d.velocity = (e.clientY - d.lastY) / dt
-    d.lastY = e.clientY
-    d.lastT = e.timeStamp
+    d.history.push({ t: e.timeStamp, y: e.clientY })
+    while (d.history.length > 2 && e.timeStamp - d.history[0].t > VELOCITY_WINDOW_MS) {
+      d.history.shift()
+    }
 
     // Dragging up (negative delta) grows the sheet; dragging down shrinks it.
     const next = Math.min(d.open, Math.max(d.peek, d.startHeight - delta))
@@ -124,8 +125,12 @@ export function useBottomSheet(open: boolean, setOpen: (open: boolean) => void) 
       const delta = e.clientY - d.startY
       const current = Math.min(d.open, Math.max(d.peek, d.startHeight - delta))
       const mid = (d.peek + d.open) / 2
-      const shouldOpen =
-        Math.abs(d.velocity) > FLICK_VELOCITY ? d.velocity < 0 : current > mid
+
+      const first = d.history[0]
+      const last = d.history[d.history.length - 1]
+      const windowDt = last.t - first.t
+      const velocity = windowDt > 0 ? (last.y - first.y) / windowDt : 0
+      const shouldOpen = Math.abs(velocity) > FLICK_VELOCITY ? velocity < 0 : current > mid
 
       justDragged.current = true
       window.setTimeout(() => {
