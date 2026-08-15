@@ -2,11 +2,7 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import legacy from '@vitejs/plugin-legacy'
 
-// The app ships to two hosts: Vercel serves it at the domain root, and
-// GitHub Pages serves it under /TRIG-101/. The Pages workflow sets BASE_PATH
-// for its build; every other build — Vercel, local — keeps the plain root.
 export default defineConfig(() => ({
-  base: process.env.BASE_PATH ?? '/',
   plugins: [
     react(),
     // A browser with no ES-module support skips the module script entirely and
