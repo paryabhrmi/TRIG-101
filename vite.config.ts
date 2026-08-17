@@ -20,7 +20,7 @@ export default defineConfig(() => ({
     outDir: 'dist',
     // No `target` here on purpose: plugin-legacy owns it, emitting a modern
     // bundle plus the `nomodule` one, and warns if this config fights it.
-    // The .riv file is the single heaviest asset (~670 kB); keeping the JS
+    // The .riv file is the single heaviest asset (~580 kB); keeping the JS
     // chunks small matters more than usual on a phone connection.
     chunkSizeWarningLimit: 900,
   },
