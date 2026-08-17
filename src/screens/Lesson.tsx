@@ -22,6 +22,9 @@ type Step = 'watch' | 'do' | 'learn'
 /** How long the task step may sit unsolved before the hint offers itself. */
 const STUCK_MS = 20_000
 
+/** Vertical travel on the grab bar that counts as a swipe rather than a tap. */
+const SWIPE_MIN = 24
+
 export function LessonScreen({ lesson, onBack, onGoto, onReview, onFinish }: Props) {
   const { progress, complete } = useProgress()
   const [rive, setRive] = useState<Rive | null>(null)
@@ -29,8 +32,8 @@ export function LessonScreen({ lesson, onBack, onGoto, onReview, onFinish }: Pro
   const [step, setStep] = useState<Step>('watch')
   const [showHint, setShowHint] = useState(false)
   // The sheet starts as a slim peek — one instruction and its button — so the
-  // artwork owns the screen. Opening it is how the learner asks for more,
-  // except where the instructions point at the readouts themselves.
+  // artwork owns the screen. Opening it is how the learner asks for the live
+  // readouts, except where the instructions point at the readouts themselves.
   const [open, setOpen] = useState(!!lesson.detailFirst)
   const [celebrate, setCelebrate] = useState(false)
 
@@ -65,6 +68,43 @@ export function LessonScreen({ lesson, onBack, onGoto, onReview, onFinish }: Pro
   useEffect(() => {
     if (step === 'learn') setOpen(true)
   }, [step])
+
+  /**
+   * The grab bar takes a swipe as well as a tap.
+   *
+   * It has always looked like a sheet handle, and a handle that only answers
+   * to a tap is a false affordance — the one gesture everybody tries on it did
+   * nothing. Pointer-up decides: past `SWIPE_MIN` in either direction is a
+   * deliberate open or close, anything shorter falls through to the click
+   * handler as a tap. Going through click rather than replacing it keeps the
+   * keyboard path (Enter and Space fire click with no pointer sequence).
+   */
+  const grabFrom = useRef<number | null>(null)
+  const swiped = useRef(false)
+
+  const onGrabDown = (e: React.PointerEvent<HTMLButtonElement>) => {
+    grabFrom.current = e.clientY
+    swiped.current = false
+    e.currentTarget.setPointerCapture(e.pointerId)
+  }
+
+  const onGrabUp = (e: React.PointerEvent<HTMLButtonElement>) => {
+    const from = grabFrom.current
+    grabFrom.current = null
+    if (from === null) return
+    const dy = e.clientY - from
+    if (Math.abs(dy) < SWIPE_MIN) return
+    swiped.current = true
+    setOpen(dy < 0)
+  }
+
+  const onGrabClick = () => {
+    if (swiped.current) {
+      swiped.current = false
+      return
+    }
+    setOpen((o) => !o)
+  }
 
   // A learner who sits on the task without progress should not have to admit
   // defeat to get help — after a while the hint surfaces on its own.
@@ -202,9 +242,15 @@ export function LessonScreen({ lesson, onBack, onGoto, onReview, onFinish }: Pro
         <button
           type="button"
           className="sheet__grab"
-          onClick={() => setOpen((o) => !o)}
+          onClick={onGrabClick}
+          onPointerDown={onGrabDown}
+          onPointerUp={onGrabUp}
+          onPointerCancel={() => {
+            grabFrom.current = null
+          }}
           aria-expanded={open}
-          aria-label={open ? 'Hide details' : 'More details'}
+          aria-controls="sheet-body"
+          aria-label={open ? 'Hide the readouts' : 'Show the readouts'}
         >
           <span className="sheet__handle" aria-hidden="true" />
           <svg
@@ -253,7 +299,7 @@ export function LessonScreen({ lesson, onBack, onGoto, onReview, onFinish }: Pro
           {solved ? ' Task complete.' : ''}
         </p>
 
-        <div className="sheet__scroll">
+        <div className="sheet__scroll" id="sheet-body">
           {step === 'watch' && (
             <>
               <p className="step__lead">{lesson.watch}</p>
@@ -291,9 +337,13 @@ export function LessonScreen({ lesson, onBack, onGoto, onReview, onFinish }: Pro
                   </p>
                 </>
               ) : (
-                lesson.checkpoint && (
-                  <div className="hintrow">
-                    {showHint ? (
+                /* The way past an unsolved task. `the-swing` has no measured
+                   checkpoint — only an action button — so it used to reach
+                   this step with no hint row and no docked button, and the
+                   step dots were the only way out. */
+                <div className="hintrow">
+                  {lesson.checkpoint &&
+                    (showHint ? (
                       <p className="step__hint">{lesson.checkpoint.hint}</p>
                     ) : (
                       <button
@@ -303,16 +353,15 @@ export function LessonScreen({ lesson, onBack, onGoto, onReview, onFinish }: Pro
                       >
                         Need a hint?
                       </button>
-                    )}
-                    <button
-                      type="button"
-                      className="linkish linkish--quiet"
-                      onClick={() => setStep('learn')}
-                    >
-                      Skip
-                    </button>
-                  </div>
-                )
+                    ))}
+                  <button
+                    type="button"
+                    className="linkish linkish--quiet"
+                    onClick={() => setStep('learn')}
+                  >
+                    Skip
+                  </button>
+                </div>
               )}
             </>
           )}
@@ -329,6 +378,15 @@ export function LessonScreen({ lesson, onBack, onGoto, onReview, onFinish }: Pro
                   <p key={i}>{para}</p>
                 ))}
               </div>
+              {/* The explanation names sin θ and cos θ; the live values belong
+                  next to it. This is also what stops the sheet toggle being a
+                  dead control here — this step had no detail pane to reveal,
+                  so pressing it did nothing at all. */}
+              {open && (
+                <div className="sheet__detail">
+                  <Instruments readouts={lesson.readouts} values={values} />
+                </div>
+              )}
             </>
           )}
         </div>
