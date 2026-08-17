@@ -1,5 +1,5 @@
 import { Alignment, Fit, Layout, useRive } from '@rive-app/react-webgl'
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import type { Rive } from '@rive-app/react-webgl'
 import type { StageTone } from '../data/curriculum'
 
@@ -17,6 +17,26 @@ interface Props {
 }
 
 /**
+ * Every artboard in the file is square or near it (`Ratio` is 500×538, the
+ * rest are 1:1), so on a portrait stage `FitWidth` and `Contain` scale
+ * identically — but `FitWidth` also guarantees the artwork reaches both edges
+ * of the screen whatever height the stage ends up with. It is only unsafe once
+ * the stage is wider than the artboard, which is the landscape layout, and
+ * there `Contain` takes over so nothing is cropped.
+ */
+const fitFor = (box: HTMLElement | null): Fit =>
+  box && box.clientWidth > box.clientHeight ? Fit.Contain : Fit.FitWidth
+
+/**
+ * A square artboard on a tall phone leaves slack above and below it. Settling
+ * the artwork on the bottom of the stage collects that slack into one band
+ * under the app bar instead of splitting it in two — and it puts the sliders,
+ * which sit along the artboard's bottom edge, within easy reach of the thumb.
+ */
+const alignFor = (box: HTMLElement | null): Alignment =>
+  box && box.clientWidth > box.clientHeight ? Alignment.Center : Alignment.BottomCenter
+
+/**
  * A single Rive artboard, sized to its container.
  *
  * The artboards ship with their own sliders and toggles, so this canvas is the
@@ -30,8 +50,10 @@ export function RiveStage({
   bindViewModel,
   onReady,
   className,
-  fit = Fit.Contain,
+  fit,
 }: Props) {
+  const box = useRef<HTMLDivElement>(null)
+
   const { rive, RiveComponent } = useRive(
     {
       src: RIVE_SRC,
@@ -41,7 +63,7 @@ export function RiveStage({
       // Binding an artboard that has no view model logs a runtime error, so
       // only opt in where the file actually defines one.
       autoBind: bindViewModel,
-      layout: new Layout({ fit, alignment: Alignment.Center }),
+      layout: new Layout({ fit: fit ?? Fit.FitWidth, alignment: Alignment.BottomCenter }),
     },
     { shouldResizeCanvasToContainer: true, useDevicePixelRatio: true },
   )
@@ -53,8 +75,27 @@ export function RiveStage({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rive])
 
+  // Rotating the phone changes which fit is safe, so the layout is re-applied
+  // rather than fixed at load.
+  useEffect(() => {
+    if (!rive || fit) return
+
+    const apply = () => {
+      const nextFit = fitFor(box.current)
+      const nextAlign = alignFor(box.current)
+      if (rive.layout.fit !== nextFit || rive.layout.alignment !== nextAlign) {
+        rive.layout = new Layout({ fit: nextFit, alignment: nextAlign })
+      }
+    }
+
+    apply()
+    const observer = new ResizeObserver(apply)
+    if (box.current) observer.observe(box.current)
+    return () => observer.disconnect()
+  }, [rive, fit])
+
   return (
-    <div className={`stage stage--${stage} ${className ?? ''}`.trim()}>
+    <div ref={box} className={`stage stage--${stage} ${className ?? ''}`.trim()}>
       <RiveComponent className="stage__canvas" />
       {!rive && <div className="stage__pending" aria-hidden="true" />}
     </div>

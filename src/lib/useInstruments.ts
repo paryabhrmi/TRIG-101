@@ -13,6 +13,15 @@ const DWELL_MS = 350
 export interface Instruments {
   /** Formatted readout strings, index-aligned with `lesson.readouts`. */
   values: string[]
+  /**
+   * How far along the checkpoint's target the learner is, 0 to 1, or null
+   * where the lesson has no numeric target. The value itself is deliberately
+   * not returned: every artboard prints its own numbers, so the app's job is
+   * the distance to the goal, not a second copy of the reading.
+   */
+  aim: number | null
+  /** Index-aligned with `lesson.conditions`. */
+  conditions: boolean[]
   /** True once the lesson's checkpoint has been satisfied. */
   solved: boolean
   /** Marks the checkpoint satisfied from outside (e.g. an action button). */
@@ -33,6 +42,10 @@ export function useInstruments(
   alreadyDone: boolean,
 ): Instruments {
   const [values, setValues] = useState<string[]>(() => lesson.readouts.map(() => '—'))
+  const [aim, setAim] = useState<number | null>(null)
+  const [conditions, setConditions] = useState<boolean[]>(() =>
+    (lesson.conditions ?? []).map(() => false),
+  )
   const [solved, setSolved] = useState(alreadyDone)
 
   // Keep the latest lesson/solved state reachable from the interval without
@@ -44,6 +57,10 @@ export function useInstruments(
 
   useEffect(() => {
     setSolved(alreadyDone)
+    setAim(null)
+    setConditions((lesson.conditions ?? []).map(() => false))
+    // `lesson.conditions` is stable per lesson; keying on the id is enough.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [alreadyDone, lesson.id])
 
   useEffect(() => {
@@ -114,6 +131,36 @@ export function useInstruments(
         )
       }
 
+      const target = current.checkpoint?.target
+      if (target) {
+        let next: number | null = null
+        try {
+          const gap = Math.abs(target.read(sample) - target.goal)
+          next = Math.max(0, Math.min(1, 1 - gap / target.span))
+        } catch {
+          next = null
+        }
+        // Round before comparing: the raw value jitters every frame and would
+        // re-render the bar at 14fps for a change no one can see.
+        setAim((prev) => {
+          const rounded = next === null ? null : Math.round(next * 200) / 200
+          return prev === rounded ? prev : rounded
+        })
+      }
+
+      if (current.conditions?.length) {
+        const next = current.conditions.map((c) => {
+          try {
+            return c.test(sample)
+          } catch {
+            return false
+          }
+        })
+        setConditions((prev) =>
+          prev.length === next.length && prev.every((v, i) => v === next[i]) ? prev : next,
+        )
+      }
+
       const check = current.checkpoint
       if (check && !solvedRef.current) {
         let pass = false
@@ -139,5 +186,5 @@ export function useInstruments(
 
   const markSolved = () => setSolved(true)
 
-  return { values, solved, markSolved }
+  return { values, aim, conditions, solved, markSolved }
 }

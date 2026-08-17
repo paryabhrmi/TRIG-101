@@ -38,6 +38,35 @@ export interface Checkpoint {
   goal: string
   hint: string
   test: (s: Sample) => boolean
+  /** Drives the lesson bar's aim slot. See `Target`. */
+  target?: Target
+}
+
+/**
+ * What the aim bar shows: where the learner is headed, and how far that is.
+ *
+ * It deliberately carries no current value. Every artboard in the file prints
+ * its own numbers, so repeating one here would say the same thing twice and
+ * split the learner's attention between two copies of it. The bar's job is
+ * the one thing the artboard cannot know: the goal.
+ */
+export interface Target {
+  /** Names the destination, e.g. `sin θ → 0.50`. Never the live value. */
+  label: string
+  /** Read from the same sample the checkpoint tests. */
+  read: (s: Sample) => number
+  /** The value that satisfies the checkpoint. */
+  goal: number
+  /** Travel either side of the goal that counts as "just started". */
+  span: number
+}
+
+/** One named state in the bar's condition slot — a thing that is or is not
+ *  yet true. Used where a checkpoint is a state to reach rather than a
+ *  number to land on. */
+export interface Condition {
+  label: string
+  test: (s: Sample) => boolean
 }
 
 export interface LessonAction {
@@ -63,17 +92,24 @@ export interface Lesson {
   /** Step 1: what to touch. This is where the canvas is taught as a control. */
   watch: string
   body: string[]
+  /**
+   * Values the app shows that the artboard does not.
+   *
+   * Nine of the ten artboards print their own instrument panel — `UnitCircle`
+   * writes `Hyp / Opp / Adj` under the circle, `SecretRatios` carries a full
+   * SOH CAH TOA table, the wave artboards print θ in degrees and radians next
+   * to the value being plotted. Mirroring any of those into a tile says the
+   * same thing twice and costs the canvas the room to say it. So this list
+   * holds only what the file leaves out: the ratios in lesson 2, and the
+   * radian expressed in π in lesson 4.
+   */
   readouts: Readout[]
   actions?: LessonAction[]
   checkpoint?: Checkpoint
+  /** Fills the lesson bar's slot where a numeric target does not fit. */
+  conditions?: Condition[]
   /** Boolean state-machine inputs to mirror into `Sample.b`. */
   watchInputs?: string[]
-  /**
-   * Open the sheet's detail pane from the start. Set on lessons whose
-   * instructions point at the readout panel — hiding what the text refers to
-   * would break the link between instruction and referent.
-   */
-  detailFirst?: boolean
 }
 
 /**
@@ -267,8 +303,7 @@ export const lessons: Lesson[] = [
     watchInputs: ['Boolean 1'],
     title: 'Naming the sides',
     tagline: 'Opposite and adjacent are job titles, not names.',
-    watch:
-      'Under the triangle is a switch — everything on the canvas responds to your finger. Flip it.',
+    watch: 'A switch sits under the triangle. Flip it.',
     body: [
       'Every right triangle has one side whose name never changes: the hypotenuse. Always across from the right angle, always the longest.',
       'The other two swap. Which one is opposite and which is adjacent depends entirely on the angle you are standing at.',
@@ -277,34 +312,17 @@ export const lessons: Lesson[] = [
     // `Angle` carries no view model, so these come from the state machine's
     // own boolean instead. Only the focus is live data — the side letters are
     // derived from it, never numbers copied out of the artboard.
-    readouts: [
+    // The artboard names all three sides and labels the switch "Focus: Angle
+    // A / Angle B" in full. Every tile this lesson used to carry was a copy.
+    readouts: [],
+    conditions: [
       {
-        id: 'focus',
-        label: 'Focus',
-        tone: 'cyan',
-        value: (s) => (s.b['Boolean 1'] ? 'Angle A' : 'Angle B'),
-      },
-      {
-        id: 'opp',
-        label: 'Opposite',
-        tone: 'amber',
-        value: (s) => (s.b['Boolean 1'] ? 'BC' : 'AC'),
-      },
-      {
-        id: 'adj',
-        label: 'Adjacent',
-        tone: 'mint',
-        value: (s) => (s.b['Boolean 1'] ? 'AC' : 'BC'),
-      },
-      {
-        id: 'hyp',
-        label: 'Hypotenuse',
-        tone: 'violet',
-        value: () => 'AB',
+        label: 'focus moved',
+        test: (s) => s.b['Boolean 1'] !== s.b0['Boolean 1'],
       },
     ],
     checkpoint: {
-      goal: 'Move the focus onto angle B and watch the two labels trade places.',
+      goal: 'Move the focus onto angle B',
       hint: 'The switch sits under the triangle.',
       test: (s) => s.b['Boolean 1'] !== s.b0['Boolean 1'],
     },
@@ -316,34 +334,18 @@ export const lessons: Lesson[] = [
     stage: 'paper',
     bindViewModel: true,
     chapter: 1,
-    // "Watch the panel" refers to the ratio readouts — keep them in view.
-    detailFirst: true,
     title: 'Shape, not size',
     tagline: 'Blow the triangle up. The ratios refuse to change.',
-    watch:
-      'Two sliders sit under the triangle: Angle and Scale. Drag either one and watch the panel.',
+    watch: 'Two sliders under the triangle: Angle and Scale.',
     body: [
       'Two triangles with the same angles are one shape at two sizes. Mathematicians call them similar.',
       'Similar triangles share their side ratios exactly. That is the hinge the entire subject swings on.',
       'Drag Scale end to end: Opposite, Adjacent and Hypotenuse all move. The three ratios below them do not.',
     ],
+    // The artboard prints the three sides with their values but no ratios —
+    // and the ratios are the whole lesson. The only tiles in the course that
+    // are not already on the canvas.
     readouts: [
-      {
-        id: 'theta',
-        label: 'Angle',
-        tone: 'cyan',
-        value: (s) => `${fixed(num(s, 'AngleControl'), 1)}°`,
-      },
-      {
-        id: 'scale',
-        label: 'Scale',
-        tone: 'violet',
-        value: (s) => fixed(num(s, 'ScaleControl'), 0),
-      },
-      // The artboard already prints Opposite, Adjacent and Hypotenuse next to
-      // the sides themselves. Repeating them here cost eight tiles, filled the
-      // sheet, and squeezed the artwork. Show only the invariant — which is
-      // the entire point of the lesson.
       {
         id: 'oh',
         label: 'Opp ÷ Hyp',
@@ -364,7 +366,7 @@ export const lessons: Lesson[] = [
       },
     ],
     checkpoint: {
-      goal: 'Hold the angle at 60°, then push Scale past 160 — and keep an eye on the three ratios.',
+      goal: 'Hold 60°, then push Scale past 160',
       hint: 'Set the angle first, then the scale. Neither slider disturbs the other.',
       test: (s) =>
         Math.abs(num(s, 'AngleControl') - 60) <= 3 && num(s, 'ScaleControl') >= 160,
@@ -379,49 +381,27 @@ export const lessons: Lesson[] = [
     chapter: 1,
     title: 'SOH CAH TOA',
     tagline: 'Three ratios, three names. That is the whole vocabulary.',
-    watch:
-      'One slider under the circle sets the angle. Drag it and watch all three ratios at once.',
+    watch: 'One slider under the circle sets the angle.',
     body: [
       'Shrink the hypotenuse to exactly 1 and the ratios stop being fractions — they become the sides themselves.',
       'sin θ is the opposite side. cos θ is the adjacent side. tan θ is one divided by the other.',
       'Sweep from 0° to 90° and watch sine climb while cosine falls. At the very end tangent gives up entirely.',
     ],
-    readouts: [
-      {
-        id: 'theta',
-        label: 'Angle',
-        tone: 'cyan',
-        value: (s) => `${fixed(num(s, 'AngleControl'), 1)}°`,
-      },
-      {
-        id: 'sin',
-        label: 'sin θ',
-        tone: 'blue',
-        value: (s) => fixed(num(s, 'OppSR'), 3),
-      },
-      {
-        id: 'cos',
-        label: 'cos θ',
-        tone: 'amber',
-        value: (s) => fixed(num(s, 'AdjSR'), 3),
-      },
-      {
-        id: 'tan',
-        label: 'tan θ',
-        tone: 'rose',
-        value: (s) => {
-          const cos = num(s, 'AdjSR')
-          if (Math.abs(cos) < 1e-4) return '∞'
-          return fixed(num(s, 'OppSR') / cos, 3)
-        },
-      },
-    ],
+    // The artboard's own SOH CAH TOA card prints sin, cos and tan as fractions
+    // and as values, and the angle under the slider. All four tiles were copies.
+    readouts: [],
     checkpoint: {
       // The artboard opens at 45°, where sine and cosine already match — so
       // "find where they are equal" would award itself. Aim somewhere else.
-      goal: 'Bring the angle down until sin θ reads 0.50.',
+      goal: 'Bring sin θ to 0.50',
       hint: 'Sine hits exactly one half at a famous angle: 30°.',
       test: (s) => Math.abs(num(s, 'OppSR') - 0.5) < 0.025,
+      target: {
+        label: 'sin θ → 0.50',
+        read: (s) => num(s, 'OppSR'),
+        goal: 0.5,
+        span: 1,
+      },
     },
   },
 
@@ -433,30 +413,16 @@ export const lessons: Lesson[] = [
     stage: 'paper',
     bindViewModel: true,
     chapter: 2,
-    // The checkpoint asks for "the radian readout" — it must be visible.
-    detailFirst: true,
     title: 'Radians',
     tagline: 'A degree is a convention. A radian is a measurement.',
-    watch:
-      'Drag the slider at the bottom. Both dials turn together — one counts degrees, one counts radii.',
+    watch: 'Drag the slider. Both dials turn together.',
     body: [
       '360 is a number inherited from Babylonian astronomers. Nothing about a circle requires it.',
       'A radian is honest: it is the angle you have turned when the arc you walked is exactly as long as the radius.',
       'So a half turn is π radians — a little over three radii laid around the rim.',
     ],
+    // Both dials print their own reading. Only the π form is the app's to add.
     readouts: [
-      {
-        id: 'deg',
-        label: 'Degrees',
-        tone: 'amber',
-        value: (s) => `${fixed(num(s, 'Angle'), 1)}°`,
-      },
-      {
-        id: 'rad',
-        label: 'Radians',
-        tone: 'cyan',
-        value: (s) => fixed(num(s, 'Angle') / DEG, 3),
-      },
       {
         id: 'pi',
         label: 'In terms of π',
@@ -465,9 +431,15 @@ export const lessons: Lesson[] = [
       },
     ],
     checkpoint: {
-      goal: 'Set the angle to exactly one radian.',
-      hint: 'Watch the radian readout, not the degrees. It lands near 57°.',
+      goal: 'Set the angle to exactly one radian',
+      hint: 'Watch the radian dial, not the degrees. It lands near 57°.',
       test: (s) => Math.abs(num(s, 'Angle') / DEG - 1) < 0.05,
+      target: {
+        label: '→ 1.00 rad',
+        read: (s) => num(s, 'Angle') / DEG,
+        goal: 1,
+        span: Math.PI,
+      },
     },
   },
   {
@@ -477,44 +449,24 @@ export const lessons: Lesson[] = [
     stage: 'navy',
     bindViewModel: true,
     chapter: 2,
-    // "Watch Opp and Adj" and the checkpoint's "Adj readout" live in the panel.
-    detailFirst: true,
     title: 'The unit circle',
     tagline: 'Trigonometry escapes the triangle.',
-    watch:
-      'Press Spin it below, then watch Opp and Adj as the arm goes all the way round.',
+    watch: 'Press Spin it and follow the arm all the way round.',
     body: [
       'Set the hypotenuse to 1 and pin it at the origin. Now the angle can keep going — past 90°, past 180°, past a full turn.',
       "The handle's height above the axis is sin θ. Its distance along the axis is cos θ. Always.",
       'Past 90° the adjacent side points backwards and cos θ turns negative — a reading no right triangle can produce. That is the moment a triangle rule becomes a function you can feed any number at all.',
     ],
-    readouts: [
-      {
-        id: 'opp',
-        label: 'Opp — sin θ',
-        tone: 'amber',
-        value: (s) => fixed(num(s, 'opp'), 2),
-      },
-      {
-        id: 'adj',
-        label: 'Adj — cos θ',
-        tone: 'mint',
-        value: (s) => fixed(num(s, 'adj'), 2),
-      },
-      {
-        id: 'hyp',
-        label: 'Hyp',
-        tone: 'blue',
-        value: () => '1.00',
-      },
-    ],
+    // `Hyp: 1  Opp: …  Adj: …` is printed under the circle by the artboard.
+    readouts: [],
+    conditions: [{ label: 'cos θ below zero', test: (s) => num(s, 'adj') < -0.5 }],
     actions: [
       { input: 'start', kind: 'trigger', label: 'Spin it', tone: 'primary' },
       { input: 'reset', kind: 'trigger', label: 'Reset', tone: 'ghost' },
     ],
     checkpoint: {
-      goal: 'Spin the circle and catch cos θ going negative — a reading no right triangle can produce.',
-      hint: 'Press Spin it and watch the Adj readout once the arm passes the top of the circle.',
+      goal: 'Catch cos θ going negative',
+      hint: 'Press Spin it and watch Adj once the arm passes the top of the circle.',
       test: (s) => num(s, 'adj') < -0.5,
     },
   },
@@ -529,37 +481,24 @@ export const lessons: Lesson[] = [
     chapter: 3,
     title: 'Unrolling the sine',
     tagline: 'A wave is a circle, walked in a straight line.',
-    watch:
-      'Drag the slider along the bottom to unroll the circle into the wave.',
+    watch: 'Drag the slider to unroll the circle into the wave.',
     body: [
       'Keep the angle turning, and plot the height of the handle against the angle itself.',
       "The circle's vertical position, stretched out along an axis, is the sine wave. There is nothing more mysterious in it than that.",
       'Sweep past π and the wave crosses zero on the way down. Past 2π the whole thing repeats — that repeat is what periodic means.',
     ],
-    readouts: [
-      {
-        id: 'deg',
-        label: 'Angle',
-        tone: 'cyan',
-        value: (s) => `${fixed(num(s, 'angle'), 0)}°`,
-      },
-      {
-        id: 'rad',
-        label: 'Radians',
-        tone: 'violet',
-        value: (s) => fixed(num(s, 'radian'), 2),
-      },
-      {
-        id: 'sin',
-        label: 'sin θ',
-        tone: 'blue',
-        value: (s) => fixed(Math.sin(num(s, 'radian')), 3),
-      },
-    ],
+    // The artboard prints θ in degrees, θ in radians and the plotted value.
+    readouts: [],
     checkpoint: {
-      goal: 'Sweep past a full turn — 2π — and watch the wave start over, identical.',
+      goal: 'Sweep past a full turn — 2π',
       hint: 'Drag the slider knob to roughly halfway; the axis is marked in multiples of π.',
       test: (s) => num(s, 'radian') >= 2 * Math.PI,
+      target: {
+        label: '→ 2π',
+        read: (s) => num(s, 'radian'),
+        goal: 2 * Math.PI,
+        span: 2 * Math.PI,
+      },
     },
   },
   {
@@ -571,37 +510,24 @@ export const lessons: Lesson[] = [
     chapter: 3,
     title: 'Cosine, one quarter early',
     tagline: 'Cosine is sine with a head start.',
-    watch:
-      'The same slider as before — but now it plots the horizontal position instead of the vertical.',
+    watch: 'The same slider — now it plots the horizontal side.',
     body: [
       'Plot the horizontal position instead of the vertical one and the cosine wave falls out.',
       'Same shape, same period. It simply starts at 1 instead of 0.',
       'That quarter-turn offset has a name: a phase shift. cos θ = sin(θ + π/2).',
     ],
-    readouts: [
-      {
-        id: 'deg',
-        label: 'Angle',
-        tone: 'cyan',
-        value: (s) => `${fixed(num(s, 'angle'), 0)}°`,
-      },
-      {
-        id: 'rad',
-        label: 'Radians',
-        tone: 'violet',
-        value: (s) => fixed(num(s, 'radian'), 2),
-      },
-      {
-        id: 'cos',
-        label: 'cos θ',
-        tone: 'amber',
-        value: (s) => fixed(Math.cos(num(s, 'radian')), 3),
-      },
-    ],
+    // The artboard prints θ in degrees, θ in radians and the plotted value.
+    readouts: [],
     checkpoint: {
-      goal: 'Sweep a half turn, until cos θ bottoms out near −1.',
+      goal: 'Sweep until cos θ bottoms out',
       hint: 'Half a turn is π — the first mark on the axis.',
       test: (s) => Math.cos(num(s, 'radian')) < -0.9,
+      target: {
+        label: 'cos θ → −1',
+        read: (s) => Math.cos(num(s, 'radian')),
+        goal: -1,
+        span: 2,
+      },
     },
   },
   {
@@ -613,41 +539,24 @@ export const lessons: Lesson[] = [
     chapter: 3,
     title: 'Tangent and its walls',
     tagline: 'The ratio that runs off the page.',
-    watch:
-      'Drag slowly through the first quarter turn. The interesting part is only a degree wide.',
+    watch: 'Drag slowly through the first quarter turn.',
     body: [
       'Tangent is sine over cosine — height divided by width.',
       'As the angle nears 90°, the width collapses toward zero while the height holds near 1. Dividing by almost nothing gives almost everything.',
       'The wall the curve never touches is called an asymptote. Tangent has one every half turn, forever.',
     ],
-    readouts: [
-      {
-        id: 'deg',
-        label: 'Angle',
-        tone: 'cyan',
-        value: (s) => `${fixed(num(s, 'angle'), 0)}°`,
-      },
-      {
-        id: 'rad',
-        label: 'Radians',
-        tone: 'violet',
-        value: (s) => fixed(num(s, 'radian'), 2),
-      },
-      {
-        id: 'tan',
-        label: 'tan θ',
-        tone: 'rose',
-        value: (s) => {
-          const t = Math.tan(num(s, 'radian'))
-          if (!Number.isFinite(t) || Math.abs(t) > 999) return '∞'
-          return fixed(t, 2)
-        },
-      },
-    ],
+    // The artboard prints θ in degrees, θ in radians and tan(θ) itself.
+    readouts: [],
     checkpoint: {
-      goal: 'Sweep straight through 90° and watch tangent blow up, flip sign, and climb back.',
+      goal: 'Sweep straight through 90°',
       hint: 'Drag slowly through the first quarter turn — the interesting part is one degree wide.',
       test: (s) => num(s, 'radian') > Math.PI / 2 + 0.15,
+      target: {
+        label: '→ past 90°',
+        read: (s) => num(s, 'radian'),
+        goal: Math.PI / 2 + 0.15,
+        span: Math.PI / 2,
+      },
     },
   },
   {
@@ -659,30 +568,23 @@ export const lessons: Lesson[] = [
     chapter: 3,
     title: 'Amplitude and frequency',
     tagline: 'Two dials turn one wave into every wave.',
-    watch:
-      'A slider for amplitude, three buttons for frequency. Try them in any order.',
+    watch: 'A slider for amplitude, buttons for frequency.',
     body: [
       'y = A·sin(Bθ). A stretches the wave vertically; B squeezes it horizontally.',
       'Amplitude is how loud. Frequency is how high the note. For sound, that is not a metaphor.',
       'Change A and the peaks move. Change B and the peaks multiply. The shape never stops being a sine.',
     ],
-    readouts: [
-      {
-        id: 'amp',
-        label: 'Amplitude — A',
-        tone: 'amber',
-        value: (s) => fixed(amplitude(s), 2),
-      },
-      {
-        id: 'frq',
-        label: 'Frequency — B',
-        tone: 'cyan',
-        value: (s) => fixed(num(s, 'frqNum'), 0),
-      },
+    // The amplitude slider carries its own 0.5–2.5 scale and the frequency
+    // buttons show which one is lit. Two conditions say what a copy cannot:
+    // which half of a two-part checkpoint is still outstanding.
+    readouts: [],
+    conditions: [
+      { label: 'A at max', test: (s) => amplitude(s) > 2.35 },
+      { label: 'B = 3', test: (s) => num(s, 'frqNum') >= 3 },
     ],
     actions: [{ input: 'start', kind: 'bool', label: 'Animate', tone: 'primary' }],
     checkpoint: {
-      goal: 'Push the amplitude to its maximum and set the frequency to 3.',
+      goal: 'Amplitude at max, frequency at 3',
       hint: 'Amplitude is the slider; frequency is the row of buttons.',
       test: (s) => amplitude(s) > 2.35 && num(s, 'frqNum') >= 3,
     },
@@ -696,27 +598,14 @@ export const lessons: Lesson[] = [
     chapter: 3,
     title: 'Where the wave shows up',
     tagline: 'A pendulum knows no trigonometry. It obeys it anyway.',
-    watch:
-      'Press Release it below and follow the weight as it traces its path.',
+    watch: 'Press Release it and follow the weight.',
     body: [
       'Release the weight and track its horizontal position over time.',
       'The trace is a sine wave. So is a plucked string, an alternating current, a tide, and the brightness of one pixel in a radio signal.',
       'You did not learn a rule about triangles. You learned the shape of anything that repeats.',
     ],
-    readouts: [
-      {
-        id: 'theta',
-        label: 'Angle',
-        tone: 'cyan',
-        value: (s) => `${fixed(num(s, 'AngleControl'), 1)}°`,
-      },
-      {
-        id: 's',
-        label: 'Displacement',
-        tone: 'amber',
-        value: (s) => fixed(num(s, 'OppSR'), 2),
-      },
-    ],
+    // Nothing to mirror: the lesson completes the moment Release it is pressed.
+    readouts: [],
     actions: [
       {
         input: 'start',
