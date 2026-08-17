@@ -178,8 +178,14 @@ export function LessonScreen({ lesson, onBack, onGoto, onReview, onFinish }: Pro
     else onFinish()
   }
 
-  /** The docked primary action for the current step, if it has one. The task
-   *  step only gets one once the task is behind the learner. */
+  /**
+   * What sits at the foot of the sheet on this step.
+   *
+   * The sheet is a fixed height, so every step has a foot to fill; leaving the
+   * task step's hint and skip up in the scrolling copy left a hand's width of
+   * blank sheet under them. Instruction at the top, controls at the bottom, the
+   * same on all three steps.
+   */
   const dock =
     step === 'watch' ? (
       <button
@@ -189,15 +195,42 @@ export function LessonScreen({ lesson, onBack, onGoto, onReview, onFinish }: Pro
       >
         Got it — give me a task
       </button>
-    ) : step === 'do' && solved ? (
-      <button
-        type="button"
-        className="btn btn--primary btn--wide"
-        onClick={() => setStep('learn')}
-      >
-        Why it works
-      </button>
-    ) : step === 'learn' ? (
+    ) : step === 'do' ? (
+      solved ? (
+        <button
+          type="button"
+          className="btn btn--primary btn--wide"
+          onClick={() => setStep('learn')}
+        >
+          Why it works
+        </button>
+      ) : (
+        /* The way past an unsolved task. `the-swing` has no measured checkpoint
+           — only an action button — so it reached this step with nothing here
+           at all, and the step dots were the only way out. */
+        <div className="hintrow">
+          {lesson.checkpoint &&
+            (showHint ? (
+              <p className="step__hint">{lesson.checkpoint.hint}</p>
+            ) : (
+              <button
+                type="button"
+                className="linkish"
+                onClick={() => setShowHint(true)}
+              >
+                Need a hint?
+              </button>
+            ))}
+          <button
+            type="button"
+            className="linkish linkish--quiet"
+            onClick={() => setStep('learn')}
+          >
+            Skip
+          </button>
+        </div>
+      )
+    ) : (
       <button type="button" className="btn btn--primary btn--wide" onClick={goNext}>
         {after?.kind === 'review'
           ? 'Chapter review'
@@ -205,10 +238,14 @@ export function LessonScreen({ lesson, onBack, onGoto, onReview, onFinish }: Pro
             ? 'Next lesson'
             : 'Finish the course'}
       </button>
-    ) : null
+    )
 
   return (
-    <div className={`screen lesson lesson--${lesson.stage}`}>
+    <div
+      className={`screen lesson lesson--${lesson.stage} ${
+        lesson.detailFirst ? 'lesson--detail' : ''
+      }`.trim()}
+    >
       <AppBar
         onBack={onBack}
         subtitle={`Lesson ${n} of ${TOTAL_LESSONS}`}
@@ -328,40 +365,11 @@ export function LessonScreen({ lesson, onBack, onGoto, onReview, onFinish }: Pro
 
               {/* Arriving here already solved — because the Find-it step asked
                   for the same move, or because the lesson was done before —
-                  gets an acknowledgement and a way on, not a task with no
-                  ending and two text links where the button should be. */}
-              {solved ? (
-                <>
-                  <p className="step__win">
-                    <span aria-hidden="true">✓</span> Done — that is the move.
-                  </p>
-                </>
-              ) : (
-                /* The way past an unsolved task. `the-swing` has no measured
-                   checkpoint — only an action button — so it used to reach
-                   this step with no hint row and no docked button, and the
-                   step dots were the only way out. */
-                <div className="hintrow">
-                  {lesson.checkpoint &&
-                    (showHint ? (
-                      <p className="step__hint">{lesson.checkpoint.hint}</p>
-                    ) : (
-                      <button
-                        type="button"
-                        className="linkish"
-                        onClick={() => setShowHint(true)}
-                      >
-                        Need a hint?
-                      </button>
-                    ))}
-                  <button
-                    type="button"
-                    className="linkish linkish--quiet"
-                    onClick={() => setStep('learn')}
-                  >
-                    Skip
-                  </button>
-                </div>
+                  gets an acknowledgement rather than a task with no ending. */}
+              {solved && (
+                <p className="step__win">
+                  <span aria-hidden="true">✓</span> Done — that is the move.
+                </p>
               )}
             </>
           )}

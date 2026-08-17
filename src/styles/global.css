@@ -69,8 +69,22 @@
 
   /* Rhythm — spacing sits on a 4px grid throughout. */
   --gut: 20px;
-  /* How far the bottom sheet rides up over the artwork. */
-  --sheet-overlap: 24px;
+  /**
+   * The strip the lesson sheet always occupies.
+   *
+   * The stage reserves exactly this much and never more, so the canvas box —
+   * and the artboard fitted inside it — is one fixed rectangle for the whole
+   * lesson. It is a constant rather than the sheet's content height because
+   * the content differs per step: sized to content, the artwork jumped every
+   * time the learner changed step or opened the sheet.
+   *
+   * 328px clears the tallest collapsed step (326px, measured across all ten
+   * lessons); the dvh term takes over on short screens.
+   */
+  --sheet-peek: min(328px, 46dvh);
+  /* The sheet's other height. What the stage reserves is one or the other,
+     picked per lesson — see `--stage-reserve` in app.css. */
+  --sheet-open: min(470px, 56dvh);
   --safe-t: env(safe-area-inset-top, 0px);
   --safe-b: env(safe-area-inset-bottom, 0px);
 

@@ -605,53 +605,71 @@
    Lesson — full-bleed stage with the sheet rising over it
    =========================================================================== */
 
-/* The stage takes whatever the sheet does not. That is the point of the
-   stepped flow: a short step leaves more room, so the artwork grows instead
-   of the empty space. The padding is the strip the sheet overlaps, kept
-   outside the canvas box, so the sheet never covers live artwork.
+/* The stage fills everything under the app bar and reserves a fixed strip of
+   it for the sheet. Because that reservation is a constant, the canvas box is
+   one fixed rectangle for the whole lesson: the artboard fitted into it does
+   not move or rescale when the sheet opens, when it closes, or when the
+   learner changes step.
+
+   It used to take "whatever the sheet does not", which sounded generous and
+   meant the artwork jumped every time anything below it changed size — opening
+   the readouts shifted and shrank the very slider the instruction was pointing
+   at, and each step's copy length nudged it again.
 
    Caveat worth knowing: `Fit.Contain` letterboxes a fixed-size artboard, but
    the artboards in this file carry their own responsive layout and overflow
    the box instead — `Ratio` loses the bottom of its Scale slider and its
    third ratio tile at every phone size. That is an artboard-side fix (export
    at a fixed size, or shorten the panel); nothing here can letterbox it. */
+/* How much of the stage the sheet is allowed to own, fixed for the whole
+   lesson. Normally that is the peek, and expanding the sheet lays it over the
+   bottom of the canvas — a deliberate, reversible act, after which the artwork
+   is exactly where it was.
+
+   Three lessons open their sheet on arrival, because their instruction points
+   at the readouts inside it ("drag either slider and watch the panel"). For
+   those, reserving only the peek would mean the sheet covered the very sliders
+   the sentence names, from the moment the lesson loaded — so they reserve the
+   open height instead. Collapsing one leaves white between the canvas and the
+   sheet, which is indistinguishable from the letterbox around the artwork. */
+.lesson {
+  --stage-reserve: var(--sheet-peek);
+}
+
+.lesson--detail {
+  --stage-reserve: var(--sheet-open);
+}
+
 .lesson__stage {
   position: relative;
   z-index: 1;
   flex: 1 1 auto;
-  min-height: 30dvh;
+  min-height: 0;
   width: 100%;
-  padding-bottom: var(--sheet-overlap);
+  padding-bottom: var(--stage-reserve);
   display: flex;
 }
 
-/* The sheet overlaps that padding strip so the two read as one composition
-   rather than two stacked boxes. It starts as a slim peek — the instruction
-   and its button — and opens on demand for the readouts, so the artwork keeps
-   the screen by default. It is sized by its step's content, capped so the
-   longest step still leaves the artwork usable.
+/* Lifted out of the column and laid over the stage, which is what keeps the
+   canvas box constant. Collapsed it fills exactly the strip the stage reserved
+   and covers no artwork at all; expanded it rides up over the bottom of the
+   canvas, and collapsing puts the artwork back precisely where it was rather
+   than re-fitting it.
 
-   The collapsed cap is what makes closing the sheet mean something. Until it
-   existed, `.is-open` was set on this element and styled nowhere: the sheet
-   never opened or closed, it simply grew when the readouts were rendered into
-   it — which is why the toggle did nothing at all on the explanation step,
-   the one step that had no readouts to render.
+   Fixed height rather than content height, for the same reason: sized to its
+   step, the sheet's top edge — and the artwork above it — moved on every step
+   change. Content sits at the top of it, the docked action at the bottom.
 
-   Nothing animates between the two. The Rive canvas is sized to the stage by a
-   ResizeObserver, so a height transition here would reallocate a WebGL backing
-   store on every frame of it. */
+   Nothing animates between the two heights. The Rive canvas is sized to the
+   stage by a ResizeObserver, so a height transition here would reallocate a
+   WebGL backing store on every frame of it. */
 .sheet {
-  position: relative;
+  position: absolute;
   z-index: 2;
-  flex: 0 1 auto;
-  min-height: 0;
-  /* Above every step's collapsed content on a tall phone, so closing only ever
-     clips the long explanation — never an instruction. On a short one it lands
-     on the same cap as the open state, where there was no room to give back. */
-  max-height: min(56dvh, 340px);
+  inset: auto 0 0;
+  height: var(--sheet-peek);
   display: flex;
   flex-direction: column;
-  margin-top: calc(-1 * var(--sheet-overlap));
   background: var(--paper);
   border-radius: var(--r-xl) var(--r-xl) 0 0;
   box-shadow: var(--lift-3);
@@ -659,8 +677,12 @@
   overflow: hidden;
 }
 
+/* Until this existed, `.is-open` was set on the element and styled nowhere:
+   the sheet never opened or closed, it simply grew when the readouts were
+   rendered into it — which is why the toggle did nothing whatsoever on the
+   explanation step, the one step with no readouts to render. */
 .sheet.is-open {
-  max-height: min(56dvh, 470px);
+  height: var(--sheet-open);
 }
 
 .sheet__scroll {
@@ -747,7 +769,7 @@
 .burst {
   position: absolute;
   left: 50%;
-  bottom: calc(var(--sheet-overlap) + 10px);
+  bottom: calc(var(--stage-reserve) + 10px);
   z-index: 2;
   pointer-events: none;
 }
@@ -951,11 +973,12 @@
   animation: pop 0.4s var(--ease);
 }
 
+/* Lives in the sheet's foot, so it carries no top padding of its own. */
 .hintrow {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding-top: 12px;
+  min-height: 50px;
 }
 
 /* "Skip" sat at the same size, weight and case as "Need a hint?" — two peers,
@@ -1533,12 +1556,6 @@
    Short viewports
    =========================================================================== */
 
-@media (max-height: 720px) {
-  .lesson__stage {
-    max-height: 52dvh;
-  }
-}
-
 @media (max-width: 360px) {
   :root {
     --gut: 16px;
@@ -1564,18 +1581,21 @@
     height: auto;
     aspect-ratio: auto;
     max-height: none;
+    /* Side by side, the sheet takes a column of its own — there is no strip
+       below the canvas to reserve. */
     padding: 0;
     min-height: 0;
   }
 
-  .lesson .sheet {
+  /* Back into the grid: beside the artwork rather than over it, so the canvas
+     column is the constant here and the sheet never covers it at all. */
+  .lesson .sheet,
+  .lesson .sheet.is-open {
+    position: relative;
+    inset: auto;
     grid-column: 2;
-    margin-top: 0;
+    height: auto;
     border-radius: var(--r-xl) 0 0 0;
     box-shadow: -14px 0 34px -22px rgba(20, 26, 70, 0.35);
-    /* Beside the artwork the sheet owns a full-height column, so the portrait
-       cap has to go. Left in, it pinned the sheet to 56dvh — 200px on a
-       360px-tall phone — and sliced the primary button in half. */
-    max-height: none;
   }
 }
