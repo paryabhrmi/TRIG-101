@@ -714,20 +714,38 @@
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
   touch-action: pan-y;
-  padding: 12px var(--gut) 4px;
+  padding: 4px var(--gut) 8px;
 }
 
 /* A step with no docked action lets the scroll area own the safe area. */
 .sheet__scroll:last-child {
-  padding-bottom: calc(20px + var(--safe-b));
+  padding-bottom: calc(16px + var(--safe-b));
 }
 
-/* The step's primary action, held below the scrolling copy. */
+/* One rhythm for every step: the lead, then whatever the step adds, each a
+   fixed step apart. Stacking it here rather than on each block is also what
+   lets the sheet measure a step's natural height in one read. */
+.sheet__inner {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* The sheet's bottom rail, holding whatever the step's way forward is — the
+   primary button on most steps, the hint and skip while a task is still open.
+   One box in the same place on every step, so the sheet always ends on a
+   control rather than trailing off into paper. */
 .sheet__dock {
   flex: 0 0 auto;
-  padding: 12px var(--gut) calc(16px + var(--safe-b));
+  padding: 10px var(--gut) calc(14px + var(--safe-b));
   background: var(--paper);
   box-shadow: 0 -1px 0 var(--line);
+}
+
+/* Text controls do not need the button's breathing room, and the rail reads
+   quieter when they do not take it. */
+.sheet__dock .hintrow {
+  padding-top: 0;
 }
 
 /* The one control that opens and closes the sheet: a grabber that toggles it
@@ -741,8 +759,12 @@
   display: grid;
   place-items: center;
   width: 100%;
+  /* 44px of target, drawn as 30px of chrome: the padding does the reaching,
+     so the handle sits close to the step row instead of floating in a band
+     of its own. */
   min-height: 44px;
-  padding: 6px 0 2px;
+  height: 44px;
+  padding: 0;
   color: var(--ink-3);
   touch-action: none;
 }
@@ -919,7 +941,14 @@
   display: flex;
   align-items: center;
   gap: 4px;
-  padding: 4px calc(var(--gut) - 8px) 0;
+  padding: 0 calc(var(--gut) - 8px);
+}
+
+/* The row is a 44px target stack, which is taller than the pills need to
+   read. Pulling its own height back in closes the band of paper that used to
+   sit between the step name and the sentence it labels. */
+.steps__seg {
+  margin-block: -6px;
 }
 
 /* Every step is a jump target, so even the collapsed ones are a full 44px
@@ -988,7 +1017,6 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 12px;
   font-size: 14px;
   font-weight: 800;
   color: var(--mint);
@@ -1029,7 +1057,6 @@
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  padding-top: 16px;
 }
 
 /* ---------------------------------------------------------------------------
@@ -1044,7 +1071,6 @@
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 8px;
-  padding-top: 16px;
 }
 
 .chip {
@@ -1112,7 +1138,6 @@
 }
 
 .prose {
-  padding-top: 16px;
   display: flex;
   flex-direction: column;
   gap: 12px;

@@ -21,11 +21,35 @@ const FLICK_VELOCITY = 0.35
  * otherwise decide the whole gesture. */
 const VELOCITY_WINDOW_MS = 80
 
-function metrics(safeBottom: number) {
+/**
+ * The open height is the step's own height, capped — not the cap itself.
+ * A sheet that always opens to its ceiling leaves the short steps ending in
+ * a hand's width of blank paper, which reads as content failing to load
+ * rather than as a step that is simply short. `content` is the height this
+ * step actually needs; only the steps that exceed the cap scroll.
+ */
+function metrics(safeBottom: number, content: number) {
   const vh = window.visualViewport?.height ?? window.innerHeight
   const peek = Math.min(PEEK_MAX, Math.max(PEEK_MIN, vh * PEEK_VH)) + safeBottom
-  const open = Math.min(OPEN_MAX, vh * OPEN_VH) + safeBottom
+  const ceiling = Math.min(OPEN_MAX, vh * OPEN_VH) + safeBottom
+  const open = content > 0 ? Math.min(ceiling, Math.max(peek, content)) : ceiling
   return { peek, open }
+}
+
+/**
+ * What this step would occupy if nothing constrained it: the sheet's own
+ * chrome (grabber, steps, docked action) plus the copy's natural height.
+ * Measured off the scroller's inner wrapper, because a scroller's own
+ * `scrollHeight` never reports less than the box it is given.
+ */
+function contentHeight(sheet: HTMLElement) {
+  const scroll = sheet.querySelector<HTMLElement>('.sheet__scroll')
+  const inner = sheet.querySelector<HTMLElement>('.sheet__inner')
+  if (!scroll || !inner) return 0
+  const pad = getComputedStyle(scroll)
+  const padding = Number.parseFloat(pad.paddingTop) + Number.parseFloat(pad.paddingBottom)
+  const chrome = sheet.offsetHeight - scroll.offsetHeight
+  return chrome + inner.offsetHeight + padding
 }
 
 function safeAreaBottom(el: HTMLElement) {
@@ -56,7 +80,7 @@ export function useBottomSheet(open: boolean, setOpen: (open: boolean) => void) 
   const applyMetrics = useCallback(() => {
     const el = sheetRef.current
     if (!el) return
-    const { peek, open: openH } = metrics(safeAreaBottom(el))
+    const { peek, open: openH } = metrics(safeAreaBottom(el), contentHeight(el))
     el.style.setProperty('--sheet-peek-h', `${peek}px`)
     el.style.setProperty('--sheet-open-h', `${openH}px`)
   }, [])
@@ -71,11 +95,23 @@ export function useBottomSheet(open: boolean, setOpen: (open: boolean) => void) 
     }
   }, [applyMetrics])
 
+  // Each step brings its own amount of copy, so the open height is re-measured
+  // whenever that copy changes. Observing the inner wrapper rather than the
+  // sheet avoids a feedback loop: its width is what wraps the text, and the
+  // height we set never touches it.
+  useEffect(() => {
+    const inner = sheetRef.current?.querySelector('.sheet__inner')
+    if (!inner) return
+    const ro = new ResizeObserver(applyMetrics)
+    ro.observe(inner)
+    return () => ro.disconnect()
+  }, [applyMetrics])
+
   const onPointerDown = useCallback(
     (e: React.PointerEvent) => {
       const el = sheetRef.current
       if (!el) return
-      const { peek, open: openH } = metrics(safeAreaBottom(el))
+      const { peek, open: openH } = metrics(safeAreaBottom(el), contentHeight(el))
       drag.current = {
         startY: e.clientY,
         startHeight: open ? openH : peek,
