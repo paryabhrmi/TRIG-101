@@ -14,12 +14,11 @@
   --line: #e6e9f4;
   --line-strong: #d5dae9;
 
-  /* Ink — sampled from the label text in the Angle artboard, then darkened
-     until the quietest step still clears 4.5:1 on paper. */
+  /* Ink — sampled from the label text in the Angle artboard. */
   --ink: #141a46;
   --ink-2: #4a5279;
-  --ink-3: #67708d;
-  --ink-mute: #67708d;
+  --ink-3: #858db0;
+  --ink-mute: #8a92b4;
 
   /**
    * Eight of the ten artboards are drawn light-on-navy inside the Rive file.
@@ -40,36 +39,21 @@
   --mint: #21b573;
   --rose: #ff4d6a;
 
-  /* The same two accents as ink. The raw artwork values are fills — as text
-     they sit at 2.7:1 and 3.2:1 on paper, so anything reading as a word or a
-     number uses these instead. */
-  --mint-ink: #0f7a4c;
-  --rose-ink: #c62740;
-
   /**
    * The game-like shell palette. Every accent comes in two steps: the fill
    * and the darker "edge" drawn as a hard bottom border, which is what makes
    * flat shapes read as chunky, pressable pieces.
-   *
-   * Each chapter accent does double duty — it is a fill carrying white text
-   * (the review row, the Start key) *and* text sitting on paper (the chapter
-   * headline, the row numbers). Contrast is symmetric, so one tone that
-   * clears 4.5:1 against white satisfies both jobs. That is why these are
-   * saturated rather than pastel: at the pastel end white text on the fill
-   * sat at 2.1–2.6:1, which is unreadable in daylight on a phone.
    */
-  --duo-blue: #1b6ac2;
-  --duo-blue-dark: #134e8f;
-  --duo-amber: #965c03;
-  --duo-amber-dark: #6d4302;
-  --duo-green: #357f0d;
-  --duo-green-dark: #255c08;
-  --duo-violet: #7b3fbe;
-  --duo-violet-dark: #5b2d8e;
+  --duo-blue: #55a6e8;
+  --duo-blue-dark: #4285c2;
+  --duo-amber: #e0a03c;
+  --duo-amber-dark: #bd811f;
+  --duo-green: #58cc02;
+  --duo-green-dark: #47a302;
+  --duo-violet: #ce82ff;
+  --duo-violet-dark: #a568cc;
   --duo-line: #e5e5e5;
   --duo-key: #f7f7f7;
-  /* Ink for the amber "soon / not built" tint, which is a pale wash. */
-  --amber-ink: #8a5a06;
 
   /* Shape */
   --r-sm: 10px;
