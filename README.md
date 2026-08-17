@@ -24,14 +24,67 @@ toggles and buttons and are fully interactive on their own.
 So the app does not re-implement the controls. Instead:
 
 - **the canvas is the input surface** — you drag what you see;
-- **the app reads the artboard's view model every frame** and mirrors it as
-  live instrument readouts;
+- **the app reads the artboard's view model every frame**, but only to decide
+  how close the learner is to the lesson's goal — not to reprint numbers the
+  artboard is already showing (see [The lesson bar](#the-lesson-bar));
 - **each lesson has a checkpoint** — a thing to *do* on the canvas. The app
   watches the view model until the learner reaches it, then marks the lesson
   complete.
 
 That keeps the app a course shell rather than a second, competing UI, and it
 means the lesson tasks are real manipulations instead of multiple-choice.
+
+## The lesson bar
+
+The whole screen is the artboard, edge to edge, with a fixed **180px** bar
+under it. The bar's height never changes between the first two steps — every
+row is reserved whether or not a lesson fills it — because the artboards'
+sliders are dragged by thumb, and a canvas that resizes mid-drag moves the knob
+out from under the finger.
+
+```
+ 12  padding
+ 14  step name
+  4  gap
+ 40  task, two lines reserved
+  8  gap
+ 28  instrument slot
+  8  gap
+ 54  action row (a 50px button and its 4px edge)
+ 12  padding
+---
+180  plus the bottom safe area
+```
+
+The third step ("why it works") opens the same bar into a panel, once, when the
+lesson is solved. There is nothing to drag and no handle to find.
+
+**What goes in the instrument slot is decided by what the artboards already
+draw.** Rendering all ten showed that nine print their own numbers: `UnitCircle`
+writes `Hyp / Opp / Adj` under the circle, `SecretRatios` carries a full SOH CAH
+TOA table, the three wave artboards print θ in degrees and in radians beside the
+plotted value, and `AmpFrqSin`'s slider carries its own 0.5–2.5 scale. Twenty-six
+of the course's thirty-two readout tiles were copies of something already on the
+canvas. So the rule is:
+
+> The artboard says where you are. The bar says where you are going.
+
+What survives is four tiles the file does not draw — the three ratios in lesson 2
+and the radian in terms of π in lesson 4 — plus:
+
+- an **aim bar** (`Checkpoint.target`), which shows the distance left to the
+  checkpoint and never the reading itself;
+- **condition pills** (`Lesson.conditions`), where a checkpoint has two halves
+  and the learner needs to know which one is outstanding;
+- nothing at all, for the lessons whose artboard says everything already.
+
+### Putting the old sheet back
+
+The previous bottom sheet is preserved whole in `src/components/LessonSheet.tsx`.
+Add `?ui=sheet` anywhere in the address to switch a live deploy back to it, and
+`?ui=bar` to return; the choice is remembered, since hash routing drops the query
+on navigation. This is a review aid, not a user setting — it is not surfaced
+anywhere in the UI. See `src/lib/uiMode.ts`.
 
 ## Curriculum
 
@@ -82,6 +135,15 @@ These were calibrated against the runtime and are worth knowing before editing
 AmpFrqSin), `ViewModel2` (CircletoSin/Cos/Tan) and `RadDegVM` (RadDeg). The
 `Angle` artboard has **no** view model — binding one logs a runtime error, so
 lessons declare `bindViewModel` explicitly.
+
+**Fit and alignment.** Every artboard is square or near it (`Ratio` is 500×538,
+the rest are 1:1). On a portrait stage `FitWidth` therefore scales identically to
+`Contain`, while also guaranteeing the artwork reaches both edges of the screen
+whatever height the stage ends up with. Landscape keeps `Contain`, because there
+the stage is wider than the artboard and `FitWidth` would crop. The artwork is
+bottom-aligned so the slack a square artboard leaves on a tall phone collects in
+one band under the app bar rather than two, which also brings the artboards'
+sliders within thumb reach.
 
 **Reads, not writes.** Property writes only stick *after* the state machine's
 first advance; before that, initialisation overwrites them. More importantly,
@@ -151,6 +213,11 @@ Vercel dashboard later.
 
 React 19 · TypeScript · Vite 8 · `@rive-app/react-canvas` · hash routing (no
 server rewrites needed) · no CSS framework.
+
+The canvas runtime rather than the WebGL one: `@rive-app/react-webgl` is pinned
+at 4.27.3, which reads script bytecode versions 3–6, and this file's artboards
+carry version 7 — on WebGL, lesson 3's tangent row renders as `Initial value`
+over garbled digits. `@rive-app/react-canvas` is on 4.32.0 and reads it.
 
 ## Credits
 
