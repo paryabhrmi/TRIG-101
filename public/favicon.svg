@@ -1,7 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- Same mark as src/components/Mark.tsx: the angle arm and the right
+       triangle it drops onto the axis. The triangle stays in one quadrant so
+       nothing crosses the centre — the old corner-to-corner hypotenuse read
+       as a "no entry" slash at tab size. Geometry is kept inside the central
+       80% because the manifest declares this icon maskable. -->
   <rect width="64" height="64" rx="14" fill="#ffffff" />
-  <circle cx="32" cy="32" r="19" fill="none" stroke="#0075FF" stroke-width="2.5" opacity=".55" />
-  <path d="M14 46 H46 L14 20 Z" fill="none" stroke="#2BAFF7" stroke-width="4" stroke-linejoin="round" />
-  <path d="M14 46 H46" stroke="#FEAF36" stroke-width="4" stroke-linecap="round" />
-  <path d="M14 38 h8 v8" fill="none" stroke="#0D1062" stroke-width="2" opacity=".8" />
+  <circle cx="28" cy="37" r="17" fill="none" stroke="#0075FF" stroke-width="1.8" opacity=".45" />
+  <path d="M11 37 H47" stroke="#B9C4E0" stroke-width="1.8" stroke-linecap="round" />
+  <path d="M28 37 H40.8" stroke="#FEAF36" stroke-width="4.2" stroke-linecap="round" />
+  <path d="M40.8 37 V24.2" stroke="#2BAFF7" stroke-width="4.2" stroke-linecap="round" />
+  <path d="M28 37 L40.8 24.2" stroke="#854DB8" stroke-width="4.2" stroke-linecap="round" />
 </svg>

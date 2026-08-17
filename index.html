@@ -18,6 +18,10 @@
     <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
     <link rel="apple-touch-icon" href="./favicon.svg" />
     <link rel="manifest" href="./manifest.webmanifest" />
+    <!-- 680 KB of artwork that nothing on screen can be drawn without. Left to
+         `useRive`, it only starts downloading after React has mounted, i.e.
+         behind the whole JS bundle; preloading overlaps it with the runtime. -->
+    <link rel="preload" href="./trig101.riv" as="fetch" crossorigin="anonymous" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <!-- Nunito's heavy weights carry the rounded, game-like UI voice. -->
@@ -88,7 +92,13 @@
            failed before first render — which used to show as a blank page. -->
       <div id="boot" class="boot">
         <div class="boot__mark"></div>
-        <p class="boot__msg">Loading Trigonometry 101…</p>
+        <p class="boot__msg">
+          Loading Trigonometry 101…
+          <span class="boot__hint" id="boot-slow" hidden>
+            The interactive artwork is a few megabytes, and it only downloads
+            once.
+          </span>
+        </p>
       </div>
     </div>
 
@@ -143,6 +153,13 @@
         window.addEventListener('unhandledrejection', function (e) {
           note('The app hit an error', e && e.reason ? String(e.reason) : '')
         })
+
+        // A spinner that has been going for four seconds looks stuck rather
+        // than busy. Say what is taking the time before it reads as a fault.
+        window.setTimeout(function () {
+          var slow = document.getElementById('boot-slow')
+          if (slow && !first) slow.hidden = false
+        }, 4000)
 
         // Nothing mounted after a generous wait: say so rather than sit blank.
         window.setTimeout(render, 15000)

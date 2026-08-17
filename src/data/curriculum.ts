@@ -68,12 +68,6 @@ export interface Lesson {
   checkpoint?: Checkpoint
   /** Boolean state-machine inputs to mirror into `Sample.b`. */
   watchInputs?: string[]
-  /**
-   * Open the sheet's detail pane from the start. Set on lessons whose
-   * instructions point at the readout panel — hiding what the text refers to
-   * would break the link between instruction and referent.
-   */
-  detailFirst?: boolean
 }
 
 /**
@@ -267,8 +261,11 @@ export const lessons: Lesson[] = [
     watchInputs: ['Boolean 1'],
     title: 'Naming the sides',
     tagline: 'Opposite and adjacent are job titles, not names.',
+    // Deliberately does *not* say "flip it": flipping the switch is this
+    // lesson's checkpoint, so an instruction to do it here cleared the task
+    // before the task step had been reached.
     watch:
-      'Under the triangle is a switch — everything on the canvas responds to your finger. Flip it.',
+      'Under the triangle is a switch, and the triangle itself has draggable corners — everything on this canvas answers to your finger.',
     body: [
       'Every right triangle has one side whose name never changes: the hypotenuse. Always across from the right angle, always the longest.',
       'The other two swap. Which one is opposite and which is adjacent depends entirely on the angle you are standing at.',
@@ -316,8 +313,6 @@ export const lessons: Lesson[] = [
     stage: 'paper',
     bindViewModel: true,
     chapter: 1,
-    // "Watch the panel" refers to the ratio readouts — keep them in view.
-    detailFirst: true,
     title: 'Shape, not size',
     tagline: 'Blow the triangle up. The ratios refuse to change.',
     watch:
@@ -386,36 +381,11 @@ export const lessons: Lesson[] = [
       'sin θ is the opposite side. cos θ is the adjacent side. tan θ is one divided by the other.',
       'Sweep from 0° to 90° and watch sine climb while cosine falls. At the very end tangent gives up entirely.',
     ],
-    readouts: [
-      {
-        id: 'theta',
-        label: 'Angle',
-        tone: 'cyan',
-        value: (s) => `${fixed(num(s, 'AngleControl'), 1)}°`,
-      },
-      {
-        id: 'sin',
-        label: 'sin θ',
-        tone: 'blue',
-        value: (s) => fixed(num(s, 'OppSR'), 3),
-      },
-      {
-        id: 'cos',
-        label: 'cos θ',
-        tone: 'amber',
-        value: (s) => fixed(num(s, 'AdjSR'), 3),
-      },
-      {
-        id: 'tan',
-        label: 'tan θ',
-        tone: 'rose',
-        value: (s) => {
-          const cos = num(s, 'AdjSR')
-          if (Math.abs(cos) < 1e-4) return '∞'
-          return fixed(num(s, 'OppSR') / cos, 3)
-        },
-      },
-    ],
+    // `SecretRatios` already draws its own SOH CAH TOA panel — angle, sin,
+    // cos and tan all live on the canvas itself. Mirroring them again in the
+    // sheet would just be the same four numbers twice, so this lesson has no
+    // readouts of its own.
+    readouts: [],
     checkpoint: {
       // The artboard opens at 45°, where sine and cosine already match — so
       // "find where they are equal" would award itself. Aim somewhere else.
@@ -433,8 +403,6 @@ export const lessons: Lesson[] = [
     stage: 'paper',
     bindViewModel: true,
     chapter: 2,
-    // The checkpoint asks for "the radian readout" — it must be visible.
-    detailFirst: true,
     title: 'Radians',
     tagline: 'A degree is a convention. A radian is a measurement.',
     watch:
@@ -477,8 +445,6 @@ export const lessons: Lesson[] = [
     stage: 'navy',
     bindViewModel: true,
     chapter: 2,
-    // "Watch Opp and Adj" and the checkpoint's "Adj readout" live in the panel.
-    detailFirst: true,
     title: 'The unit circle',
     tagline: 'Trigonometry escapes the triangle.',
     watch:

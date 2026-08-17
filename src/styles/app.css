@@ -99,8 +99,8 @@
   flex: 0 0 auto;
   display: grid;
   place-items: center;
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   border-radius: var(--r-md);
   background: rgba(255, 255, 255, 0.14);
   border: 2px solid rgba(255, 255, 255, 0.35);
@@ -202,9 +202,13 @@
   width: 100%;
 }
 
+/* Text buttons still have to be hittable, so the padding carries them to a
+   44px target even though the ink is only 13.5px tall. */
 .linkish {
-  display: inline-block;
-  padding: 8px 4px;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 8px 8px;
   font-size: 13.5px;
   font-weight: 800;
   letter-spacing: 0.03em;
@@ -213,7 +217,8 @@
 }
 
 .linkish--center {
-  display: block;
+  display: flex;
+  justify-content: center;
   width: 100%;
   text-align: center;
 }
@@ -558,44 +563,148 @@
   color: #ffffff;
 }
 
+/* ---------------------------------------------------------------------------
+   Course progress, on the index itself. It used to live only inside About,
+   behind the last link on the page — so the one question the index exists to
+   answer ("how far am I?") needed two taps to get to.
+   --------------------------------------------------------------------------- */
+
+.duohead__meter {
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.duohead__track {
+  flex: 1;
+  height: 10px;
+  border-radius: var(--r-pill);
+  background: var(--duo-blue-dark);
+  overflow: hidden;
+}
+
+.duohead__fill {
+  height: 100%;
+  border-radius: var(--r-pill);
+  background: #ffffff;
+  transform-origin: left center;
+  transition: transform 0.45s var(--ease);
+}
+
+.duohead__count {
+  flex: 0 0 auto;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  color: #ffffff;
+  font-variant-numeric: tabular-nums;
+}
+
 /* ===========================================================================
    Lesson — full-bleed stage with the sheet rising over it
    =========================================================================== */
 
-/* The stage takes whatever the sheet does not. That is the point of the
-   stepped flow: a short step leaves more room, so the artwork grows instead
-   of the empty space. Fit.Contain never crops, so a smaller box only ever means
-   smaller artwork — never a hidden slider. The padding is the strip the sheet
-   overlaps, kept outside the canvas box. */
+/* The stage fills every pixel below the AppBar, always — the sheet floats
+   over it as a separate layer (see below), so nothing the sheet does ever
+   feeds back into the stage's box size. The artwork's frame is therefore
+   fixed for the lifetime of the screen: opening, closing, or dragging the
+   sheet never resizes or repositions the Rive canvas underneath it. The
+   frame sits at the top of this region and the slack falls below it, so the
+   run from frame to sheet is the same length in every lesson.
+
+   Caveat worth knowing: `Fit.Contain` letterboxes a fixed-size artboard, but
+   the artboards in this file carry their own responsive layout and overflow
+   the box instead — `Ratio` loses the bottom of its Scale slider and its
+   third ratio tile at every phone size. That is an artboard-side fix (export
+   at a fixed size, or shorten the panel); nothing here can letterbox it. */
 .lesson__stage {
   position: relative;
   z-index: 1;
   flex: 1 1 auto;
-  min-height: 30dvh;
+  min-height: 0;
   width: 100%;
-  padding-bottom: var(--sheet-overlap);
-  display: flex;
+  display: grid;
+  align-items: start;
+  justify-items: center;
+  padding-bottom: var(--frame-gap);
+  /* Makes this region a size container, which is what lets the frame below
+     take the smaller of its two sides and come out actually square. */
+  container-type: size;
 }
 
-/* The sheet overlaps that padding strip so the two read as one composition
-   rather than two stacked boxes. It starts as a slim peek — the instruction
-   and its button — and opens on demand for readouts and explanation, so the
-   artwork keeps the screen by default. It is sized by its step's content,
-   capped so the longest step still leaves the artwork usable. */
-.sheet {
-  position: relative;
+/* The frame itself: one square. Nine of the ten artboards are authored square
+   and the tenth is within 8% of it, so a square is the shape they all fill —
+   which makes the artwork land at the same size, in the same place, in every
+   lesson. It is the largest square the region allows.
+
+   Fixed matters here beyond tidiness: the artboards carry their own sliders
+   and toggles, so a frame that changed with the sheet would rescale and
+   re-place every control under the learner's finger. */
+.lesson__stage .stage {
+  flex: none;
+  /* The largest square the region allows: cqmin is the smaller of the two
+     sides, so this is width-bound on a tall screen and height-bound on a
+     short one, and square either way. */
+  width: 100cqmin;
+  height: 100cqmin;
+}
+
+/* A true overlay sheet, positioned against the screen rather than sized by
+   flex layout — the standard native pattern (iOS/Android/Maps), and the
+   only way to guarantee the stage above never reacts to it. It is
+   bottom-anchored, so growing it only ever moves its own top edge; it
+   snaps between a slim peek and an open height, both reachable by drag as
+   well as tap, and settles with a spring-like ease rather than a linear one.
+   `--sheet-peek-h` / `--sheet-open-h` are computed in JS off the live
+   viewport (see useBottomSheet) so drag math and the CSS agree exactly;
+   the px fallback only matters before that first effect runs. */
+/* Dims the stage as the sheet opens, the standard read that the sheet has
+   become its own floating layer rather than just a taller footer sitting
+   flush against the artwork. The AppBar's own z-index (3) keeps it above
+   this regardless — the scrim never dims the navigation chrome. Opacity is
+   driven live during a drag (see useBottomSheet) and by the `is-open`
+   class otherwise, on the same timing as the sheet's own height so the two
+   always read as one motion. */
+.sheet__scrim {
+  position: absolute;
   z-index: 2;
-  flex: 0 1 auto;
-  min-height: 0;
-  max-height: min(56dvh, 470px);
+  inset: 0;
+  background: var(--scrim);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.38s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.sheet__scrim.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.sheet {
+  position: absolute;
+  z-index: 3;
+  inset: auto 0 0 0;
+  height: var(--sheet-peek-h, 240px);
   display: flex;
   flex-direction: column;
-  margin-top: calc(-1 * var(--sheet-overlap));
   background: var(--paper);
   border-radius: var(--r-xl) var(--r-xl) 0 0;
   box-shadow: var(--lift-3);
+  pointer-events: auto;
   /* Without this, scrolled content shows through the rounded top corners. */
   overflow: hidden;
+  transition: height 0.38s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.sheet.is-open {
+  height: var(--sheet-open-h, 440px);
+}
+
+/* Mid-drag the sheet tracks the pointer directly (inline height, set in
+   JS) — a CSS transition fighting that input would feel laggy. */
+.sheet.is-dragging {
+  transition: none;
 }
 
 .sheet__scroll {
@@ -604,16 +713,38 @@
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
-  padding: 12px var(--gut) calc(20px + var(--safe-b));
+  touch-action: pan-y;
+  padding: 12px var(--gut) 4px;
 }
 
-/* The universal bottom-sheet affordance: a grabber that toggles the sheet. */
+/* A step with no docked action lets the scroll area own the safe area. */
+.sheet__scroll:last-child {
+  padding-bottom: calc(20px + var(--safe-b));
+}
+
+/* The step's primary action, held below the scrolling copy. */
+.sheet__dock {
+  flex: 0 0 auto;
+  padding: 12px var(--gut) calc(16px + var(--safe-b));
+  background: var(--paper);
+  box-shadow: 0 -1px 0 var(--line);
+}
+
+/* The one control that opens and closes the sheet: a grabber that toggles it
+   on tap and resizes it on drag. It used to be two — this grabber and a
+   chevron in the step row — sitting a thumb's width apart and doing the same
+   thing. Now it is a single full-width 44px target: the handle says "sheet",
+   the chevron says which way it will go. */
 .sheet__grab {
+  position: relative;
   flex: 0 0 auto;
   display: grid;
   place-items: center;
   width: 100%;
-  padding: 8px 0 2px;
+  min-height: 44px;
+  padding: 6px 0 2px;
+  color: var(--ink-3);
+  touch-action: none;
 }
 
 .sheet__handle {
@@ -628,9 +759,28 @@
   background: var(--ink-3);
 }
 
+.sheet__chev {
+  position: absolute;
+  inset-inline-end: var(--gut);
+  top: 50%;
+  margin-top: -6px;
+  transition: transform 0.25s var(--ease);
+}
+
+.sheet__grab[aria-expanded='true'] .sheet__chev {
+  transform: rotate(180deg);
+}
+
 /* Detail content slides in as the sheet opens instead of just appearing. */
 .sheet__detail {
   animation: detail-in 0.3s var(--ease);
+}
+
+/* Peeked, the sheet shows only its lead line and pinned action — the
+   readouts stay for the open state, so the grab/chevron always has a real,
+   visible reveal to perform instead of an ambiguous scroll-to-find. */
+.sheet:not(.is-open) .sheet__detail {
+  display: none;
 }
 
 @keyframes detail-in {
@@ -652,7 +802,7 @@
 .burst {
   position: absolute;
   left: 50%;
-  bottom: calc(var(--sheet-overlap) + 10px);
+  bottom: calc(var(--frame-gap) + 10px);
   z-index: 2;
   pointer-events: none;
 }
@@ -772,11 +922,15 @@
   padding: 4px calc(var(--gut) - 8px) 0;
 }
 
+/* Every step is a jump target, so even the collapsed ones are a full 44px
+   tall and 44px wide — the dot inside stays 8px, the target does not. */
 .steps__seg {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
-  min-height: 36px;
+  min-width: 44px;
+  min-height: 44px;
   padding: 0 8px;
   border-radius: var(--r-pill);
   transition: background 0.25s var(--ease);
@@ -810,24 +964,6 @@
   text-transform: uppercase;
   color: var(--ink-2);
   white-space: nowrap;
-}
-
-/* The details toggle: one chevron, flipping over as the sheet opens. */
-.steps__more {
-  margin-inline-start: auto;
-  display: grid;
-  place-items: center;
-  width: 40px;
-  height: 36px;
-  color: var(--ink-3);
-}
-
-.steps__more svg {
-  transition: transform 0.25s var(--ease);
-}
-
-.steps__more[aria-expanded='true'] svg {
-  transform: rotate(180deg);
 }
 
 .step__lead {
@@ -877,8 +1013,15 @@
   padding-top: 12px;
 }
 
+/* "Skip" sat at the same size, weight and case as "Need a hint?" — two peers,
+   with the escape hatch in the bottom-trailing corner the eye lands on. It
+   stays reachable, but it stops competing with the offer of help. */
 .linkish--quiet {
   margin-inline-start: auto;
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: none;
   color: var(--ink-3);
 }
 
@@ -985,10 +1128,6 @@
 .prose__dim {
   color: var(--ink-3) !important;
   font-size: 13.5px !important;
-}
-
-.sheet__foot {
-  padding-top: 20px;
 }
 
 /* ===========================================================================
@@ -1098,6 +1237,18 @@
   font-weight: 600;
   line-height: 1.65;
   color: var(--ink-2);
+}
+
+/* The quiz pane scrolls; this rides below it, always in thumb reach. */
+.quiz__dock {
+  position: relative;
+  z-index: 2;
+  flex: 0 0 auto;
+  padding: 12px var(--gut) calc(16px + var(--safe-b));
+  background: var(--paper);
+  border-top: 1px solid var(--line);
+  box-shadow: 0 -6px 18px -12px rgba(20, 26, 70, 0.35);
+  animation: detail-in 0.25s var(--ease);
 }
 
 .score {
@@ -1365,6 +1516,16 @@
   color: var(--ink-2);
 }
 
+.gate__url {
+  max-width: 168px;
+  overflow-wrap: anywhere;
+  text-align: center;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--ink-3);
+}
+
 /* ===========================================================================
    Phone frame (desktop review only)
    =========================================================================== */
@@ -1427,11 +1588,9 @@
    Short viewports
    =========================================================================== */
 
-@media (max-height: 720px) {
-  .lesson__stage {
-    max-height: 52dvh;
-  }
-}
+/* No short-viewport override for the stage any more: the sheet floats over it
+   and its two heights are viewport relative, so the frame stays proportional
+   without one. */
 
 @media (max-width: 360px) {
   :root {
@@ -1452,20 +1611,34 @@
     grid-column: 1 / -1;
   }
 
+  /* Side by side there is no run down to a sheet below, so the frame simply
+     centres in its column — still square, still the same in every lesson. */
   .lesson__stage {
     grid-column: 1;
-    width: auto;
-    height: auto;
-    aspect-ratio: auto;
-    max-height: none;
+    align-items: center;
     padding: 0;
     min-height: 0;
   }
 
-  .lesson .sheet {
+  .lesson .sheet,
+  .lesson .sheet.is-open {
+    /* A side panel is a normal grid cell, not a floating overlay — the
+       peek/open drag is a portrait affair. */
+    position: static;
     grid-column: 2;
-    margin-top: 0;
+    height: auto;
+    max-height: 100%;
     border-radius: var(--r-xl) 0 0 0;
     box-shadow: -14px 0 34px -22px rgba(20, 26, 70, 0.35);
+    /* Beside the artwork the sheet owns a full-height column, so the portrait
+       cap has to go. Left in, it pinned the sheet to 56dvh — 200px on a
+       360px-tall phone — and sliced the primary button in half. */
+    max-height: none;
+  }
+
+  /* No peek/open distinction for a permanently visible side panel, so
+     there is nothing for the scrim to announce. */
+  .lesson .sheet__scrim {
+    display: none;
   }
 }

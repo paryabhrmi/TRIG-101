@@ -66,11 +66,16 @@
   --lift-1: 0 1px 2px rgba(20, 26, 70, 0.05), 0 2px 8px rgba(20, 26, 70, 0.04);
   --lift-2: 0 2px 6px rgba(20, 26, 70, 0.06), 0 10px 26px rgba(20, 26, 70, 0.08);
   --lift-3: 0 -2px 10px rgba(20, 26, 70, 0.05), 0 -18px 44px rgba(20, 26, 70, 0.12);
+  /* The bottom sheet's backdrop, once open — enough to read as a distinct
+     floating layer without going modal-dark. */
+  --scrim: rgba(13, 17, 38, 0.42);
 
   /* Rhythm — spacing sits on a 4px grid throughout. */
   --gut: 20px;
-  /* How far the bottom sheet rides up over the artwork. */
-  --sheet-overlap: 24px;
+  /* The breathing space under the interactive frame, before the sheet. It is
+     a constant, so the frame and the run down to the sheet read the same in
+     every lesson. */
+  --frame-gap: 24px;
   --safe-t: env(safe-area-inset-top, 0px);
   --safe-b: env(safe-area-inset-bottom, 0px);
 
@@ -135,6 +140,20 @@ ul {
   margin: 0;
   padding: 0;
   list-style: none;
+}
+
+/* Announced, never drawn. Used for the live region that narrates step and
+   checkpoint changes, which are otherwise carried by colour and a pill. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 :focus-visible {

@@ -1,4 +1,4 @@
-import { chapters, lessons, reviewKey, upcoming } from '../data/curriculum'
+import { chapters, lessons, reviewKey, slotNumber, upcoming } from '../data/curriculum'
 import { useProgress } from '../lib/progress'
 
 interface Props {
@@ -18,12 +18,31 @@ export function Home({ onOpen, onReview, onAbout }: Props) {
   // The one lesson the course would hand you next — flagged so the index
   // always answers "where do I go?" at a glance.
   const nextUp = lessons.find((l) => !progress[l.id])?.id
+  const doneCount = lessons.filter((l) => progress[l.id]).length
 
   return (
     <div className="screen home">
       <header className="duohead">
         <h1 className="duohead__title">Trigonometry 101</h1>
         <p className="duohead__sub">Lessons</p>
+        <div className="duohead__meter">
+          <div
+            className="duohead__track"
+            role="progressbar"
+            aria-valuenow={doneCount}
+            aria-valuemin={0}
+            aria-valuemax={lessons.length}
+            aria-label="Course progress"
+          >
+            <div
+              className="duohead__fill"
+              style={{ transform: `scaleX(${doneCount / lessons.length})` }}
+            />
+          </div>
+          <span className="duohead__count">
+            {doneCount}/{lessons.length}
+          </span>
+        </div>
       </header>
 
       <div className="home__scroll">
@@ -40,8 +59,12 @@ export function Home({ onOpen, onReview, onAbout }: Props) {
               <span className="chapter__no">Chapter {chapter.id}</span>
               <h2 className="chapter__title">{chapter.title}</h2>
 
+              {/* Numbered against the whole course, not the chapter. These
+                  used to restart at 01 in every chapter while the lesson
+                  screen itself said "Lesson 4 of 15" — so tapping 01 opened
+                  lesson 4. */}
               <ul className="group">
-                {ready.map((lesson, i) => {
+                {ready.map((lesson) => {
                   const done = !!progress[lesson.id]
                   const isNext = lesson.id === nextUp
                   return (
@@ -54,7 +77,7 @@ export function Home({ onOpen, onReview, onAbout }: Props) {
                         onClick={() => onOpen(lesson.id)}
                       >
                         <span className="row__key" aria-hidden="true">
-                          {done ? '✓' : String(i + 1).padStart(2, '0')}
+                          {done ? '✓' : String(slotNumber(lesson.id)).padStart(2, '0')}
                         </span>
                         <span className="row__title">{lesson.title}</span>
                         {isNext && <span className="row__next">Start</span>}
@@ -63,7 +86,7 @@ export function Home({ onOpen, onReview, onAbout }: Props) {
                   )
                 })}
 
-                {soon.map((lesson, i) => (
+                {soon.map((lesson) => (
                   <li key={lesson.id}>
                     <button
                       type="button"
@@ -71,7 +94,7 @@ export function Home({ onOpen, onReview, onAbout }: Props) {
                       onClick={() => onOpen(lesson.id)}
                     >
                       <span className="row__key" aria-hidden="true">
-                        {String(ready.length + i + 1).padStart(2, '0')}
+                        {String(slotNumber(lesson.id)).padStart(2, '0')}
                       </span>
                       <span className="row__title">{lesson.title}</span>
                       <span className="row__soon">Soon</span>

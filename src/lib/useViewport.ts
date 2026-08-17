@@ -3,14 +3,24 @@ import { useEffect, useState } from 'react'
 /** Below this width the mobile course runs; at or above it, the gate shows. */
 export const DESKTOP_MIN = 900
 
+/**
+ * The gate exists because every lesson is a thumb-drag, so what disqualifies a
+ * viewport is the absence of a thumb — not its width. Width alone turned away
+ * a landscape tablet, which has a touchscreen and could take the course as
+ * authored, while a narrowed desktop window sailed past it with only a mouse.
+ *
+ * `pointer: coarse` is the actual question, so it is the one asked; width
+ * still decides for the pointerless case, where the layout is the problem.
+ */
+const QUERY = `(min-width: ${DESKTOP_MIN}px) and (pointer: fine)`
+
 export function useIsDesktop(): boolean {
-  const [isDesktop, setIsDesktop] = useState(
-    () => window.matchMedia(`(min-width: ${DESKTOP_MIN}px)`).matches,
-  )
+  const [isDesktop, setIsDesktop] = useState(() => window.matchMedia(QUERY).matches)
 
   useEffect(() => {
-    const mq = window.matchMedia(`(min-width: ${DESKTOP_MIN}px)`)
+    const mq = window.matchMedia(QUERY)
     const onChange = (e: MediaQueryListEvent) => setIsDesktop(e.matches)
+    setIsDesktop(mq.matches)
     mq.addEventListener('change', onChange)
     return () => mq.removeEventListener('change', onChange)
   }, [])

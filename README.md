@@ -4,8 +4,8 @@ An interactive, mobile-first course that teaches sine, cosine and tangent by
 letting you drag them. Fifteen lessons planned, ten built, one Rive file doing
 the heavy lifting.
 
-**Live:** https://paryabhrmi.github.io/TRIG-101/ (published by
-`.github/workflows/deploy.yml` — see [Deploying](#deploying))
+**Live:** https://trig101.vercel.app (project name is claimed on first
+deploy — see [Deploying](#deploying))
 
 > **Desktop is intentionally gated in this MVP.** Every lesson is a thumb-drag
 > on a canvas laid out for a phone, so wide viewports get an honest "open this
@@ -18,7 +18,7 @@ the heavy lifting.
 ## The idea
 
 The course is built around one Rive file (`public/trig101.riv`, 44 artboards)
-authored by Lucid Paper Studios. Those artboards ship with their own sliders,
+authored by AYNE Studio. Those artboards ship with their own sliders,
 toggles and buttons and are fully interactive on their own.
 
 So the app does not re-implement the controls. Instead:
@@ -53,24 +53,35 @@ appear in the index with a SOON badge and open a screen naming what they will
 cover. Titles are provisional — rename them freely, and move an entry from
 `upcoming` into `lessons` once its artboard exists.
 
-Copy is bilingual (English / Persian) with full RTL support; the switch is in
-the app bar. Progress persists in `localStorage` and tracks the ten playable
-lessons; numbering runs against all fifteen.
+Copy is English only. Progress persists in `localStorage` and tracks the ten
+playable lessons; numbering runs against all fifteen and is the same on the
+index as it is inside a lesson.
 
 ## Design
 
-The app chrome deliberately borrows the file's own visual language so the
-canvas does not look pasted into someone else's UI:
+The shell is one light surface end to end, so the artwork — not the chrome —
+is the thing on screen:
 
-- the navy `#0D1062` and the blueprint grid come from the `Cover` artboard;
-- panels are drawn like the `Ratio` panel — dark navy inside a thin steel-blue
-  rule, with a teal-to-navy header wash;
-- buttons reproduce the glossy silver-edged pills from the `Frequency (B)` row;
-- readout labels take accent colours the way the ratio panel colours its terms;
-- **M PLUS Rounded 1c** stands in for the file's DIN Round Pro.
+- paper white throughout. The eight artboards drawn light-on-navy are inverted
+  into it with a CSS filter (`--invert-artboard`), which is why there is no
+  dark theme to switch to and no navy chrome left;
+- flat fills riding on a hard darker "edge", so buttons, keys and rows read as
+  chunky pressable pieces;
+- one accent per chapter, cycling in course order;
+- readout labels take the colour of the side they mirror on the canvas;
+- **Nunito** carries the rounded, game-like voice, with M PLUS Rounded 1c
+  behind it.
 
-Light-themed artboards (`Angle`, `SecretRatios`) sit on a white card; the dark
-ones blend straight into the page.
+Every control is at least a 44 px target.
+
+**Colour contrast is a known exception.** The palette is deliberately pastel,
+and measured against the running app most of it does not reach WCAG AA: white
+text on `--duo-blue` — every primary button, app bar title and review row —
+sits at 2.6:1 against a 4.5:1 requirement, the chapter headlines at 2.1–2.6:1
+against 3:1, and the row numbers at 1.9–2.5:1. Darkening the four `--duo-*`
+accents and their derived inks is the fix, and it was tried; the pastel look
+was preferred. Anyone revisiting this should know it is a choice, not an
+oversight.
 
 ## Rive integration notes
 
@@ -112,11 +123,35 @@ jsDelivr, which would tie an otherwise static site to a third party and fail
 closed if that CDN is blocked. `src/lib/riveRuntime.ts` repoints the loader at
 the bundled copy, so the deploy is self-contained.
 
-## Known asset issue
+## Known asset issues
 
-Several artboards render `θ` as a missing-glyph box (`□ = 45.0°`). The theta
-character is absent from the font subset embedded in the `.riv` file, so it has
-to be fixed in Rive and re-exported — it cannot be patched from the app side.
+All three are in the `.riv` file and none can be patched from the app side.
+
+**Script bytecode is ahead of the runtime.** The file's scripts are compiled at
+bytecode version 7; `@rive-app/react-webgl` 4.27.3 — the latest published
+runtime — accepts 3 to 6, so they refuse to run:
+
+```
+[string "TriangleCalculator"]: bytecode version mismatch (expected [3..6], got 7)
+```
+
+Every value that script derives then reads as zero, in the artboard's own panel
+as well as in the app's readouts. On `SecretRatios` at the default 45° that
+means `sin θ 0.000`, `cos θ 0.000`, `tan θ ∞`, and because lesson 3's
+checkpoint tests `OppSR` against 0.5, **that lesson cannot be completed**.
+Lesson 2's three ratios are wrong for the same reason. Fix: re-export from a
+Rive editor whose runtime is released, or drop the checkpoint's dependency on
+script-derived values.
+
+**`Ratio` overflows its canvas.** The artboard carries its own responsive
+layout rather than a fixed size, so `Fit.Contain` does not letterbox it: the
+bottom of the Scale slider and the whole third ratio tile are cut off at every
+phone size, including on a viewport tall enough to hold them. Fix: export at a
+fixed size, or shorten the panel.
+
+**Missing theta glyph.** Several artboards render `θ` as a missing-glyph box
+(`□ = 45.0°`) — the character is absent from the font subset embedded in the
+file.
 
 ## Running it
 
@@ -127,24 +162,27 @@ npm run build      # -> dist/
 npm run preview
 ```
 
-The desktop gate kicks in at ≥900 px wide. To see the course on a laptop,
-either narrow the window or use the phone-frame preview on the gate.
+The desktop gate kicks in at ≥900 px wide *and* `pointer: fine` — the lessons
+need a thumb, not a narrow window, so a landscape tablet gets the course and a
+narrowed desktop window still gets the gate. To see the course on a laptop, use
+the phone-frame preview on the gate.
 
 ## Deploying
 
-Pushing to `main` runs `.github/workflows/deploy.yml`, which builds and
-publishes `dist/` to GitHub Pages at https://paryabhrmi.github.io/TRIG-101/.
+The site deploys on [Vercel](https://vercel.com), connected to this GitHub
+repository. One-time setup: on vercel.com, **Add New → Project**, import
+`paryabhrmi/TRIG-101`, and accept the auto-detected Vite settings
+(`npm run build`, output `dist`). Name the project `trig101` to get the
+`trig101.vercel.app` URL (first come, first served — pick another name if
+it's taken).
 
-No manual setup is needed: the workflow passes `enablement: true` to
-`configure-pages`, so a fresh fork or a renamed repository provisions its own
-Pages site on the first run.
+After that, every push to the production branch deploys automatically, and
+every other branch gets its own preview URL on push. No workflow file or
+config is needed; Vercel detects Vite on its own.
 
-One caveat worth knowing if this repo ever goes private: GitHub Pages on a
-private repository requires a paid plan. On Free, `configure-pages` fails
-with `Resource not accessible by integration` until the repo is public again.
-
-`vite.config.ts` sets `base: '/TRIG-101/'` for production builds. If the
-repository is ever renamed, that value has to change with it.
+The app builds with the default `/` base and hash routing, so it needs no
+rewrites and would also work unchanged behind a custom domain added in the
+Vercel dashboard later.
 
 ## Stack
 
@@ -153,5 +191,5 @@ server rewrites needed) · no CSS framework.
 
 ## Credits
 
-Animation and artwork: **Lucid Paper Studios**, authored in
+Animation and artwork: **AYNE Studio**, authored in
 [Rive](https://rive.app). This repository is the course shell around that file.

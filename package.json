@@ -1,7 +1,7 @@
 {
   "name": "trig-101",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.2.0",
   "type": "module",
   "description": "Trigonometry 101 — an interactive, mobile-first learning app built on Rive.",
   "scripts": {

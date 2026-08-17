@@ -139,7 +139,9 @@ export function Review({ chapter, onBack, onGoto, onFinish }: Props) {
             {index + 1}/{questions.length}
           </span>
         }
-        progress={index / questions.length}
+        /* Counts the question you are on, not the ones behind you: at 1/3 the
+           bar used to sit at empty, reading as "nothing has happened yet". */
+        progress={(index + (picked === null ? 0 : 1)) / questions.length}
       />
 
       <div className="quiz">
@@ -177,7 +179,9 @@ export function Review({ chapter, onBack, onGoto, onFinish }: Props) {
 
         {picked !== null && (
           <>
-            <p className="quiz__explain">{q.explain}</p>
+            <p className="quiz__explain" role="status">
+              {q.explain}
+            </p>
             {picked !== q.answer && q.lesson && lessonById(q.lesson) && (
               <button
                 type="button"
@@ -187,14 +191,20 @@ export function Review({ chapter, onBack, onGoto, onFinish }: Props) {
                 Revisit: {lessonById(q.lesson)!.title}
               </button>
             )}
-            <div className="sheet__foot">
-              <button type="button" className="btn btn--primary btn--wide" onClick={advance}>
-                {index + 1 < questions.length ? 'Next question' : 'See how you did'}
-              </button>
-            </div>
           </>
         )}
       </div>
+
+      {/* Docked, not appended to the scroll. A long question plus four options
+          plus the explanation pushed this past the fold, so continuing meant
+          scrolling to find the button that was the only way forward. */}
+      {picked !== null && (
+        <div className="quiz__dock">
+          <button type="button" className="btn btn--primary btn--wide" onClick={advance}>
+            {index + 1 < questions.length ? 'Next question' : 'See how you did'}
+          </button>
+        </div>
+      )}
     </div>
   )
 }
