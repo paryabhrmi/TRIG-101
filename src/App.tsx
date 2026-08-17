@@ -34,6 +34,7 @@ function Course() {
               key={planned.id}
               lesson={planned}
               onBack={() => navigate({ name: 'home' })}
+              onOpen={(id) => navigate({ name: 'lesson', id })}
             />
           )
         }

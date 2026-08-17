@@ -16,6 +16,10 @@ interface Props {
  */
 export function DesktopGate({ onPreview }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  // Shown as text beside the code. A QR is unreadable to a person, so if it
+  // fails to draw — or the reader has no camera to hand — the address is still
+  // there to type.
+  const url = `${window.location.origin}${window.location.pathname}`
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -25,7 +29,7 @@ export function DesktopGate({ onPreview }: Props) {
       margin: 1,
       color: { dark: '#141a46', light: '#ffffff' },
     }).catch(() => {
-      // A missing QR is cosmetic; the URL is in the address bar either way.
+      // A missing QR is cosmetic; the address below it still gets you there.
     })
   }, [])
 
@@ -36,7 +40,7 @@ export function DesktopGate({ onPreview }: Props) {
           <Mark size={64} />
         </div>
 
-        <span className="gate__kicker">Lucid Paper Studios presents</span>
+        <span className="gate__kicker">AYNE Studio presents</span>
         <h1 className="gate__title">Trigonometry 101</h1>
         <p className="gate__tagline">
           Learn sine, cosine and tangent by dragging — not by reading.
@@ -58,6 +62,7 @@ export function DesktopGate({ onPreview }: Props) {
           <div className="gate__qr">
             <canvas ref={canvasRef} width={168} height={168} />
             <span>Scan to open on your phone</span>
+            <code className="gate__url">{url.replace(/^https?:\/\//, '')}</code>
           </div>
         </div>
       </div>
