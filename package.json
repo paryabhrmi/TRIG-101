@@ -11,7 +11,7 @@
     "typecheck": "tsc -b --noEmit"
   },
   "dependencies": {
-    "@rive-app/react-webgl": "^4.27.3",
+    "@rive-app/react-canvas": "^4.32.0",
     "qrcode": "^1.5.4",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"

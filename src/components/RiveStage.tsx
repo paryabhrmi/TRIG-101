@@ -1,6 +1,6 @@
-import { Alignment, Fit, Layout, useRive } from '@rive-app/react-webgl'
+import { Alignment, Fit, Layout, useRive } from '@rive-app/react-canvas'
 import { useEffect, useRef } from 'react'
-import type { Rive } from '@rive-app/react-webgl'
+import type { Rive } from '@rive-app/react-canvas'
 import type { StageTone } from '../data/curriculum'
 
 export const RIVE_SRC = `${import.meta.env.BASE_URL}trig101.riv`

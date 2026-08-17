@@ -7,7 +7,7 @@ import { TOTAL_LESSONS, lessons, nextStop, slotNumber } from '../data/curriculum
 import { useProgress } from '../lib/progress'
 import { useInstruments } from '../lib/useInstruments'
 import { uiMode } from '../lib/uiMode'
-import type { Rive } from '@rive-app/react-webgl'
+import type { Rive } from '@rive-app/react-canvas'
 import type { Step } from '../components/lessonPane'
 import type { Lesson as LessonModel, LessonAction } from '../data/curriculum'
 
