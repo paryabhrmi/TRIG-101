@@ -72,11 +72,16 @@ is the thing on screen:
 - **Nunito** carries the rounded, game-like voice, with M PLUS Rounded 1c
   behind it.
 
-Every colour that carries text clears WCAG AA (4.5:1, or 3:1 at large sizes),
-and every control is at least a 44 px target. Both are checked against the
-running app rather than by eye — the chapter accents in particular are
-saturated rather than pastel because white text on the pastel versions sat at
-2.1–2.6:1.
+Every control is at least a 44 px target.
+
+**Colour contrast is a known exception.** The palette is deliberately pastel,
+and measured against the running app most of it does not reach WCAG AA: white
+text on `--duo-blue` — every primary button, app bar title and review row —
+sits at 2.6:1 against a 4.5:1 requirement, the chapter headlines at 2.1–2.6:1
+against 3:1, and the row numbers at 1.9–2.5:1. Darkening the four `--duo-*`
+accents and their derived inks is the fix, and it was tried; the pastel look
+was preferred. Anyone revisiting this should know it is a choice, not an
+oversight.
 
 ## Rive integration notes
 
