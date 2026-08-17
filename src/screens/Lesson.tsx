@@ -46,6 +46,13 @@ export function LessonScreen({ lesson, onBack, onGoto, onReview, onFinish }: Pro
 
   const { values, solved, markSolved } = useInstruments(rive, lesson, alreadyDone)
 
+  // Some artboards already draw their own readout panel on the canvas — for
+  // those lessons `readouts` is empty, and there is nothing left to reveal.
+  // The learn step never gates its content on `open`, so it stays expandable
+  // regardless.
+  const hasDetail = lesson.readouts.length > 0
+  const canExpand = hasDetail || step === 'learn'
+
   useEffect(() => {
     if (solved && !alreadyDone) complete(lesson.id)
   }, [solved, alreadyDone, complete, lesson.id])
@@ -154,16 +161,18 @@ export function LessonScreen({ lesson, onBack, onGoto, onReview, onFinish }: Pro
         ref={sheetRef}
         className={`sheet ${open ? 'is-open' : ''} ${dragging ? 'is-dragging' : ''}`.trim()}
       >
-        <button
-          type="button"
-          className="sheet__grab"
-          onClick={toggle}
-          aria-expanded={open}
-          aria-label={open ? 'Hide details' : 'More details'}
-          {...dragHandleProps}
-        >
-          <span className="sheet__handle" aria-hidden="true" />
-        </button>
+        {canExpand && (
+          <button
+            type="button"
+            className="sheet__grab"
+            onClick={toggle}
+            aria-expanded={open}
+            aria-label={open ? 'Hide details' : 'More details'}
+            {...dragHandleProps}
+          >
+            <span className="sheet__handle" aria-hidden="true" />
+          </button>
+        )}
 
         <nav className="steps" aria-label="Lesson steps">
           {steps.map((s, i) => {
@@ -186,36 +195,40 @@ export function LessonScreen({ lesson, onBack, onGoto, onReview, onFinish }: Pro
               </button>
             )
           })}
-          <button
-            type="button"
-            className="steps__more"
-            onClick={() => setOpen((o) => !o)}
-            aria-expanded={open}
-            aria-label={open ? 'Hide details' : 'More details'}
-          >
-            <svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true">
-              <path
-                d="M2.5 7.5 L6 4 L9.5 7.5"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </button>
+          {canExpand && (
+            <button
+              type="button"
+              className="steps__more"
+              onClick={() => setOpen((o) => !o)}
+              aria-expanded={open}
+              aria-label={open ? 'Hide details' : 'More details'}
+            >
+              <svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true">
+                <path
+                  d="M2.5 7.5 L6 4 L9.5 7.5"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </button>
+          )}
         </nav>
 
         <div className="sheet__scroll" ref={scrollRef}>
           {step === 'watch' && (
             <>
               <p className="step__lead">{lesson.watch}</p>
-              {/* Always in the tree: closed, it peeks below the fold (and is
-                  reachable by scroll); open, the extra height reveals it. The
-                  toggle therefore always has a visible effect. */}
-              <div className="sheet__detail">
-                <Instruments readouts={lesson.readouts} values={values} />
-              </div>
+              {/* Always in the tree where the lesson has readouts of its own:
+                  closed, it peeks below the fold (and is reachable by scroll);
+                  open, the extra height reveals it. */}
+              {hasDetail && (
+                <div className="sheet__detail">
+                  <Instruments readouts={lesson.readouts} values={values} />
+                </div>
+              )}
             </>
           )}
 
@@ -243,9 +256,11 @@ export function LessonScreen({ lesson, onBack, onGoto, onReview, onFinish }: Pro
                 </div>
               )}
 
-              <div className="sheet__detail">
-                <Instruments readouts={lesson.readouts} values={values} />
-              </div>
+              {hasDetail && (
+                <div className="sheet__detail">
+                  <Instruments readouts={lesson.readouts} values={values} />
+                </div>
+              )}
             </>
           )}
 
