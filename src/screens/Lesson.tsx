@@ -40,10 +40,14 @@ export function LessonScreen({ lesson, onBack, onGoto, onReview, onFinish }: Pro
     setOpen,
   )
 
-  const index = lessons.indexOf(lesson)
   const alreadyDone = !!progress[lesson.id]
   const n = slotNumber(lesson.id)
   const after = useMemo(() => nextStop(lesson.id), [lesson.id])
+
+  // The bar reports how much of the course is actually finished. It used to
+  // report the lesson's *position*, so opening lesson 8 first showed a
+  // seven-tenths-full bar to someone who had done nothing.
+  const doneCount = lessons.filter((l) => progress[l.id]).length
 
   const { values, solved, markSolved } = useInstruments(rive, lesson, alreadyDone)
 
@@ -58,10 +62,16 @@ export function LessonScreen({ lesson, onBack, onGoto, onReview, onFinish }: Pro
     if (solved && !alreadyDone) complete(lesson.id)
   }, [solved, alreadyDone, complete, lesson.id])
 
-  // Clearing the task is the cue to move on, but only while the learner is
-  // still on that step — never yank the screen out from under them.
+  // Clearing the task is the cue to move on — but only when it is cleared
+  // *here*, on the task step. Several lessons can be satisfied by following
+  // the Find-it instruction (lesson 1's "flip the switch" is the checkpoint),
+  // and auto-advancing on a checkpoint that was already met threw the learner
+  // straight from Find it to Why it works: the button promising a task
+  // delivered the explanation instead, and the task step was never seen.
+  const wasSolved = useRef(solved)
   useEffect(() => {
-    if (solved && step === 'do') setStep('learn')
+    if (solved && !wasSolved.current && step === 'do') setStep('learn')
+    wasSolved.current = solved
   }, [solved, step])
 
   // The learn step is nothing but explanation, so the sheet opens itself.
@@ -114,11 +124,69 @@ export function LessonScreen({ lesson, onBack, onGoto, onReview, onFinish }: Pro
     scrollRef.current?.scrollTo({ top: 0 })
   }, [step, open])
 
+  /** The task step is green only when the task was actually cleared — passing
+   *  it with Skip used to paint it done, which is a claim the app cannot make. */
+  const stepDone = (s: Step, i: number) => (s === 'do' ? solved : i < stepIndex)
+
+  const stepName = (s: Step) =>
+    s === 'watch' ? 'Find it' : s === 'do' ? 'Try it' : 'Why it works'
+
+  /* Rendered on Find it as well as Try it. Two lessons open with "Press Spin
+     it below" / "Press Release it below", and the buttons they name only ever
+     appeared on the next step — so the very first instruction pointed at a
+     control that was not on screen. */
+  const actionRow = lesson.actions?.length ? (
+    <div className="actions">
+      {lesson.actions.map((action) => (
+        <button
+          key={action.input}
+          type="button"
+          className={`btn ${
+            action.tone === 'ghost' ? 'btn--ghost' : 'btn--primary'
+          } ${toggles[action.input] ? 'is-on' : ''}`.trim()}
+          onClick={() => runAction(action)}
+          disabled={!rive}
+        >
+          {action.label}
+        </button>
+      ))}
+    </div>
+  ) : null
+
   const goNext = () => {
     if (after?.kind === 'lesson') onGoto(after.id)
     else if (after?.kind === 'review') onReview(after.chapter)
     else onFinish()
   }
+
+  /** The docked primary action for the current step, if it has one. The task
+   *  step only gets one once the task is behind the learner. */
+  const dock =
+    step === 'watch' ? (
+      <button
+        type="button"
+        className="btn btn--primary btn--wide"
+        onClick={() => setStep('do')}
+      >
+        Got it — give me a task
+      </button>
+    ) : step === 'do' && solved ? (
+      <button
+        type="button"
+        className="btn btn--primary btn--wide"
+        onClick={() => setStep('learn')}
+      >
+        Why it works
+      </button>
+    ) : step === 'learn' ? (
+      <button type="button" className="btn btn--primary btn--wide" onClick={goNext}>
+        {after?.kind === 'review'
+          ? 'Chapter review'
+          : after?.kind === 'lesson'
+            ? 'Next lesson'
+            : 'Finish the course'}
+      </button>
+    ) : null
 
   return (
     <div className={`screen lesson lesson--${lesson.stage}`}>
@@ -127,7 +195,7 @@ export function LessonScreen({ lesson, onBack, onGoto, onReview, onFinish }: Pro
         subtitle={`Lesson ${n} of ${TOTAL_LESSONS}`}
         title={lesson.title}
         right={solved ? <span className="pill pill--done">Done</span> : undefined}
-        progress={(index + (solved ? 1 : 0)) / lessons.length}
+        progress={doneCount / lessons.length}
       />
 
       {/* Full-bleed stage: no card, no inset — the artwork is the backdrop. */}
@@ -163,6 +231,9 @@ export function LessonScreen({ lesson, onBack, onGoto, onReview, onFinish }: Pro
         ref={sheetRef}
         className={`sheet ${open ? 'is-open' : ''} ${dragging ? 'is-dragging' : ''}`.trim()}
       >
+        {/* The sheet's only toggle: drag it, or tap it. The chevron rides
+            inside it rather than sitting in the step row as a second button
+            doing the same job. */}
         {canExpand && (
           <button
             type="button"
@@ -173,56 +244,58 @@ export function LessonScreen({ lesson, onBack, onGoto, onReview, onFinish }: Pro
             {...dragHandleProps}
           >
             <span className="sheet__handle" aria-hidden="true" />
+            <svg
+              className="sheet__chev"
+              viewBox="0 0 12 12"
+              width="12"
+              height="12"
+              aria-hidden="true"
+            >
+              <path
+                d="M2.5 7.5 L6 4 L9.5 7.5"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
           </button>
         )}
 
         <nav className="steps" aria-label="Lesson steps">
           {steps.map((s, i) => {
             const current = i === stepIndex
-            const doneStep = i < stepIndex || (s === 'do' && solved)
-            const name = s === 'watch' ? 'Find it' : s === 'do' ? 'Try it' : 'Why it works'
             return (
               <button
                 key={s}
                 type="button"
                 className={`steps__seg ${current ? 'is-current' : ''} ${
-                  doneStep ? 'is-done' : ''
+                  stepDone(s, i) ? 'is-done' : ''
                 }`.trim()}
                 aria-current={current}
-                aria-label={`Step ${i + 1}: ${name}`}
+                aria-label={`Step ${i + 1}: ${stepName(s)}`}
                 onClick={() => setStep(s)}
               >
                 <span className="steps__dot" aria-hidden="true" />
-                {current && <span className="steps__name">{name}</span>}
+                {current && <span className="steps__name">{stepName(s)}</span>}
               </button>
             )
           })}
-          {canExpand && (
-            <button
-              type="button"
-              className="steps__more"
-              onClick={() => setOpen((o) => !o)}
-              aria-expanded={open}
-              aria-label={open ? 'Hide details' : 'More details'}
-            >
-              <svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true">
-                <path
-                  d="M2.5 7.5 L6 4 L9.5 7.5"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </button>
-          )}
         </nav>
+
+        {/* Step and checkpoint changes were silent to a screen reader: the
+            readouts are visual, and "Done" only ever appeared as a pill. */}
+        <p className="sr-only" role="status">
+          {`Step ${stepIndex + 1} of 3: ${stepName(step)}.`}
+          {solved ? ' Task complete.' : ''}
+        </p>
 
         <div className="sheet__scroll" ref={scrollRef}>
           {step === 'watch' && (
             <>
               <p className="step__lead">{lesson.watch}</p>
+              {actionRow}
               {/* Always in the tree where the lesson has readouts of its own:
                   closed, it peeks below the fold (and is reachable by scroll);
                   open, the extra height reveals it. */}
@@ -240,28 +313,47 @@ export function LessonScreen({ lesson, onBack, onGoto, onReview, onFinish }: Pro
                 {lesson.checkpoint ? lesson.checkpoint.goal : lesson.tagline}
               </p>
 
-              {lesson.actions && lesson.actions.length > 0 && (
-                <div className="actions">
-                  {lesson.actions.map((action) => (
-                    <button
-                      key={action.input}
-                      type="button"
-                      className={`btn ${
-                        action.tone === 'ghost' ? 'btn--ghost' : 'btn--primary'
-                      } ${toggles[action.input] ? 'is-on' : ''}`.trim()}
-                      onClick={() => runAction(action)}
-                      disabled={!rive}
-                    >
-                      {action.label}
-                    </button>
-                  ))}
-                </div>
-              )}
+              {actionRow}
 
               {hasDetail && (
                 <div className="sheet__detail">
                   <Instruments readouts={lesson.readouts} values={values} />
                 </div>
+              )}
+
+              {/* Arriving here already solved — because the Find-it step asked
+                  for the same move, or because the lesson was done before —
+                  gets an acknowledgement and a way on, not a task with no
+                  ending and two text links where the button should be. */}
+              {solved ? (
+                <>
+                  <p className="step__win">
+                    <span aria-hidden="true">✓</span> Done — that is the move.
+                  </p>
+                </>
+              ) : (
+                lesson.checkpoint && (
+                  <div className="hintrow">
+                    {showHint ? (
+                      <p className="step__hint">{lesson.checkpoint.hint}</p>
+                    ) : (
+                      <button
+                        type="button"
+                        className="linkish"
+                        onClick={() => setShowHint(true)}
+                      >
+                        Need a hint?
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      className="linkish linkish--quiet"
+                      onClick={() => setStep('learn')}
+                    >
+                      Skip
+                    </button>
+                  </div>
+                )
               )}
             </>
           )}
@@ -282,60 +374,12 @@ export function LessonScreen({ lesson, onBack, onGoto, onReview, onFinish }: Pro
           )}
         </div>
 
-        {/* Footers live outside the scroll area so the step's one call to
-            action is always on screen, whatever the scroll position. */}
-        {step === 'watch' && (
-          <div className="sheet__foot sheet__foot--pinned">
-            <button
-              type="button"
-              className="btn btn--primary btn--wide"
-              onClick={() => setStep('do')}
-            >
-              Got it — give me a task
-            </button>
-          </div>
-        )}
-
-        {step === 'do' && lesson.checkpoint && (
-          <div className="sheet__foot sheet__foot--pinned">
-            <div className="hintrow">
-              {showHint ? (
-                <p className="step__hint">{lesson.checkpoint.hint}</p>
-              ) : (
-                <button
-                  type="button"
-                  className="linkish"
-                  onClick={() => setShowHint(true)}
-                >
-                  Need a hint?
-                </button>
-              )}
-              <button
-                type="button"
-                className="linkish linkish--quiet"
-                onClick={() => setStep('learn')}
-              >
-                Skip
-              </button>
-            </div>
-          </div>
-        )}
-
-        {step === 'learn' && (
-          <div className="sheet__foot sheet__foot--pinned">
-            <button
-              type="button"
-              className="btn btn--primary btn--wide"
-              onClick={goNext}
-            >
-              {after?.kind === 'review'
-                ? 'Chapter review'
-                : after?.kind === 'lesson'
-                  ? 'Next lesson'
-                  : 'Finish the course'}
-            </button>
-          </div>
-        )}
+        {/* The step's one way forward, docked below the scrolling pane rather
+            than appended to the end of it. Inside the scroll it fell past the
+            fold whenever the copy ran long — the whole explanation step on a
+            short phone, and every step in landscape, where the sheet is a
+            narrow column and this button was sliced in half by its edge. */}
+        {dock && <div className="sheet__dock">{dock}</div>}
       </div>
     </div>
   )

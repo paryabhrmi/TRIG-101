@@ -15,7 +15,7 @@ export function AppBar({ onBack, title, subtitle, right, progress }: Props) {
       <div className="appbar__row">
         {onBack ? (
           <button type="button" className="iconbtn" onClick={onBack} aria-label="Back">
-            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
               <path
                 d="M15 5 L8 12 L15 19"
                 fill="none"

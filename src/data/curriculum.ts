@@ -261,8 +261,11 @@ export const lessons: Lesson[] = [
     watchInputs: ['Boolean 1'],
     title: 'Naming the sides',
     tagline: 'Opposite and adjacent are job titles, not names.',
+    // Deliberately does *not* say "flip it": flipping the switch is this
+    // lesson's checkpoint, so an instruction to do it here cleared the task
+    // before the task step had been reached.
     watch:
-      'Under the triangle is a switch — everything on the canvas responds to your finger. Flip it.',
+      'Under the triangle is a switch, and the triangle itself has draggable corners — everything on this canvas answers to your finger.',
     body: [
       'Every right triangle has one side whose name never changes: the hypotenuse. Always across from the right angle, always the longest.',
       'The other two swap. Which one is opposite and which is adjacent depends entirely on the angle you are standing at.',

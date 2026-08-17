@@ -45,12 +45,14 @@
   gap: 1px;
 }
 
+/* Solid white, not a translucent one: at 85% over the banner this sat at
+   4.2:1, and size and case already separate it from the title. */
 .appbar__sub {
   font-size: 11px;
   font-weight: 800;
   letter-spacing: 0.09em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.85);
+  color: #ffffff;
 }
 
 .appbar__title {
@@ -99,8 +101,8 @@
   flex: 0 0 auto;
   display: grid;
   place-items: center;
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   border-radius: var(--r-md);
   background: rgba(255, 255, 255, 0.14);
   border: 2px solid rgba(255, 255, 255, 0.35);
@@ -138,13 +140,13 @@
 .pill--done {
   background: rgba(33, 181, 115, 0.12);
   border-color: rgba(33, 181, 115, 0.4);
-  color: var(--mint);
+  color: var(--mint-ink);
 }
 
 .pill--soon {
   background: rgba(254, 175, 54, 0.14);
   border-color: rgba(254, 175, 54, 0.45);
-  color: #b57708;
+  color: var(--amber-ink);
 }
 
 /* ===========================================================================
@@ -202,9 +204,13 @@
   width: 100%;
 }
 
+/* Text buttons still have to be hittable, so the padding carries them to a
+   44px target even though the ink is only 13.5px tall. */
 .linkish {
-  display: inline-block;
-  padding: 8px 4px;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 8px 8px;
   font-size: 13.5px;
   font-weight: 800;
   letter-spacing: 0.03em;
@@ -213,13 +219,14 @@
 }
 
 .linkish--center {
-  display: block;
+  display: flex;
+  justify-content: center;
   width: 100%;
   text-align: center;
 }
 
 .linkish--warn {
-  color: var(--rose);
+  color: var(--rose-ink);
 }
 
 /* ===========================================================================
@@ -389,24 +396,40 @@
   padding-top: 32px;
 }
 
+/* `--tone-wash*` are the accent at 8/16/30% over paper, precomputed rather
+   than mixed at runtime so the review row still tints on older Safari. */
 .chapter--blue {
   --tone: var(--duo-blue);
   --tone-dark: var(--duo-blue-dark);
+  --tone-wash: #f2f6fc;
+  --tone-wash-2: #e5edf8;
+  --tone-wash-3: #c4d8ef;
 }
 
 .chapter--amber {
   --tone: var(--duo-amber);
   --tone-dark: var(--duo-amber-dark);
+  --tone-wash: #faf6f0;
+  --tone-wash-2: #f4eee1;
+  --tone-wash-3: #e5d5b8;
 }
 
 .chapter--green {
   --tone: var(--duo-green);
   --tone-dark: var(--duo-green-dark);
+  /* A touch lighter than the other three: green is the brightest accent, so
+     at the same wash strength its own ink fell just under 4.5:1 on it. */
+  --tone-wash: #f6faf3;
+  --tone-wash-2: #f0f7ec;
+  --tone-wash-3: #cbe1c0;
 }
 
 .chapter--violet {
   --tone: var(--duo-violet);
   --tone-dark: var(--duo-violet-dark);
+  --tone-wash: #f8f4fc;
+  --tone-wash-2: #f1e9f8;
+  --tone-wash-3: #dbc8ee;
 }
 
 .chapter__no {
@@ -493,8 +516,8 @@
   padding: 4px 10px;
   border-radius: var(--r-pill);
   background: rgba(254, 175, 54, 0.15);
-  color: #b57708;
-  font-size: 10px;
+  color: var(--amber-ink);
+  font-size: 11px;
   font-weight: 900;
   letter-spacing: 0.07em;
   text-transform: uppercase;
@@ -538,24 +561,64 @@
   }
 }
 
-/* The review row is the chapter's accent, edge to edge. */
+/* The review row carries the chapter accent, but as a tint rather than a
+   full-bleed fill. Filled edge to edge it was the loudest thing on the index —
+   louder than the lessons it is supposed to come after. */
 .row--review {
-  background: var(--tone);
+  background: var(--tone-wash);
 }
 
 .row--review:active {
-  background: var(--tone-dark);
+  background: var(--tone-wash-2);
 }
 
 .row--review .row__key {
-  background: rgba(255, 255, 255, 0.24);
-  border-color: rgba(255, 255, 255, 0.42);
-  border-bottom-color: rgba(0, 0, 0, 0.16);
-  color: #ffffff;
+  background: var(--tone-wash-2);
+  border-color: var(--tone-wash-3);
+  border-bottom-color: var(--tone);
+  color: var(--tone);
 }
 
 .row--review .row__title {
+  color: var(--tone);
+}
+
+/* ---------------------------------------------------------------------------
+   Course progress, on the index itself. It used to live only inside About,
+   behind the last link on the page — so the one question the index exists to
+   answer ("how far am I?") needed two taps to get to.
+   --------------------------------------------------------------------------- */
+
+.duohead__meter {
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.duohead__track {
+  flex: 1;
+  height: 10px;
+  border-radius: var(--r-pill);
+  background: var(--duo-blue-dark);
+  overflow: hidden;
+}
+
+.duohead__fill {
+  height: 100%;
+  border-radius: var(--r-pill);
+  background: #ffffff;
+  transform-origin: left center;
+  transition: transform 0.45s var(--ease);
+}
+
+.duohead__count {
+  flex: 0 0 auto;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.04em;
   color: #ffffff;
+  font-variant-numeric: tabular-nums;
 }
 
 /* ===========================================================================
@@ -568,7 +631,13 @@
    fixed for the lifetime of the screen: opening, closing, or dragging the
    sheet never resizes or repositions the Rive canvas underneath it. The
    frame sits at the top of this region and the slack falls below it, so the
-   run from frame to sheet is the same length in every lesson. */
+   run from frame to sheet is the same length in every lesson.
+
+   Caveat worth knowing: `Fit.Contain` letterboxes a fixed-size artboard, but
+   the artboards in this file carry their own responsive layout and overflow
+   the box instead — `Ratio` loses the bottom of its Scale slider and its
+   third ratio tile at every phone size. That is an artboard-side fix (export
+   at a fixed size, or shorten the panel); nothing here can letterbox it. */
 .lesson__stage {
   position: relative;
   z-index: 1;
@@ -658,10 +727,6 @@
   transition: none;
 }
 
-.sheet.is-open {
-  height: 100%;
-}
-
 .sheet__scroll {
   flex: 1;
   min-height: 0;
@@ -669,22 +734,36 @@
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
   touch-action: pan-y;
-  padding: 12px var(--gut) 16px;
+  padding: 12px var(--gut) 4px;
 }
 
-/* A step with no pinned footer lets the scroll area own the safe area. */
+/* A step with no docked action lets the scroll area own the safe area. */
 .sheet__scroll:last-child {
   padding-bottom: calc(20px + var(--safe-b));
 }
 
-/* The universal bottom-sheet affordance: a grabber that toggles the sheet
-   on tap and resizes it on drag. */
+/* The step's primary action, held below the scrolling copy. */
+.sheet__dock {
+  flex: 0 0 auto;
+  padding: 12px var(--gut) calc(16px + var(--safe-b));
+  background: var(--paper);
+  box-shadow: 0 -1px 0 var(--line);
+}
+
+/* The one control that opens and closes the sheet: a grabber that toggles it
+   on tap and resizes it on drag. It used to be two — this grabber and a
+   chevron in the step row — sitting a thumb's width apart and doing the same
+   thing. Now it is a single full-width 44px target: the handle says "sheet",
+   the chevron says which way it will go. */
 .sheet__grab {
+  position: relative;
   flex: 0 0 auto;
   display: grid;
   place-items: center;
   width: 100%;
-  padding: 8px 0 2px;
+  min-height: 44px;
+  padding: 6px 0 2px;
+  color: var(--ink-3);
   touch-action: none;
 }
 
@@ -698,6 +777,18 @@
 
 .sheet__grab:active .sheet__handle {
   background: var(--ink-3);
+}
+
+.sheet__chev {
+  position: absolute;
+  inset-inline-end: var(--gut);
+  top: 50%;
+  margin-top: -6px;
+  transition: transform 0.25s var(--ease);
+}
+
+.sheet__grab[aria-expanded='true'] .sheet__chev {
+  transform: rotate(180deg);
 }
 
 /* Detail content slides in as the sheet opens instead of just appearing. */
@@ -851,11 +942,15 @@
   padding: 4px calc(var(--gut) - 8px) 0;
 }
 
+/* Every step is a jump target, so even the collapsed ones are a full 44px
+   tall and 44px wide — the dot inside stays 8px, the target does not. */
 .steps__seg {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
-  min-height: 36px;
+  min-width: 44px;
+  min-height: 44px;
   padding: 0 8px;
   border-radius: var(--r-pill);
   transition: background 0.25s var(--ease);
@@ -891,35 +986,6 @@
   white-space: nowrap;
 }
 
-/* The details toggle: a filled pill so it reads as its own tappable
-   control (matching the current-step pill's fill), not a bare glyph
-   floating with no boundary — the chevron inside still flips as the sheet
-   opens. */
-.steps__more {
-  margin-inline-start: auto;
-  display: grid;
-  place-items: center;
-  width: 36px;
-  height: 36px;
-  border-radius: var(--r-pill);
-  background: var(--surface);
-  color: var(--ink-2);
-  transition: background 0.2s var(--ease), transform 0.15s var(--ease);
-}
-
-.steps__more:active {
-  background: var(--line);
-  transform: scale(0.94);
-}
-
-.steps__more svg {
-  transition: transform 0.25s var(--ease);
-}
-
-.steps__more[aria-expanded='true'] svg {
-  transform: rotate(180deg);
-}
-
 .step__lead {
   font-size: 17px;
   font-weight: 800;
@@ -945,7 +1011,7 @@
   margin-bottom: 12px;
   font-size: 14px;
   font-weight: 800;
-  color: var(--mint);
+  color: var(--mint-ink);
 }
 
 .step__win span {
@@ -954,7 +1020,7 @@
   width: 20px;
   height: 20px;
   border-radius: var(--r-pill);
-  background: var(--mint);
+  background: var(--mint-ink);
   color: #ffffff;
   font-size: 11px;
   animation: pop 0.4s var(--ease);
@@ -967,8 +1033,15 @@
   padding-top: 12px;
 }
 
+/* "Skip" sat at the same size, weight and case as "Need a hint?" — two peers,
+   with the escape hatch in the bottom-trailing corner the eye lands on. It
+   stays reachable, but it stops competing with the offer of help. */
 .linkish--quiet {
   margin-inline-start: auto;
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: none;
   color: var(--ink-3);
 }
 
@@ -1026,24 +1099,28 @@
   color: var(--ink);
 }
 
-/* Accents darkened where the raw artwork colour is too pale for small text. */
+/* The raw artwork accents sit at 3.3–4.0:1 on the tile, and these labels are
+   10.5px — so each one is darkened until it clears 4.5:1 while staying
+   recognisably the colour of the side it mirrors on the canvas. The last one
+   is a plum rather than the artwork's pink: a red label on a numeric readout
+   reads as "this value is wrong". */
 .chip--blue .chip__label {
-  color: var(--blue);
+  color: #0060d6;
 }
 .chip--cyan .chip__label {
-  color: #0e8fd6;
+  color: #0a6f9e;
 }
 .chip--amber .chip__label {
-  color: #b57708;
+  color: var(--amber-ink);
 }
 .chip--violet .chip__label {
-  color: var(--violet);
+  color: #6f3ba8;
 }
 .chip--mint .chip__label {
-  color: #189a63;
+  color: #0f7a4c;
 }
 .chip--rose .chip__label {
-  color: #e13a57;
+  color: #a03060;
 }
 
 @keyframes pop {
@@ -1075,33 +1152,6 @@
 .prose__dim {
   color: var(--ink-3) !important;
   font-size: 13.5px !important;
-}
-
-/* The sheet is a fixed strip, so a long step scrolls rather than grows — and a
-   step's one action must never be the part that scrolls away. It sticks to the
-   bottom of the scroller, over its own paper, so it is on screen in every
-   lesson at every size. The negative offsets cancel the scroller's padding so
-   it sits flush in the corner. */
-.sheet__foot {
-  position: sticky;
-  bottom: calc(-1 * (20px + var(--safe-b)));
-  margin: 0 calc(-1 * var(--gut)) calc(-1 * (20px + var(--safe-b)));
-  padding: 20px var(--gut) calc(20px + var(--safe-b));
-  background: var(--paper);
-}
-
-/* Pinned variant: sits after the scroll area so the step's call to action
-   never leaves the screen. The hairline separates it from content sliding
-   underneath without adding visual weight. */
-.sheet__foot--pinned {
-  flex: 0 0 auto;
-  padding: 12px var(--gut) calc(16px + var(--safe-b));
-  border-top: 1px solid var(--line);
-  background: var(--paper);
-}
-
-.sheet__foot--pinned .hintrow {
-  padding-top: 0;
 }
 
 /* ===========================================================================
@@ -1192,8 +1242,8 @@
 }
 
 .quiz__option.is-wrong .quiz__key {
-  background: var(--rose);
-  border-color: #d63c55;
+  background: var(--rose-ink);
+  border-color: #9e1c31;
   color: #ffffff;
 }
 
@@ -1211,6 +1261,18 @@
   font-weight: 600;
   line-height: 1.65;
   color: var(--ink-2);
+}
+
+/* The quiz pane scrolls; this rides below it, always in thumb reach. */
+.quiz__dock {
+  position: relative;
+  z-index: 2;
+  flex: 0 0 auto;
+  padding: 12px var(--gut) calc(16px + var(--safe-b));
+  background: var(--paper);
+  border-top: 1px solid var(--line);
+  box-shadow: 0 -6px 18px -12px rgba(20, 26, 70, 0.35);
+  animation: detail-in 0.25s var(--ease);
 }
 
 .score {
@@ -1234,7 +1296,7 @@
 }
 
 .score.is-perfect strong {
-  color: var(--mint);
+  color: var(--mint-ink);
 }
 
 .score span {
@@ -1275,7 +1337,7 @@
   padding: 5px 12px;
   border-radius: var(--r-pill);
   background: rgba(254, 175, 54, 0.15);
-  color: #b57708;
+  color: var(--amber-ink);
   font-size: 11px;
   font-weight: 900;
   letter-spacing: 0.09em;
@@ -1428,7 +1490,7 @@
   padding: 5px 11px;
   border-radius: var(--r-pill);
   background: rgba(254, 175, 54, 0.15);
-  color: #b57708;
+  color: var(--amber-ink);
   font-size: 11px;
   font-weight: 900;
   letter-spacing: 0.05em;
@@ -1476,6 +1538,16 @@
   font-weight: 800;
   line-height: 1.4;
   color: var(--ink-2);
+}
+
+.gate__url {
+  max-width: 168px;
+  overflow-wrap: anywhere;
+  text-align: center;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--ink-3);
 }
 
 /* ===========================================================================
@@ -1582,6 +1654,10 @@
     max-height: 100%;
     border-radius: var(--r-xl) 0 0 0;
     box-shadow: -14px 0 34px -22px rgba(20, 26, 70, 0.35);
+    /* Beside the artwork the sheet owns a full-height column, so the portrait
+       cap has to go. Left in, it pinned the sheet to 56dvh — 200px on a
+       360px-tall phone — and sliced the primary button in half. */
+    max-height: none;
   }
 
   /* No peek/open distinction for a permanently visible side panel, so
