@@ -72,8 +72,10 @@
 
   /* Rhythm — spacing sits on a 4px grid throughout. */
   --gut: 20px;
-  /* How far the bottom sheet rides up over the artwork. */
-  --sheet-overlap: 24px;
+  /* The breathing space under the interactive frame, before the sheet. It is
+     a constant, so the frame and the run down to the sheet read the same in
+     every lesson. */
+  --frame-gap: 24px;
   --safe-t: env(safe-area-inset-top, 0px);
   --safe-b: env(safe-area-inset-bottom, 0px);
 

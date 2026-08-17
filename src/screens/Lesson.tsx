@@ -30,9 +30,10 @@ export function LessonScreen({ lesson, onBack, onGoto, onReview, onFinish }: Pro
   const [step, setStep] = useState<Step>('watch')
   const [showHint, setShowHint] = useState(false)
   // The sheet starts as a slim peek — one instruction and its button — so the
-  // artwork owns the screen. Opening it is how the learner asks for more,
-  // except where the instructions point at the readouts themselves.
-  const [open, setOpen] = useState(!!lesson.detailFirst)
+  // artwork owns the screen. Every lesson starts that same way and there are
+  // no exceptions: lessons used to be able to open it themselves on arrival,
+  // which made those few start unlike all the others.
+  const [open, setOpen] = useState(false)
   const [celebrate, setCelebrate] = useState(false)
   const { sheetRef, scrimRef, dragging, toggle, collapse, dragHandleProps } = useBottomSheet(
     open,
@@ -106,11 +107,12 @@ export function LessonScreen({ lesson, onBack, onGoto, onReview, onFinish }: Pro
   const stepIndex = steps.indexOf(step)
 
   // Each step starts reading from the top; leftover scroll from the previous
-  // step would leave the lead sentence hidden above the fold.
+  // step — or from the height the sheet just changed by — would leave the lead
+  // sentence hidden above the fold.
   const scrollRef = useRef<HTMLDivElement>(null)
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: 0 })
-  }, [step])
+  }, [step, open])
 
   const goNext = () => {
     if (after?.kind === 'lesson') onGoto(after.id)

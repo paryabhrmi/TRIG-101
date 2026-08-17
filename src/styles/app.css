@@ -566,15 +566,39 @@
    over it as a separate layer (see below), so nothing the sheet does ever
    feeds back into the stage's box size. The artwork's frame is therefore
    fixed for the lifetime of the screen: opening, closing, or dragging the
-   sheet never resizes or repositions the Rive canvas underneath it. */
+   sheet never resizes or repositions the Rive canvas underneath it. The
+   frame sits at the top of this region and the slack falls below it, so the
+   run from frame to sheet is the same length in every lesson. */
 .lesson__stage {
   position: relative;
   z-index: 1;
   flex: 1 1 auto;
-  min-height: 30dvh;
+  min-height: 0;
   width: 100%;
-  padding-bottom: var(--sheet-overlap);
-  display: flex;
+  display: grid;
+  align-items: start;
+  justify-items: center;
+  padding-bottom: var(--frame-gap);
+  /* Makes this region a size container, which is what lets the frame below
+     take the smaller of its two sides and come out actually square. */
+  container-type: size;
+}
+
+/* The frame itself: one square. Nine of the ten artboards are authored square
+   and the tenth is within 8% of it, so a square is the shape they all fill —
+   which makes the artwork land at the same size, in the same place, in every
+   lesson. It is the largest square the region allows.
+
+   Fixed matters here beyond tidiness: the artboards carry their own sliders
+   and toggles, so a frame that changed with the sheet would rescale and
+   re-place every control under the learner's finger. */
+.lesson__stage .stage {
+  flex: none;
+  /* The largest square the region allows: cqmin is the smaller of the two
+     sides, so this is width-bound on a tall screen and height-bound on a
+     short one, and square either way. */
+  width: 100cqmin;
+  height: 100cqmin;
 }
 
 /* A true overlay sheet, positioned against the screen rather than sized by
@@ -618,6 +642,7 @@
   background: var(--paper);
   border-radius: var(--r-xl) var(--r-xl) 0 0;
   box-shadow: var(--lift-3);
+  pointer-events: auto;
   /* Without this, scrolled content shows through the rounded top corners. */
   overflow: hidden;
   transition: height 0.38s cubic-bezier(0.32, 0.72, 0, 1);
@@ -631,6 +656,10 @@
    JS) — a CSS transition fighting that input would feel laggy. */
 .sheet.is-dragging {
   transition: none;
+}
+
+.sheet.is-open {
+  height: 100%;
 }
 
 .sheet__scroll {
@@ -702,7 +731,7 @@
 .burst {
   position: absolute;
   left: 50%;
-  bottom: calc(var(--sheet-overlap) + 10px);
+  bottom: calc(var(--frame-gap) + 10px);
   z-index: 2;
   pointer-events: none;
 }
@@ -1048,8 +1077,17 @@
   font-size: 13.5px !important;
 }
 
+/* The sheet is a fixed strip, so a long step scrolls rather than grows — and a
+   step's one action must never be the part that scrolls away. It sticks to the
+   bottom of the scroller, over its own paper, so it is on screen in every
+   lesson at every size. The negative offsets cancel the scroller's padding so
+   it sits flush in the corner. */
 .sheet__foot {
-  padding-top: 20px;
+  position: sticky;
+  bottom: calc(-1 * (20px + var(--safe-b)));
+  margin: 0 calc(-1 * var(--gut)) calc(-1 * (20px + var(--safe-b)));
+  padding: 20px var(--gut) calc(20px + var(--safe-b));
+  background: var(--paper);
 }
 
 /* Pinned variant: sits after the scroll area so the step's call to action
@@ -1502,11 +1540,9 @@
    Short viewports
    =========================================================================== */
 
-@media (max-height: 720px) {
-  .lesson__stage {
-    max-height: 52dvh;
-  }
-}
+/* No short-viewport override for the stage any more: the sheet floats over it
+   and its two heights are viewport relative, so the frame stays proportional
+   without one. */
 
 @media (max-width: 360px) {
   :root {
@@ -1527,12 +1563,11 @@
     grid-column: 1 / -1;
   }
 
+  /* Side by side there is no run down to a sheet below, so the frame simply
+     centres in its column — still square, still the same in every lesson. */
   .lesson__stage {
     grid-column: 1;
-    width: auto;
-    height: auto;
-    aspect-ratio: auto;
-    max-height: none;
+    align-items: center;
     padding: 0;
     min-height: 0;
   }
@@ -1544,6 +1579,7 @@
     position: static;
     grid-column: 2;
     height: auto;
+    max-height: 100%;
     border-radius: var(--r-xl) 0 0 0;
     box-shadow: -14px 0 34px -22px rgba(20, 26, 70, 0.35);
   }
