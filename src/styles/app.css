@@ -619,15 +619,31 @@
   --control-gap: 12px;
   --safe-l: env(safe-area-inset-left, 0px);
   --safe-r: env(safe-area-inset-right, 0px);
-  /* Each strip is a 550x60 artboard at full width, plus the air between them. */
+  /**
+   * The lesson frame is inset from both sides of the screen.
+   *
+   * The artboards are composed differently from one another — the triangle
+   * carries about 73px of its own side margin, the slider strips are drawn
+   * hard to their edges — so at full bleed one lesson floats and the next one
+   * touches the glass. The inset is on the frame rather than on any artboard,
+   * so whatever is inside it, every lesson keeps the same distance from the
+   * edge. It is the same gutter the rest of the app uses, and it follows that
+   * token down to 16px on a narrow phone.
+   */
+  --frame-pad: var(--gut);
+  --frame-l: calc(var(--frame-pad) + var(--safe-l));
+  --frame-r: calc(var(--frame-pad) + var(--safe-r));
+  /* Everything below sizes against the frame's real width, not the screen's. */
+  --frame-w: calc(100vw - var(--frame-l) - var(--frame-r));
+  /* Each strip is a 550x60 artboard across the frame, plus the air between. */
   --controls-h: calc(
-    (100vw - var(--safe-l) - var(--safe-r)) * 60 / 550 * var(--controls-n) +
-      var(--control-gap) * max(var(--controls-n) - 1, 0)
+    var(--frame-w) * 60 / 550 * var(--controls-n) + var(--control-gap) *
+      max(var(--controls-n) - 1, 0)
   );
   --dock-h: clamp(
     180px,
     calc(
-      var(--vh, 100dvh) - var(--appbar-h) - (100vw * var(--band)) -
+      var(--vh, 100dvh) - var(--appbar-h) - (var(--frame-w) * var(--band)) -
         var(--controls-h)
     ),
     200px
@@ -649,6 +665,8 @@
   flex-direction: column;
   justify-content: center;
   background: var(--field);
+  padding-left: var(--frame-l);
+  padding-right: var(--frame-r);
   /* Lets the stage measure itself against the room the field has, width and
      height both. It is the field rather than the art box that carries this:
      the art box has to hug the stage, or the leftover height ends up between
@@ -703,11 +721,8 @@
      labels land 0.8px off the glass — which is the artboard's composition,
      not a crop.
 
-     The one thing they do get is the side safe-area insets. Those are 0 on an
-     ordinary phone, so the look is unchanged, but on hardware with a rounded
-     corner or a notch they keep "15°" and "75°" out from under the bezel. */
-  padding-left: env(safe-area-inset-left, 0px);
-  padding-right: env(safe-area-inset-right, 0px);
+     The frame around them carries the inset from the screen edge, and the
+     safe area with it, so there is nothing to add here. */
 }
 
 .lesson .stage--control {
@@ -1927,7 +1942,8 @@
     width: auto;
     height: auto;
     max-height: none;
-    padding: 0;
+    /* Only the sheet's overlap strip goes; the frame keeps its side inset. */
+    padding-block: 0;
     min-height: 0;
   }
 
