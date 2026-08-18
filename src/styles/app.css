@@ -612,7 +612,12 @@
    */
   --band: 1;
   --controls-n: 0;
-  --controls-h: calc(100vw * 60 / 550 * var(--controls-n));
+  --control-gap: 12px;
+  /* Each strip is a 550x60 artboard at full width, plus the air between them. */
+  --controls-h: calc(
+    100vw * 60 / 550 * var(--controls-n) + var(--control-gap) *
+      max(var(--controls-n) - 1, 0)
+  );
   --dock-h: clamp(
     180px,
     calc(
@@ -638,17 +643,19 @@
   flex-direction: column;
   justify-content: center;
   background: var(--field);
+  /* Lets the stage measure itself against the room the field has, width and
+     height both. It is the field rather than the art box that carries this:
+     the art box has to hug the stage, or the leftover height ends up between
+     the artboard and the sliders bound to it instead of around the pair. */
+  container-type: size;
 }
 
 .lesson__art {
-  flex: 1 1 auto;
+  flex: 0 1 auto;
   min-height: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  /* Lets the square below measure itself against this box's height as well as
-     its width, so it is never taller than the room it has. */
-  container-type: size;
 }
 
 /* `--band` is the fraction of the square artboard that carries artwork; the
@@ -666,14 +673,24 @@
    enough for it, and merely inset rather than cropped when it is not. */
 @supports (container-type: size) {
   .lesson__art .stage {
-    width: min(100%, calc(100cqh / var(--band, 1)));
+    /* The control strips are measured off the same height, so the artboard and
+       its sliders are sized as one composition and centred as one. */
+    width: min(100%, calc((100cqh - var(--controls-h)) / var(--band, 1)));
   }
 }
 
-/* `Ratio`'s two sliders are their own artboards; they sit directly under the
-   triangle and are bound to it, so the three read as one control surface. */
+/* `Ratio`'s two sliders are their own artboards; they sit under the triangle
+   and are bound to it, so the three read as one control surface.
+
+   They still need air between them. Each strip is drawn full bleed — the track
+   touches the top edge of its artboard and the labels touch the bottom — so
+   stacked flush the first one's readout sits directly on the second one's
+   track and the two read as one broken control. */
 .lesson__controls {
   flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--control-gap);
 }
 
 .lesson .stage--control {
