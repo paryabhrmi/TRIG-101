@@ -613,12 +613,10 @@
   --band: 1;
   --controls-n: 0;
   --control-gap: 12px;
-  /* Each strip is a 550x60 artboard drawn across the gutters, plus the air
-     between them. The dock's height is derived from this, so it has to follow
-     the strips' real width rather than the viewport's. */
+  /* Each strip is a 550x60 artboard at full width, plus the air between them. */
   --controls-h: calc(
-    (100vw - 2 * var(--gut)) * 60 / 550 * var(--controls-n) +
-      var(--control-gap) * max(var(--controls-n) - 1, 0)
+    100vw * 60 / 550 * var(--controls-n) + var(--control-gap) *
+      max(var(--controls-n) - 1, 0)
   );
   --dock-h: clamp(
     180px,
@@ -693,12 +691,11 @@
   display: flex;
   flex-direction: column;
   gap: var(--control-gap);
-  /* The strips are drawn to their own edges — track cap and end labels both —
-     so at full bleed the slider runs into the side of the screen and "15°"
-     sits on it. The artboard above keeps a fifth of the width as margin on
-     each side; the gutter is what everything else in the app uses, and it is
-     enough to stop these reading as content falling off the screen. */
-  padding-inline: var(--gut);
+  /* No gutter here on purpose. These strips are artboards like the one above
+     them and are bound to it, so they get the same treatment: full bleed,
+     edge to edge. They are drawn to their own left and right edges, so the
+     track meets the side of the screen — that is the artboard's composition,
+     not a crop. The only thing the app adds is the air between them. */
 }
 
 .lesson .stage--control {
