@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { STEPS, stepName } from './lessonPane'
+import { Steps } from './Steps'
 import type { LessonPaneProps } from './lessonPane'
 
 /**
@@ -9,7 +9,7 @@ import type { LessonPaneProps } from './lessonPane'
  * dock carries only what the file cannot know: what the learner is being asked
  * to do, how far off it they still are, and what happens next.
  *
- * Its height is fixed at 216px (see `.lbar` in app.css) across the first two
+ * Its height is fixed at 180px (see `.lbar` in app.css) across the first two
  * steps. Every row is reserved whether or not it has content, so moving from
  * "find it" to "try it" does not resize the canvas — which matters because the
  * artboards' sliders are dragged by thumb, and a canvas that rescales mid-drag
@@ -51,6 +51,7 @@ export function LessonBar({
   if (step === 'learn') {
     return (
       <div className="lbar lbar--panel">
+        <Steps step={step} solved={solved} onStep={onStep} />
         {solved && (
           <p className="win">
             <span aria-hidden="true">✓</span> Nice — that is the idea
@@ -85,9 +86,7 @@ export function LessonBar({
 
   return (
     <div className={`lbar ${solved && doing ? 'is-hit' : ''}`.trim()}>
-      <p className="lbar__step">
-        Step {STEPS.indexOf(step) + 1} of {STEPS.length} · {stepName(step)}
-      </p>
+      <Steps step={step} solved={solved} onStep={onStep} tight />
 
       <p className="lbar__task">{task}</p>
 

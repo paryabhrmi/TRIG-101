@@ -33,8 +33,8 @@
   z-index: 3;
   flex: 0 0 auto;
   padding-top: var(--safe-t);
-  background: var(--blue);
-  border-bottom: var(--edge) solid var(--blue-edge);
+  background: var(--duo-blue);
+  border-bottom: var(--edge) solid var(--duo-blue-dark);
 }
 
 .appbar__row {
@@ -53,21 +53,19 @@
   gap: 1px;
 }
 
-/* Solid white, not a translucent one: the subtitle is 11px, and every step of
-   transparency over the banner takes it below the readable line. */
 .appbar__sub {
   font-size: var(--t-caps);
   font-weight: var(--w-bold);
   letter-spacing: 0.09em;
   text-transform: uppercase;
-  color: var(--blue-on);
+  color: rgba(255, 255, 255, 0.85);
 }
 
 .appbar__title {
   font-size: var(--t-2xl);
   font-weight: var(--w-black);
   line-height: 1.2;
-  color: var(--blue-on);
+  color: #ffffff;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -80,34 +78,28 @@
   gap: 8px;
 }
 
-/* On the banner a pill goes solid paper and carries accent ink. A glassy fill
-   cannot hold 11px black type against a saturated blue. */
+/* On the blue banner the pills go glassy white. */
 .appbar .pill {
-  background: var(--paper);
-  border-color: var(--paper);
-  color: var(--blue-ink);
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.4);
+  color: #ffffff;
 }
 
-/* The status keeps its own accent — only the plate under it turns to paper.
-   A "Soon" that reads blue in the bar and amber in the page is two colours
-   for one state. */
 .appbar .pill--done {
-  color: var(--green-ink);
-}
-
-.appbar .pill--soon {
-  color: var(--amber-ink);
+  background: #ffffff;
+  border-color: #ffffff;
+  color: var(--duo-green-dark);
 }
 
 .appbar__track {
   height: var(--edge);
-  background: var(--blue-edge);
+  background: var(--duo-blue-dark);
 }
 
 .appbar__fill {
   height: 100%;
   transform-origin: left center;
-  background: var(--paper);
+  background: #ffffff;
   transition: transform 0.45s var(--ease);
 }
 
@@ -118,15 +110,14 @@
   width: 40px;
   height: 40px;
   border-radius: var(--r-md);
-  background: var(--wash);
-  border: var(--b) solid var(--wash-line);
-  color: var(--blue-on);
+  background: rgba(255, 255, 255, 0.14);
+  border: var(--b) solid rgba(255, 255, 255, 0.35);
+  color: #ffffff;
   transition: transform 0.18s var(--ease), background 0.18s var(--ease);
 }
 
 .iconbtn:active {
   transform: scale(0.94);
-  background: var(--wash-hi);
 }
 
 .iconbtn--ghost {
@@ -158,14 +149,14 @@
 }
 
 .pill--done {
-  background: var(--green-soft);
-  border-color: var(--green-line);
-  color: var(--green-ink);
+  background: rgba(33, 181, 115, 0.12);
+  border-color: rgba(33, 181, 115, 0.4);
+  color: var(--mint);
 }
 
 .pill--soon {
-  background: var(--amber-soft);
-  border-color: var(--amber-line);
+  background: rgba(254, 175, 54, 0.14);
+  border-color: rgba(254, 175, 54, 0.45);
   color: var(--amber-ink);
 }
 
@@ -182,7 +173,7 @@
 }
 
 .tag--soon {
-  background: var(--amber-soft);
+  background: rgba(254, 175, 54, 0.15);
   color: var(--amber-ink);
 }
 
@@ -195,9 +186,7 @@
    =========================================================================== */
 
 .btn {
-  --btn-fill: var(--paper);
-  --btn-edge: var(--line);
-  --btn-on: var(--blue-ink);
+  --edge-c: var(--duo-line);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -209,36 +198,31 @@
   font-weight: var(--w-black);
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  color: var(--btn-on);
-  background: var(--btn-fill);
-  box-shadow: 0 var(--edge) 0 var(--btn-edge);
+  box-shadow: 0 var(--edge) 0 var(--edge-c);
   transition: transform var(--dur-press) var(--ease),
     box-shadow var(--dur-press) var(--ease), opacity var(--dur-tint) var(--ease);
 }
 
 .btn--primary {
-  --btn-fill: var(--blue);
-  --btn-edge: var(--blue-edge);
-  --btn-on: var(--blue-on);
+  --edge-c: var(--duo-blue-dark);
+  color: #ffffff;
+  background: var(--duo-blue);
 }
 
-/* A toggle that is currently on reads as solved, in the app's one green. */
 .btn--primary.is-on {
-  --btn-fill: var(--green);
-  --btn-edge: var(--green-edge);
-  --btn-on: var(--green-on);
+  --edge-c: var(--duo-green-dark);
+  background: var(--duo-green);
 }
 
 .btn--ghost {
-  --btn-fill: var(--paper);
-  --btn-edge: var(--line);
-  --btn-on: var(--blue-ink);
-  border: var(--b) solid var(--line);
+  color: var(--duo-blue);
+  background: var(--paper);
+  border: var(--b) solid var(--duo-line);
 }
 
 .btn:active {
   transform: translateY(3px);
-  box-shadow: 0 1px 0 var(--btn-edge);
+  box-shadow: 0 1px 0 var(--edge-c);
 }
 
 .btn:disabled {
@@ -266,7 +250,7 @@
   font-weight: var(--w-bold);
   letter-spacing: 0.03em;
   text-transform: uppercase;
-  color: var(--blue-ink);
+  color: var(--duo-blue-dark);
 }
 
 .linkish--center {
@@ -281,7 +265,7 @@
 }
 
 .linkish--warn {
-  color: var(--rose-ink);
+  color: var(--rose);
 }
 
 /* ===========================================================================
@@ -328,7 +312,7 @@
   background: linear-gradient(
     100deg,
     transparent 20%,
-    var(--blue-soft) 42%,
+    rgba(43, 175, 247, 0.12) 42%,
     transparent 64%
   );
   background-size: 220% 100%;
@@ -369,7 +353,7 @@
     180deg,
     transparent 66%,
     rgba(255, 255, 255, 0.72) 80%,
-    var(--paper) 92%
+    #ffffff 92%
   );
 }
 
@@ -413,15 +397,14 @@
   height: calc(32px + var(--safe-b));
 }
 
-/* The home banner is the app bar without the bar: same fill, same hard edge,
-   so the two screens read as one surface at the top. */
+/* The home banner: flat blue, bold white wordmark, hard darker bottom edge. */
 .duohead {
   position: relative;
   z-index: 3;
   flex: 0 0 auto;
   padding: calc(var(--safe-t) + 16px) var(--gut) 16px;
-  background: var(--blue);
-  border-bottom: var(--edge) solid var(--blue-edge);
+  background: var(--duo-blue);
+  border-bottom: var(--edge) solid var(--duo-blue-dark);
 }
 
 .duohead__title {
@@ -429,73 +412,55 @@
   font-weight: var(--w-black);
   letter-spacing: 0.02em;
   text-transform: uppercase;
-  color: var(--blue-on);
+  color: #ffffff;
 }
 
 .duohead__sub {
   margin-top: 4px;
   font-size: var(--t-xl);
   font-weight: var(--w-mid);
-  color: var(--blue-on);
+  color: rgba(255, 255, 255, 0.95);
 }
 
-/* Each chapter carries its accent as the four `--tone-*` tokens; everything
-   inside — headline, number keys, the review row — reads from them and never
-   names a colour of its own. The four sets are the same four accents the rest
-   of the app uses, so a chapter is a tint of the system, not a palette. */
+/* Each chapter carries its accent as a pair of custom properties; everything
+   inside — headline, number keys, the review row — reads from them. */
 .chapter {
   padding-top: 32px;
 }
 
 .chapter--blue {
-  --tone: var(--blue);
-  --tone-edge: var(--blue-edge);
-  --tone-on: var(--blue-on);
-  --tone-ink: var(--blue-ink);
+  --tone: var(--duo-blue);
+  --tone-dark: var(--duo-blue-dark);
 }
 
-/* Amber is the one accent whose `on` colour is ink, so its washes invert with
-   it: a dark key on a bright fill rather than a light one. */
 .chapter--amber {
-  --wash: rgba(20, 26, 70, 0.12);
-  --wash-hi: rgba(20, 26, 70, 0.2);
-  --wash-line: rgba(20, 26, 70, 0.26);
-  --wash-shade: rgba(20, 26, 70, 0.34);
-  --tone: var(--amber);
-  --tone-edge: var(--amber-edge);
-  --tone-on: var(--amber-on);
-  --tone-ink: var(--amber-ink);
+  --tone: var(--duo-amber);
+  --tone-dark: var(--duo-amber-dark);
 }
 
 .chapter--green {
-  --tone: var(--green);
-  --tone-edge: var(--green-edge);
-  --tone-on: var(--green-on);
-  --tone-ink: var(--green-ink);
+  --tone: var(--duo-green);
+  --tone-dark: var(--duo-green-dark);
 }
 
 .chapter--violet {
-  --tone: var(--violet);
-  --tone-edge: var(--violet-edge);
-  --tone-on: var(--violet-on);
-  --tone-ink: var(--violet-ink);
+  --tone: var(--duo-violet);
+  --tone-dark: var(--duo-violet-dark);
 }
 
 .chapter__no {
   display: block;
   font-size: var(--t-lg);
   font-weight: var(--w-bold);
-  color: var(--ink-3);
+  color: var(--tone-dark);
 }
 
-/* The headline takes the accent's ink step, not its fill: a 26px word in the
-   raw fill is a pale word on white, whichever accent it is. */
 .chapter__title {
   margin-top: 2px;
   font-size: var(--t-5xl);
   font-weight: var(--w-black);
   letter-spacing: -0.01em;
-  color: var(--tone-ink);
+  color: var(--tone);
 }
 
 /* One card per chapter: rows divided by hairlines, review row filling the
@@ -503,13 +468,13 @@
 .group {
   margin-top: 16px;
   background: var(--paper);
-  border: var(--b) solid var(--line);
+  border: var(--b) solid var(--duo-line);
   border-radius: var(--r-lg);
   overflow: hidden;
 }
 
 .group li + li .row {
-  border-top: var(--b) solid var(--line);
+  border-top: var(--b) solid var(--duo-line);
 }
 
 .row {
@@ -533,13 +498,13 @@
   width: 44px;
   height: 44px;
   border-radius: var(--r-md);
-  background: var(--paper-2);
-  border: var(--b) solid var(--line);
+  background: var(--duo-key);
+  border: var(--b) solid var(--duo-line);
   border-bottom-width: var(--edge);
   font-size: var(--t-xl);
   font-weight: var(--w-black);
   font-variant-numeric: tabular-nums;
-  color: var(--tone-ink);
+  color: var(--tone);
 }
 
 .row__title {
@@ -551,7 +516,7 @@
 }
 
 .row.is-done .row__key {
-  color: var(--green-ink);
+  color: var(--duo-green-dark);
 }
 
 .row.is-soon .row__key {
@@ -566,14 +531,14 @@
    always answers "where do I go?" without reading every row. */
 .row--next .row__key {
   background: var(--tone);
-  border-color: var(--tone-edge);
-  color: var(--tone-on);
+  border-color: var(--tone-dark);
+  color: #ffffff;
 }
 
 .tag--next {
   background: var(--tone);
-  box-shadow: 0 var(--edge-sm) 0 var(--tone-edge);
-  color: var(--tone-on);
+  box-shadow: 0 var(--edge-sm) 0 var(--tone-dark);
+  color: #ffffff;
   animation: next-nudge 2.2s var(--ease) infinite;
 }
 
@@ -597,18 +562,18 @@
 }
 
 .row--review:active {
-  background: var(--tone-edge);
+  background: var(--tone-dark);
 }
 
 .row--review .row__key {
-  background: var(--wash);
-  border-color: var(--wash-line);
-  border-bottom-color: var(--wash-shade);
-  color: var(--tone-on);
+  background: rgba(255, 255, 255, 0.24);
+  border-color: rgba(255, 255, 255, 0.42);
+  border-bottom-color: rgba(0, 0, 0, 0.16);
+  color: #ffffff;
 }
 
 .row--review .row__title {
-  color: var(--tone-on);
+  color: #ffffff;
 }
 
 /* ===========================================================================
@@ -726,8 +691,6 @@
   }
 }
 
-/* The confetti is the palette, in order — the same six accents the rest of
-   the app is built from, at their fill step. */
 .burst i:nth-child(6n + 1) {
   background: var(--blue);
 }
@@ -735,7 +698,7 @@
   background: var(--amber);
 }
 .burst i:nth-child(6n + 3) {
-  background: var(--green);
+  background: var(--mint);
 }
 .burst i:nth-child(6n + 4) {
   background: var(--rose);
@@ -881,54 +844,79 @@
   padding-top: 20px;
 }
 
-/* One pill per step: the current one carries its name, the rest collapse to
-   dots. The whole row stays one quiet line, but the roadmap is always named. */
+/* ---------------------------------------------------------------------------
+   The stepper — one component, both panes
+
+   The bar used to print "Step 1 of 3 · Find it" and the sheet drew a row of
+   dots: the same idea, two shapes, and neither showed what was still ahead.
+   It is one track now. The count is what the segments are for, so only the
+   current step is named; done segments carry the solved colour, and the
+   current one grows so the eye lands on it without reading anything.
+   --------------------------------------------------------------------------- */
+
 .steps {
   flex: 0 0 auto;
   display: flex;
   align-items: center;
   gap: 4px;
-  padding: 4px calc(var(--gut) - 8px) 0;
+}
+
+/* A 4px bar is nowhere near a tap target, so the button is padded out to 34px
+   and the negative margin hands that space straight back to the layout. In the
+   bar that matters: the row still contributes exactly 14px to its fixed
+   height, which is what stops the canvas resizing between steps. */
+.steps--tight .steps__seg {
+  height: 34px;
+  margin: -10px 0;
 }
 
 .steps__seg {
-  display: inline-flex;
+  display: grid;
   align-items: center;
-  gap: 8px;
-  min-height: 36px;
-  padding: 0 8px;
-  border-radius: var(--r-pill);
-  transition: background 0.25s var(--ease);
+  height: 24px;
+  padding: 10px 0;
 }
 
-.steps__seg.is-current {
-  background: var(--surface);
-  padding-inline-end: 12px;
+/* Segments you cannot reach are not dimmed — an upcoming step is not
+   unavailable, it simply has not happened yet. Only the cursor says so. */
+.steps__seg:disabled {
+  cursor: default;
 }
 
-.steps__dot {
-  width: 8px;
-  height: 8px;
+.steps__bar {
+  display: block;
+  width: 14px;
+  height: 4px;
   border-radius: var(--r-pill);
   background: var(--line-strong);
-  transition: background 0.25s var(--ease);
+  transition: width 0.25s var(--ease), background 0.25s var(--ease);
 }
 
-.steps__seg.is-done .steps__dot {
-  background: var(--green);
+.steps__seg.is-done .steps__bar {
+  background: var(--mint);
 }
 
-.steps__seg.is-current .steps__dot {
+.steps__seg.is-current .steps__bar {
+  width: 22px;
   background: var(--blue);
 }
 
 .steps__name {
+  margin-inline-start: 8px;
   font-size: var(--t-caps);
-  font-weight: var(--w-black);
-  letter-spacing: var(--track-caps);
+  font-weight: var(--w-bold);
+  letter-spacing: 0.09em;
   text-transform: uppercase;
-  color: var(--ink-2);
+  color: var(--ink-3);
   white-space: nowrap;
+}
+
+/* In the sheet the stepper shares its line with the details chevron. */
+.steps__row {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  padding: 4px var(--gut) 0;
 }
 
 /* The details toggle: one chevron, flipping over as the sheet opens. */
@@ -986,12 +974,13 @@
    --------------------------------------------------------------------------- */
 
 .win {
+  flex: 0 0 auto;
   display: flex;
   align-items: center;
   gap: 8px;
   font-size: var(--t-md);
   font-weight: var(--w-bold);
-  color: var(--green-ink);
+  color: var(--mint);
 }
 
 .win span {
@@ -1000,8 +989,8 @@
   width: 20px;
   height: 20px;
   border-radius: var(--r-pill);
-  background: var(--green);
-  color: var(--green-on);
+  background: var(--mint);
+  color: #ffffff;
   font-size: var(--t-caps);
   animation: pop 0.4s var(--ease);
 }
@@ -1065,10 +1054,9 @@
   color: var(--ink);
 }
 
-/* Each tile names its accent's ink step — the one measured to hold small
-   type on the tile's own tinted paper. */
+/* Accents darkened where the raw artwork colour is too pale for small text. */
 .chip--blue .chip__label {
-  color: var(--blue-ink);
+  color: var(--blue);
 }
 .chip--cyan .chip__label {
   color: var(--cyan-ink);
@@ -1077,10 +1065,10 @@
   color: var(--amber-ink);
 }
 .chip--violet .chip__label {
-  color: var(--violet-ink);
+  color: var(--violet);
 }
 .chip--mint .chip__label {
-  color: var(--green-ink);
+  color: var(--mint-ink);
 }
 .chip--rose .chip__label {
   color: var(--rose-ink);
@@ -1118,7 +1106,7 @@
    knob out from under the finger.
 
      12  padding
-     14  step name          --t-caps on a 14px line
+     14  stepper — three segments and the current step's name
       4  gap
      40  task, two lines reserved     --t-xl on a 20px line
       8  gap
@@ -1143,17 +1131,6 @@
   box-shadow: var(--lift-dock);
 }
 
-.lbar__step {
-  flex: 0 0 auto;
-  height: 14px;
-  font-size: var(--t-caps);
-  font-weight: var(--w-bold);
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
-  line-height: 14px;
-  color: var(--ink-3);
-}
-
 /* Two lines are reserved whatever the copy runs to, which is the whole reason
    the bar keeps one height across the first two steps. */
 .lbar__task {
@@ -1171,7 +1148,7 @@
 }
 
 .lbar.is-hit .lbar__task {
-  color: var(--green-ink);
+  color: var(--duo-green-dark);
 }
 
 .lbar__slot {
@@ -1246,7 +1223,7 @@
   display: block;
   height: 100%;
   border-radius: var(--r-pill);
-  background: var(--blue);
+  background: var(--duo-blue);
   transition: width 0.12s linear;
 }
 
@@ -1262,12 +1239,12 @@
 }
 
 .lbar.is-hit .aim__fill {
-  background: var(--green);
+  background: var(--duo-green);
 }
 
 .lbar.is-hit .aim__goal,
 .lbar.is-hit .aim__state {
-  color: var(--green-ink);
+  color: var(--duo-green-dark);
 }
 
 /* ---------------------------------------------------------------------------
@@ -1303,8 +1280,8 @@
   padding: 0 8px;
   justify-content: space-between;
   gap: 6px;
-  border-color: var(--green-line);
-  background: var(--green-soft);
+  border-color: rgba(88, 204, 2, 0.4);
+  background: rgba(88, 204, 2, 0.08);
 }
 
 .cells__l {
@@ -1313,7 +1290,7 @@
   font-weight: var(--w-black);
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: var(--ink-2);
+  color: var(--ink-3);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1324,7 +1301,7 @@
   font-size: var(--t-sm);
   font-weight: var(--w-bold);
   font-variant-numeric: tabular-nums;
-  color: var(--green-ink);
+  color: var(--duo-green-dark);
 }
 
 .conds__c {
@@ -1337,9 +1314,9 @@
 }
 
 .conds__c.is-on {
-  border-color: var(--green-line);
-  background: var(--green-soft);
-  color: var(--green-ink);
+  border-color: rgba(88, 204, 2, 0.5);
+  background: rgba(88, 204, 2, 0.09);
+  color: var(--duo-green-dark);
 }
 
 .conds__b {
@@ -1351,12 +1328,12 @@
   border-radius: var(--r-2xs);
   border: var(--b) solid var(--line-strong);
   font-size: var(--t-micro);
-  color: var(--green-on);
+  color: #ffffff;
 }
 
 .conds__c.is-on .conds__b {
-  background: var(--green);
-  border-color: var(--green);
+  background: var(--duo-green);
+  border-color: var(--duo-green);
 }
 
 /* ---------------------------------------------------------------------------
@@ -1369,6 +1346,12 @@
   max-height: 58dvh;
   padding-top: 16px;
   animation: panel-in 0.32s var(--ease);
+}
+
+/* Finishing a lesson should not drop you out of the roadmap at the moment you
+   complete it, so the panel keeps the stepper and spaces itself off it. */
+.lbar--panel .steps {
+  margin-bottom: 12px;
 }
 
 @keyframes panel-in {
@@ -1436,7 +1419,7 @@
    same sink on press — only the type is sentence case rather than caps,
    because these are answers, not commands. */
 .quiz__option {
-  --opt-line: var(--line);
+  --opt-line: var(--duo-line);
   display: flex;
   align-items: center;
   gap: 12px;
@@ -1469,33 +1452,33 @@
   width: 32px;
   height: 32px;
   border-radius: var(--r-sm);
-  background: var(--paper-2);
-  border: var(--b) solid var(--line);
+  background: var(--duo-key);
+  border: var(--b) solid var(--duo-line);
   font-size: var(--t-xs);
   font-weight: var(--w-black);
   color: var(--ink-2);
 }
 
 .quiz__option.is-right {
-  --opt-line: var(--green-line);
-  background: var(--green-soft);
+  --opt-line: rgba(88, 204, 2, 0.55);
+  background: rgba(88, 204, 2, 0.09);
 }
 
 .quiz__option.is-right .quiz__key {
-  background: var(--green);
-  border-color: var(--green-edge);
-  color: var(--green-on);
+  background: var(--duo-green);
+  border-color: var(--duo-green-dark);
+  color: #ffffff;
 }
 
 .quiz__option.is-wrong {
-  --opt-line: var(--rose-line);
-  background: var(--rose-soft);
+  --opt-line: rgba(255, 77, 106, 0.45);
+  background: rgba(255, 77, 106, 0.07);
 }
 
 .quiz__option.is-wrong .quiz__key {
   background: var(--rose);
-  border-color: var(--rose-edge);
-  color: var(--rose-on);
+  border-color: #d63c55;
+  color: #ffffff;
 }
 
 .quiz__option.is-dim {
@@ -1535,7 +1518,7 @@
 }
 
 .score.is-perfect strong {
-  color: var(--green-ink);
+  color: var(--mint);
 }
 
 .score span {
@@ -1570,6 +1553,26 @@
   border-radius: var(--r-lg);
   background: var(--paper-2);
   border: var(--b-hair) dashed var(--line-strong);
+}
+
+/* The two "not yet" badges. They read like a pill but were authored without
+   a border and a shade warmer, so they keep their own rule. */
+.soon__badge,
+.gate__badge {
+  padding: 5px 12px;
+  border-radius: var(--r-pill);
+  background: rgba(254, 175, 54, 0.15);
+  color: var(--amber-ink);
+  font-size: var(--t-caps);
+  font-weight: var(--w-black);
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.gate__badge {
+  display: inline-block;
+  padding: 5px 11px;
+  letter-spacing: 0.05em;
 }
 
 .soon__title {
@@ -1652,11 +1655,7 @@
   min-height: 100dvh;
   display: grid;
   place-items: center;
-  background: radial-gradient(
-    120% 90% at 50% -20%,
-    var(--blue-soft) 0%,
-    var(--paper) 60%
-  );
+  background: radial-gradient(120% 90% at 50% -20%, #eef3ff 0%, var(--paper) 60%);
 }
 
 .gate {
@@ -1788,7 +1787,7 @@
   height: min(844px, calc(100dvh - 80px));
   padding: 12px;
   border-radius: 54px;
-  background: linear-gradient(160deg, var(--line), var(--line-strong));
+  background: linear-gradient(160deg, #dfe4f2, #b9c1d8);
   box-shadow: 0 40px 90px -34px rgba(20, 26, 70, 0.45),
     inset 0 0 0 1px rgba(255, 255, 255, 0.7);
 }
@@ -1801,7 +1800,7 @@
   width: 116px;
   height: 26px;
   border-radius: var(--r-pill);
-  background: var(--ink);
+  background: #141a46;
   z-index: 2;
 }
 

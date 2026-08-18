@@ -1,103 +1,27 @@
 /* ---------------------------------------------------------------------------
    Trigonometry 101 — design tokens
 
-   One system, one source of truth. The palette is sampled from the Rive file
-   itself — the artwork cannot change, so the shell is the thing that has to
-   agree with it — and then stepped until every pairing the app actually draws
-   clears 4.5:1. Nothing below is decorative: each token names a role, and a
-   rule that needs a colour picks the role, never a hex.
+   A light, premium shell derived from the light-themed panels inside the Rive
+   file (the SOH CAH TOA card): near-white paper, soft grey surfaces, and the
+   file's own saturated accents used sparingly and with intent.
+
+   The colour values below are the artwork's and are deliberately left alone.
+   Everything under them — type, shape, elevation, timing — is a scale, so that
+   a rule states which step it wants rather than a number someone once typed.
    --------------------------------------------------------------------------- */
 
 :root {
-  /* -------------------------------------------------------------------------
-     Paper & ink — one neutral ramp, blue-tinted to sit under the navy ink.
-     ------------------------------------------------------------------------- */
+  /* Paper */
   --paper: #ffffff;
-  --paper-2: #f7f8fc;
-  --surface: #eef1f8;
-  --line: #e4e8f2;
-  --line-strong: #cfd6e6;
+  --paper-2: #f6f7fb;
+  --surface: #f2f4fa;
+  --line: #e6e9f4;
+  --line-strong: #d5dae9;
 
+  /* Ink — sampled from the label text in the Angle artboard. */
   --ink: #141a46;
   --ink-2: #4a5279;
-  --ink-3: #646b8d;
-
-  /* -------------------------------------------------------------------------
-     Accents
-
-     Every accent is one hue from the artwork, expressed in six roles. A rule
-     never reaches past these: the fill is the chunky surface, the edge is the
-     hard border drawn under it, `on` is whatever text rides on the fill, `ink`
-     is the accent used AS text, and soft/line are its tinted surface pair.
-
-     The steps are measured, not eyeballed. `on` against `fill`, `ink` against
-     both paper and `soft` — every one of those pairs clears 4.5:1.
-     ------------------------------------------------------------------------- */
-
-  /* Blue — the brand, and every interactive affordance in the app. */
-  --blue: #0f6fe8;
-  --blue-edge: #0b52ac;
-  --blue-on: #ffffff;
-  --blue-ink: #0e66d5;
-  --blue-soft: #e2eefc;
-  --blue-line: #adcef7;
-
-  /* Green — solved, correct, complete. The app's only success colour. */
-  --green: #188655;
-  --green-edge: #12633f;
-  --green-on: #ffffff;
-  --green-ink: #16794d;
-  --green-soft: #e3f0eb;
-  --green-line: #b0d6c5;
-
-  /* Amber — not built yet, held back, hinted at. The one accent bright enough
-     that its text goes dark: white on amber is unreadable at every step that
-     still reads as amber, so `on` is ink and the fill keeps its brightness. */
-  --amber: #f5a623;
-  --amber-edge: #c67f09;
-  --amber-on: #141a46;
-  --amber-ink: #9b6307;
-  --amber-soft: #fef4e5;
-  --amber-line: #fce1b4;
-
-  /* Violet & cyan — chapter accents and canvas readouts. */
-  --violet: #854db8;
-  --violet-edge: #63378a;
-  --violet-on: #ffffff;
-  --violet-ink: #854db8;
-  --violet-soft: #f0eaf6;
-  --violet-line: #d6c2e7;
-
-  --cyan: #0e7bb8;
-  --cyan-edge: #0a5b88;
-  --cyan-on: #ffffff;
-  --cyan-ink: #0c70a7;
-  --cyan-soft: #e2f0f7;
-  --cyan-line: #add3e9;
-
-  /* Rose — wrong answers, and the one destructive action in the app. */
-  --rose: #d62744;
-  --rose-edge: #9e1d32;
-  --rose-on: #ffffff;
-  --rose-ink: #c82440;
-  --rose-soft: #fae5e9;
-  --rose-line: #f1b6bf;
-
-  /* A surface lifted off a coloured fill borrows that fill's own `on` colour
-     at low alpha, so one rule works on every accent without naming any of
-     them. Amber redefines these four because its `on` colour is ink. */
-  --wash: rgba(255, 255, 255, 0.18);
-  --wash-hi: rgba(255, 255, 255, 0.30);
-  --wash-line: rgba(255, 255, 255, 0.45);
-  --wash-shade: rgba(0, 0, 0, 0.16);
-
-  /* The chapter tone every accented block reads from. Home sets the four
-     values per chapter; everything downstream — headline, keys, review row —
-     only ever sees `--tone`. */
-  --tone: var(--blue);
-  --tone-edge: var(--blue-edge);
-  --tone-on: var(--blue-on);
-  --tone-ink: var(--blue-ink);
+  --ink-3: #858db0;
 
   /**
    * Eight of the ten artboards are drawn light-on-navy inside the Rive file.
@@ -112,10 +36,43 @@
   /* #0d1062 through that filter lands here; measured, not guessed. */
   --field-inverted: #f6f9ff;
 
+  /* Accents, straight out of the artwork. */
+  --blue: #0075ff;
+  --cyan: #2baff7;
+  --amber: #feaf36;
+  --violet: #854db8;
+  --mint: #21b573;
+  --rose: #ff4d6a;
+
+  /**
+   * The game-like shell palette. Every accent comes in two steps: the fill
+   * and the darker "edge" drawn as a hard bottom border, which is what makes
+   * flat shapes read as chunky, pressable pieces.
+   */
+  --duo-blue: #55a6e8;
+  --duo-blue-dark: #4285c2;
+  --duo-amber: #e0a03c;
+  --duo-amber-dark: #bd811f;
+  --duo-green: #58cc02;
+  --duo-green-dark: #47a302;
+  --duo-violet: #ce82ff;
+  --duo-violet-dark: #a568cc;
+  --duo-line: #e5e5e5;
+  --duo-key: #f7f7f7;
+
+  /* Accent text, darkened where the raw artwork colour is too pale to set
+     small type in. Named here so the five places that need them agree. */
+  --amber-ink: #b57708;
+  --cyan-ink: #0e8fd6;
+  --mint-ink: #189a63;
+  --rose-ink: #e13a57;
+
   /* -------------------------------------------------------------------------
      Type — one scale. Twelve steps replace the two dozen sizes the screens had
      drifted into, and no step is a half-pixel.
      ------------------------------------------------------------------------- */
+  /* Nunito's heavy weights are the classic web stand-in for the rounded
+     "game" face; M PLUS Rounded 1c backs it up. */
   --font-ui: 'Nunito', 'M PLUS Rounded 1c', ui-rounded, 'SF Pro Rounded',
     system-ui, -apple-system, 'Segoe UI', sans-serif;
 
@@ -249,12 +206,6 @@ ul {
   outline: var(--b) solid var(--blue);
   outline-offset: 3px;
   border-radius: var(--r-xs);
-}
-
-/* On a coloured fill the ring has to leave the fill, not blend into it. */
-.appbar :focus-visible,
-.row--review:focus-visible {
-  outline-color: var(--paper);
 }
 
 @media (prefers-reduced-motion: reduce) {

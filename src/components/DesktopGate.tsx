@@ -44,7 +44,7 @@ export function DesktopGate({ onPreview }: Props) {
 
         <div className="gate__card">
           <div className="gate__copy">
-            <span className="pill pill--soon">Desktop — coming soon</span>
+            <span className="gate__badge">Desktop — coming soon</span>
             <h2 className="gate__h2">Built for your phone</h2>
             <p className="gate__body">
               Every lesson here is something you drag with a thumb. The desktop build

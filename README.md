@@ -111,51 +111,41 @@ numbering runs against all fifteen.
 
 ## Design
 
-Everything the app draws comes from one token file, `src/styles/global.css`.
-No rule in `src/styles/app.css` names a colour, a font size, a weight or a
-radius directly — if you find yourself typing a hex, the system is missing a
-role and the role is what should be added.
+**Colour is the artwork's, and is left alone.** The palette in
+`src/styles/global.css` is sampled from the Rive file — the navy, the accents,
+the two-step "duo" fills with their darker edges — so the chrome and the canvas
+read as one product. Nothing in the app invents a colour of its own.
 
-**Colour.** The palette is sampled from the Rive file, because the artwork
-cannot change and so the shell is the thing that has to agree with it. Each of
-the six accents is one hue in six roles:
+Everything *under* colour is a scale, so a rule states which step it wants
+rather than a number someone typed once:
 
-| role | what it is |
-| --- | --- |
-| `--x` | the fill — chunky surfaces, banners, filled keys |
-| `--x-edge` | the hard darker border drawn under the fill |
-| `--x-on` | text and icons that ride **on** the fill |
-| `--x-ink` | the accent used **as** text, on paper or on `--x-soft` |
-| `--x-soft` | its tinted surface |
-| `--x-line` | its tinted border |
+- **Type** — one scale, `--t-micro` (10px) through `--t-display` (54px), and
+  four weights: `--w-body` 500, `--w-mid` 700, `--w-bold` 800, `--w-black` 900.
+  Those four are the only ones fetched from Google Fonts. **Nunito** carries the
+  rounded, game-like voice; **M PLUS Rounded 1c** backs it up and stands in for
+  the file's DIN Round Pro.
+- **Shape** — `--r-2xs` … `--r-xl` plus `--r-pill`; two border weights
+  (`--b-hair` 1px, `--b` 2px); and `--edge`, the hard bottom border that makes
+  a flat shape read as pressable.
+- **Elevation** — four, each named for its one job: `--lift-card`,
+  `--lift-sheet`, `--lift-dock`, `--lift-rail`.
 
-The steps are measured, not eyeballed: `on` against `fill`, and `ink` against
-both paper and `soft`, all clear 4.5:1. Amber is the one accent whose `on`
-colour is ink rather than white — no step of amber that still reads as amber
-can carry white text — so anything that sits on an amber fill inverts with it,
-via the `--wash-*` tokens.
+Every pressable thing is the same object: a flat fill riding on its `--edge`,
+which sinks into that edge when pressed. Nothing dims and nothing scales.
+Buttons, quiz options, number keys and the lesson bar's hint key are all that
+one object at different sizes.
 
-Each accent means one thing, everywhere:
+Chapters pick an accent and republish it as `--tone`/`--tone-dark`; nothing
+below `.chapter--*` names a colour.
 
-- **blue** — the brand, and every interactive affordance;
-- **green** — solved, correct, complete. The app's only success colour;
-- **amber** — not built yet, held back, hinted at;
-- **rose** — wrong answers, and the one destructive action;
-- **violet, cyan** — chapter accents and canvas readouts.
-
-A chapter picks one of them and republishes it as `--tone`/`--tone-edge`/
-`--tone-on`/`--tone-ink`; nothing downstream of `.chapter--*` names an accent.
-
-**Shape.** Every pressable thing in the app is the same object: a flat fill
-riding on a hard darker edge (`--edge`), which sinks into that edge when
-pressed. Nothing dims and nothing scales. Buttons, quiz options, number keys
-and the hint key are all that one object at different sizes.
-
-**Type.** One scale, `--t-micro` through `--t-display`, and four weights
-(`--w-body` 500, `--w-mid` 700, `--w-bold` 800, `--w-black` 900). Only those
-four are fetched from Google Fonts. **Nunito** carries the rounded, game-like
-voice; **M PLUS Rounded 1c** backs it up and stands in for the file's
-DIN Round Pro.
+**The stepper.** `src/components/Steps.tsx` draws the lesson's three steps for
+both bottom panes. It is a track rather than a sentence — the segments carry
+the count, so only the current step is named, done segments take the solved
+colour and the current one grows. Tapping a segment goes back to that step; the
+bar refuses to go forward, because skipping the task there would hand out the
+answer. In the bar the row contributes exactly 14px so the fixed height holds,
+while each segment is padded out to a 34px tap target and gives the space back
+with a negative margin.
 
 **The canvas.** The artboards are never restyled — the app owns the chrome
 around them and nothing inside them. The two dark artboard themes are inverted

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Instruments } from './Instruments'
-import { STEPS, stepName } from './lessonPane'
+import { Steps } from './Steps'
 import type { LessonPaneProps } from './lessonPane'
 
 /**
@@ -26,7 +26,6 @@ export function LessonSheet({
   onNext,
 }: LessonPaneProps) {
   const [open, setOpen] = useState(step === 'learn')
-  const stepIndex = STEPS.indexOf(step)
 
   return (
     <div className={`sheet ${open ? 'is-open' : ''}`.trim()}>
@@ -40,26 +39,8 @@ export function LessonSheet({
         <span className="sheet__handle" aria-hidden="true" />
       </button>
 
-      <nav className="steps" aria-label="Lesson steps">
-        {STEPS.map((s, i) => {
-          const current = i === stepIndex
-          const doneStep = i < stepIndex || (s === 'do' && solved)
-          return (
-            <button
-              key={s}
-              type="button"
-              className={`steps__seg ${current ? 'is-current' : ''} ${
-                doneStep ? 'is-done' : ''
-              }`.trim()}
-              aria-current={current}
-              aria-label={`Step ${i + 1}: ${stepName(s)}`}
-              onClick={() => onStep(s)}
-            >
-              <span className="steps__dot" aria-hidden="true" />
-              {current && <span className="steps__name">{stepName(s)}</span>}
-            </button>
-          )
-        })}
+      <div className="steps__row">
+        <Steps step={step} solved={solved} onStep={onStep} allowForward />
         <button
           type="button"
           className="steps__more"
@@ -78,7 +59,7 @@ export function LessonSheet({
             />
           </svg>
         </button>
-      </nav>
+      </div>
 
       <div className="sheet__scroll">
         {step === 'watch' && (
