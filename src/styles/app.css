@@ -601,9 +601,13 @@
    *
    * It takes whatever is left once the square artboard has claimed the full
    * width of the screen — so the canvas sits edge to edge — but never less
-   * than the 180px the three steps need to lay out, and never more than 230px:
-   * the rows come to 180, and past ~50px of slack the gap above the button
-   * stops reading as breathing room and starts reading as a hole.
+   * than the 180px the three steps need to lay out, and never more than 200px.
+   *
+   * The floor is not arbitrary and neither is the cap. On the first step the
+   * instrument slot is empty but still holds its 28px, so 28 plus the 16px of
+   * row gaps is already sitting between the task and the button before any
+   * slack is added. At 230px that measured 93px of hole; at 200px it is ~64px,
+   * and the explanation step still keeps about 88px to scroll in.
    *
    * The artboard's share is `100vw * --band`, not `100vw`: a framed lesson
    * crops its dead margin, so it needs less height and the dock can have the
@@ -613,10 +617,12 @@
   --band: 1;
   --controls-n: 0;
   --control-gap: 12px;
+  --safe-l: env(safe-area-inset-left, 0px);
+  --safe-r: env(safe-area-inset-right, 0px);
   /* Each strip is a 550x60 artboard at full width, plus the air between them. */
   --controls-h: calc(
-    100vw * 60 / 550 * var(--controls-n) + var(--control-gap) *
-      max(var(--controls-n) - 1, 0)
+    (100vw - var(--safe-l) - var(--safe-r)) * 60 / 550 * var(--controls-n) +
+      var(--control-gap) * max(var(--controls-n) - 1, 0)
   );
   --dock-h: clamp(
     180px,
@@ -624,7 +630,7 @@
       var(--vh, 100dvh) - var(--appbar-h) - (100vw * var(--band)) -
         var(--controls-h)
     ),
-    230px
+    200px
   );
   background: var(--field);
 }
@@ -693,9 +699,15 @@
   gap: var(--control-gap);
   /* No gutter here on purpose. These strips are artboards like the one above
      them and are bound to it, so they get the same treatment: full bleed,
-     edge to edge. They are drawn to their own left and right edges, so the
-     track meets the side of the screen — that is the artboard's composition,
-     not a crop. The only thing the app adds is the air between them. */
+     edge to edge. They are drawn to their own left and right edges — the end
+     labels land 0.8px off the glass — which is the artboard's composition,
+     not a crop.
+
+     The one thing they do get is the side safe-area insets. Those are 0 on an
+     ordinary phone, so the look is unchanged, but on hardware with a rounded
+     corner or a notch they keep "15°" and "75°" out from under the bezel. */
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
 }
 
 .lesson .stage--control {
