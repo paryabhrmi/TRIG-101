@@ -62,7 +62,8 @@ export function LessonBar({
               <span aria-hidden="true">✓</span> Nice — that is the idea
             </p>
           )}
-          <h2 className="lbar__title">{lesson.title}</h2>
+          {/* No title here: the app bar above is already showing it, and in a
+              dock this size a second copy costs a third of the explanation. */}
           <div className="lbar__prose">
             {lesson.body.map((para, i) => (
               <p key={i}>{para}</p>

@@ -21,6 +21,38 @@
  * `global.css` turns it back into paper. See README.
  */
 export type StageTone = 'navy' | 'deep' | 'paper'
+
+/**
+ * The band of a square artboard that actually carries artwork.
+ *
+ * Several artboards are composed with a wide margin of nothing — `Ratio` never
+ * draws below 58% of its height, even with both sliders at their extremes — and
+ * `Fit.Contain` in a square box puts that emptiness on screen as a hole between
+ * the artwork and whatever sits under it. Naming the band lets the stage box be
+ * the band's shape instead of the artboard's, so the emptiness is cropped and
+ * the composition closes up.
+ *
+ * `band` is the fraction of the square's height that is ever drawn into and
+ * `align` is where that band sits. Both are measured off the rendered canvas,
+ * with the sliders swept, then given margin. A lesson with no frame uses the
+ * whole square, which is always safe.
+ *
+ * 0.75 is not a guess: with both sliders swept to their extremes, 0.66 clips
+ * the Adjacent line's ticks and 0.72 is the floor. 0.75 leaves ~34px of margin
+ * under the largest triangle the lesson can draw, and still takes about 110px
+ * of dead paper out of the gap.
+ *
+ * Only `Ratio` carries one, and deliberately. It is the one lesson with
+ * artboards *below* the main one — its two slider strips — so its 42% of dead
+ * margin shows up as a hole between the triangle and the sliders. Where the
+ * artboard is the last thing in the field, cropping that margin only moves the
+ * same white from inside the box to around it, and on a tall phone it moves
+ * more of it there, so those lessons are left square.
+ */
+export interface Frame {
+  band: number
+  align: 'top' | 'center' | 'bottom'
+}
 export type Tone = 'blue' | 'cyan' | 'amber' | 'violet' | 'mint' | 'rose'
 
 /** One frame of artboard state, sampled from the view model + state machine. */
@@ -92,6 +124,8 @@ export interface Lesson {
   artboard: string
   stateMachine: string
   stage: StageTone
+  /** Crops the artboard's dead margin. See `Frame`. */
+  frame?: Frame
   /** False for artboards that carry no view model (Rive warns if you bind). */
   bindViewModel: boolean
   /**
@@ -353,6 +387,7 @@ export const lessons: Lesson[] = [
     artboard: 'Ratio',
     stateMachine: SM,
     stage: 'paper',
+    frame: { band: 0.75, align: 'top' },
     bindViewModel: true,
     controls: ['Ratio/AngleSlider', 'Ratiop/ScaleSlider'],
     chapter: 1,

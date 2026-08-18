@@ -20,6 +20,7 @@ interface Props {
   bindTo?: Rive | null
   className?: string
   fit?: Fit
+  alignment?: Alignment
 }
 
 /**
@@ -38,6 +39,7 @@ export function RiveStage({
   className,
   bindTo,
   fit = Fit.Contain,
+  alignment = Alignment.Center,
 }: Props) {
   const { rive, RiveComponent } = useRive(
     {
@@ -48,10 +50,14 @@ export function RiveStage({
       // Binding an artboard that has no view model logs a runtime error, so
       // only opt in where the file actually defines one.
       autoBind: bindViewModel,
-      layout: new Layout({ fit, alignment: Alignment.Center }),
+      layout: new Layout({ fit, alignment }),
     },
     { shouldResizeCanvasToContainer: true, useDevicePixelRatio: true },
   )
+
+  useEffect(() => {
+    if (rive) rive.layout = new Layout({ fit, alignment })
+  }, [rive, fit, alignment])
 
   useEffect(() => {
     if (rive && onReady) onReady(rive)

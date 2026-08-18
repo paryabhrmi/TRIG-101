@@ -600,12 +600,27 @@
    * nothing left for it to move into.
    *
    * It takes whatever is left once the square artboard has claimed the full
-   * width of the screen — so the canvas sits edge to edge and centred — but
-   * never less than the 180px the three steps need to lay out, and never more
-   * than 240px, past which it is just empty paper under the task. Whatever is
-   * left over lands as symmetric margin above and below the artboard.
+   * width of the screen — so the canvas sits edge to edge — but never less
+   * than the 180px the three steps need to lay out, and never more than 230px:
+   * the rows come to 180, and past ~50px of slack the gap above the button
+   * stops reading as breathing room and starts reading as a hole.
+   *
+   * The artboard's share is `100vw * --band`, not `100vw`: a framed lesson
+   * crops its dead margin, so it needs less height and the dock can have the
+   * difference rather than leaving it as a gap nobody asked for. Control
+   * strips are 550x60 artboards at full width, so each costs 100vw * 60/550.
    */
-  --dock-h: clamp(180px, calc(var(--vh, 100dvh) - var(--appbar-h) - 100vw), 240px);
+  --band: 1;
+  --controls-n: 0;
+  --controls-h: calc(100vw * 60 / 550 * var(--controls-n));
+  --dock-h: clamp(
+    180px,
+    calc(
+      var(--vh, 100dvh) - var(--appbar-h) - (100vw * var(--band)) -
+        var(--controls-h)
+    ),
+    230px
+  );
   background: var(--field);
 }
 
@@ -636,10 +651,14 @@
   container-type: size;
 }
 
+/* `--band` is the fraction of the square artboard that carries artwork; the
+   lesson sets it when it has a frame, and the box takes that shape so the
+   artboard's dead margin is cropped instead of drawn as a hole. Unframed
+   lessons leave it at 1 and the box stays square. */
 .lesson .stage {
   flex: 0 0 auto;
   width: 100%;
-  aspect-ratio: 1 / 1;
+  aspect-ratio: 1 / var(--band, 1);
   background: transparent;
 }
 
@@ -647,7 +666,7 @@
    enough for it, and merely inset rather than cropped when it is not. */
 @supports (container-type: size) {
   .lesson__art .stage {
-    width: min(100%, 100cqh);
+    width: min(100%, calc(100cqh / var(--band, 1)));
   }
 }
 
@@ -1401,16 +1420,7 @@
   mask-image: linear-gradient(180deg, #000 calc(100% - 24px), transparent);
 }
 
-.lbar__title {
-  font-size: var(--t-4xl);
-  font-weight: var(--w-black);
-  line-height: 1.2;
-  color: var(--ink);
-  text-wrap: balance;
-}
-
 .lbar__prose {
-  margin-top: 12px;
   display: flex;
   flex-direction: column;
   gap: 12px;

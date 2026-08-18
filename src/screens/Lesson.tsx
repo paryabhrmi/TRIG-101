@@ -7,6 +7,7 @@ import { TOTAL_LESSONS, lessons, nextStop, slotNumber } from '../data/curriculum
 import { useProgress } from '../lib/progress'
 import { useInstruments } from '../lib/useInstruments'
 import { uiMode } from '../lib/uiMode'
+import { Alignment, Fit } from '@rive-app/react-canvas'
 import type { Rive } from '@rive-app/react-canvas'
 import type { Step } from '../components/lessonPane'
 import type { Lesson as LessonModel, LessonAction } from '../data/curriculum'
@@ -38,6 +39,18 @@ export function LessonScreen({ lesson, onBack, onGoto, onReview, onFinish }: Pro
   const alreadyDone = !!progress[lesson.id]
   const n = slotNumber(lesson.id)
   const after = useMemo(() => nextStop(lesson.id), [lesson.id])
+
+  // A framed lesson crops its artboard's dead margin: the box takes the band's
+  // shape and `Cover` fills it, anchored to the side the artwork sits on.
+  const frame = lesson.frame
+  const fit = frame ? Fit.Cover : Fit.Contain
+  const alignment = !frame
+    ? Alignment.Center
+    : frame.align === 'top'
+      ? Alignment.TopCenter
+      : frame.align === 'bottom'
+        ? Alignment.BottomCenter
+        : Alignment.Center
 
   const { values, aim, conditions, solved, markSolved } = useInstruments(
     rive,
@@ -113,7 +126,17 @@ export function LessonScreen({ lesson, onBack, onGoto, onReview, onFinish }: Pro
   }
 
   return (
-    <div className={`screen lesson lesson--${lesson.stage} lesson--${mode}`}>
+    <div
+      className={`screen lesson lesson--${lesson.stage} lesson--${mode}`}
+      // The dock's height is derived from these, so they belong on the screen
+      // rather than on the field they describe.
+      style={
+        {
+          '--band': frame?.band ?? 1,
+          '--controls-n': lesson.controls?.length ?? 0,
+        } as React.CSSProperties
+      }
+    >
       <AppBar
         onBack={onBack}
         subtitle={`Lesson ${n} of ${TOTAL_LESSONS}`}
@@ -135,6 +158,8 @@ export function LessonScreen({ lesson, onBack, onGoto, onReview, onFinish }: Pro
             stateMachine={lesson.stateMachine}
             stage={lesson.stage}
             bindViewModel={lesson.bindViewModel}
+            fit={fit}
+            alignment={alignment}
             onReady={setRive}
           />
         </div>
