@@ -147,12 +147,27 @@ answer. In the bar the row contributes exactly 14px so the fixed height holds,
 while each segment is padded out to a 34px tap target and gives the space back
 with a negative margin.
 
-**The canvas.** The artboards are never restyled — the app owns the chrome
-around them and nothing inside them. The two dark artboard themes are inverted
-into the light one (`--invert-artboard`) so the whole product is a single white
-surface; the field behind an inverted artboard carries `--field-inverted`, the
-measured result of running the file's navy through that filter, so canvas and
-page are one continuous surface rather than a tile on a backdrop.
+**The canvas, and the dock under it.** The artboards are never restyled — the
+app owns the chrome around them and nothing inside them.
+
+Every artboard in the current `trig101.riv` is drawn light, so every lesson
+declares `stage: 'paper'` and nothing is filtered. The `navy` and `deep` tones
+are still in the model because the file has shipped dark artboards before: a
+lesson whose artboard comes back light-on-navy only has to say so in
+`curriculum.ts`, and `--invert-artboard` turns it into paper again, with
+`--field-inverted` behind it so canvas and page stay one surface. Getting this
+wrong is visible — an inverted light artboard renders black.
+
+The bottom dock is `--dock-h` on **all three steps**, the explanation included,
+which scrolls inside it rather than growing. That is what pins the artboard: it
+takes whatever is left once the square artboard has claimed the full width of
+the screen, so the canvas is edge to edge and centred, floored at the 180px the
+three steps need to lay out and capped at 240px. The action row is pinned to
+the foot of the dock, so the primary button is in the same place on every step.
+
+The payoff is measurable: on every phone size tested, the canvas box is
+identical — same size, same position, to the pixel — across all three steps,
+and exactly as wide as the viewport.
 
 ## Rive integration notes
 

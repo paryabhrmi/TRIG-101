@@ -11,7 +11,15 @@
  * README.md for the full map.
  */
 
-/** Which of the file's two artboard themes this lesson uses. */
+/**
+ * Which of the file's artboard themes this lesson uses.
+ *
+ * Every artboard in the current `trig101.riv` is drawn light, so every lesson
+ * is `paper` and nothing is filtered. The two dark tones are kept because the
+ * file has shipped dark artboards before: a lesson whose artboard comes back
+ * light-on-navy only has to say so here, and `--invert-artboard` in
+ * `global.css` turns it back into paper. See README.
+ */
 export type StageTone = 'navy' | 'deep' | 'paper'
 export type Tone = 'blue' | 'cyan' | 'amber' | 'violet' | 'mint' | 'rose'
 
@@ -460,7 +468,7 @@ export const lessons: Lesson[] = [
     id: 'unit-circle',
     artboard: 'UnitCircle',
     stateMachine: SM,
-    stage: 'navy',
+    stage: 'paper',
     bindViewModel: true,
     chapter: 2,
     title: 'The unit circle',
@@ -490,7 +498,7 @@ export const lessons: Lesson[] = [
     id: 'sine-wave',
     artboard: 'CircletoSin',
     stateMachine: SM,
-    stage: 'deep',
+    stage: 'paper',
     bindViewModel: true,
     chapter: 3,
     title: 'Unrolling the sine',
@@ -519,7 +527,7 @@ export const lessons: Lesson[] = [
     id: 'cosine-wave',
     artboard: 'CircletoCos',
     stateMachine: SM,
-    stage: 'deep',
+    stage: 'paper',
     bindViewModel: true,
     chapter: 3,
     title: 'Cosine, one quarter early',
@@ -548,7 +556,7 @@ export const lessons: Lesson[] = [
     id: 'tangent',
     artboard: 'CircletoTan',
     stateMachine: SM,
-    stage: 'deep',
+    stage: 'paper',
     bindViewModel: true,
     chapter: 3,
     title: 'Tangent and its walls',
@@ -577,7 +585,7 @@ export const lessons: Lesson[] = [
     id: 'amplitude-frequency',
     artboard: 'AmpFrqSin',
     stateMachine: SM,
-    stage: 'navy',
+    stage: 'paper',
     bindViewModel: true,
     chapter: 3,
     title: 'Amplitude and frequency',
@@ -607,7 +615,7 @@ export const lessons: Lesson[] = [
     id: 'the-swing',
     artboard: 'TheSwing',
     stateMachine: SM,
-    stage: 'navy',
+    stage: 'paper',
     bindViewModel: true,
     chapter: 3,
     title: 'Where the wave shows up',

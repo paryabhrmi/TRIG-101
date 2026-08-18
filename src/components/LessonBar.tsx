@@ -9,11 +9,12 @@ import type { LessonPaneProps } from './lessonPane'
  * dock carries only what the file cannot know: what the learner is being asked
  * to do, how far off it they still are, and what happens next.
  *
- * Its height is fixed at 180px (see `.lbar` in app.css) across the first two
- * steps. Every row is reserved whether or not it has content, so moving from
- * "find it" to "try it" does not resize the canvas — which matters because the
- * artboards' sliders are dragged by thumb, and a canvas that rescales mid-drag
- * moves the knob out from under the finger.
+ * Its height is `--dock-h` (see `.lbar` in app.css) on all three steps — the
+ * explanation scrolls inside it rather than making it taller. Every row is
+ * reserved whether or not it has content, so moving between steps does not
+ * resize the canvas above — which matters because the artboards' sliders are
+ * dragged by thumb, and a canvas that rescales mid-drag moves the knob out
+ * from under the finger.
  */
 
 /** How long a hint stays up before the slot returns to its instrument. */
@@ -51,17 +52,22 @@ export function LessonBar({
   if (step === 'learn') {
     return (
       <div className="lbar lbar--panel">
-        <Steps step={step} solved={solved} onStep={onStep} />
-        {solved && (
-          <p className="win">
-            <span aria-hidden="true">✓</span> Nice — that is the idea
-          </p>
-        )}
-        <h2 className="lbar__title">{lesson.title}</h2>
-        <div className="lbar__prose">
-          {lesson.body.map((para, i) => (
-            <p key={i}>{para}</p>
-          ))}
+        <Steps step={step} solved={solved} onStep={onStep} tight />
+        {/* Title and explanation scroll together. The dock is the same height
+            it is on every other step, so there is no room to lay them out and
+            nothing to gain from crushing one to fit the other. */}
+        <div className="lbar__scroll">
+          {solved && (
+            <p className="win">
+              <span aria-hidden="true">✓</span> Nice — that is the idea
+            </p>
+          )}
+          <h2 className="lbar__title">{lesson.title}</h2>
+          <div className="lbar__prose">
+            {lesson.body.map((para, i) => (
+              <p key={i}>{para}</p>
+            ))}
+          </div>
         </div>
         <div className="lbar__act">
           <button type="button" className="btn btn--primary btn--wide" onClick={onNext}>

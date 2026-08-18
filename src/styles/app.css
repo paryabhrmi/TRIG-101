@@ -591,6 +591,21 @@
    instead of a tile on a backdrop. */
 .lesson {
   --field: var(--paper);
+  /* The app bar's own height: its 64px row, its 4px edge and the 4px progress
+     track, plus whatever the notch takes. */
+  --appbar-h: calc(72px + var(--safe-t));
+  /**
+   * The dock is the same height on every step. That is the whole point: the
+   * artboard above it cannot move when the learner advances, because there is
+   * nothing left for it to move into.
+   *
+   * It takes whatever is left once the square artboard has claimed the full
+   * width of the screen — so the canvas sits edge to edge and centred — but
+   * never less than the 180px the three steps need to lay out, and never more
+   * than 240px, past which it is just empty paper under the task. Whatever is
+   * left over lands as symmetric margin above and below the artboard.
+   */
+  --dock-h: clamp(180px, calc(var(--vh, 100dvh) - var(--appbar-h) - 100vw), 240px);
   background: var(--field);
 }
 
@@ -1100,10 +1115,14 @@
    panel, so this dock holds only what the file cannot know: the task, how far
    off it the learner still is, and what happens next.
 
-   The height is fixed. Every row is reserved whether or not this lesson fills
-   it, so moving between steps never resizes the canvas — the artboards'
-   sliders are dragged by thumb, and a canvas that rescales mid-drag takes the
-   knob out from under the finger.
+   The height is `--dock-h` on all three steps — the explanation step included,
+   which scrolls inside it rather than growing. That is what keeps the artboard
+   from moving when the learner advances: the artboards' sliders are dragged by
+   thumb, and a canvas that rescales mid-drag takes the knob out from under the
+   finger.
+
+   Every row is reserved whether or not this lesson fills it. The rows come to
+   180px, which is why that is `--dock-h`'s floor:
 
      12  padding
      14  stepper — three segments and the current step's name
@@ -1116,13 +1135,17 @@
      12  padding
     ---
     180  plus the bottom safe area
+
+   Anything `--dock-h` has beyond that lands between the slot and the action
+   row, which is pinned to the foot so the primary button is in the same place
+   on every step.
    =========================================================================== */
 
 .lbar {
   position: relative;
   z-index: 2;
   flex: 0 0 auto;
-  height: 180px;
+  height: var(--dock-h);
   padding: 12px var(--gut) calc(12px + var(--safe-b));
   display: flex;
   flex-direction: column;
@@ -1161,7 +1184,8 @@
 
 .lbar__act {
   flex: 0 0 auto;
-  margin-top: 8px;
+  margin-top: auto;
+  padding-top: 8px;
   height: 54px;
   display: flex;
   align-items: flex-start;
@@ -1341,16 +1365,15 @@
    Progress opens it — there is nothing here for the learner to drag.
    --------------------------------------------------------------------------- */
 
+/* The third step is the same dock, not a taller one. Everything it says
+   scrolls inside it, which is what lets the artboard stay put. */
 .lbar--panel {
-  height: auto;
-  max-height: 58dvh;
-  padding-top: 16px;
   animation: panel-in 0.32s var(--ease);
 }
 
 /* Finishing a lesson should not drop you out of the roadmap at the moment you
    complete it, so the panel keeps the stepper and spaces itself off it. */
-.lbar--panel .steps {
+.lbar--panel .win {
   margin-bottom: 12px;
 }
 
@@ -1363,9 +1386,22 @@
   }
 }
 
-.lbar__title {
-  flex: 0 0 auto;
+.lbar__scroll {
+  flex: 1 1 auto;
+  min-height: 0;
   margin-top: 12px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  /* The dock is a fixed height, so the explanation is usually taller than the
+     box. Without this the last visible line is sliced off square and reads as
+     a bug; fading it says "there is more" in the way every scroll region
+     does. */
+  -webkit-mask-image: linear-gradient(180deg, #000 calc(100% - 24px), transparent);
+  mask-image: linear-gradient(180deg, #000 calc(100% - 24px), transparent);
+}
+
+.lbar__title {
   font-size: var(--t-4xl);
   font-weight: var(--w-black);
   line-height: 1.2;
@@ -1374,12 +1410,7 @@
 }
 
 .lbar__prose {
-  flex: 1 1 auto;
-  min-height: 0;
   margin-top: 12px;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior: contain;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -1882,20 +1913,13 @@
   .lesson .lbar--panel {
     grid-column: 2;
     height: auto;
-    max-height: none;
     border-top: 0;
     border-inline-start: var(--b-hair) solid var(--line);
     box-shadow: var(--lift-rail);
   }
 
-  .lesson .lbar__prose {
+  .lesson .lbar__scroll {
     flex: 1 1 auto;
-  }
-
-  /* The action row is pinned to the bottom of the column instead of sitting
-     directly under the slot. */
-  .lesson .lbar__act {
-    margin-top: auto;
   }
 }
 
@@ -1906,8 +1930,8 @@
      12 + 14 + 4 + 36 + 8 + 28 + 8 + 50 + 12 = 172
    */
 @media (orientation: portrait) and (max-height: 640px) {
-  .lbar {
-    height: 172px;
+  .lesson {
+    --dock-h: 172px;
   }
 
   .lbar__task {
