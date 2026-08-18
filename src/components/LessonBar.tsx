@@ -76,7 +76,10 @@ export function LessonBar({
   }
 
   const doing = step === 'do'
-  const task = doing ? (lesson.checkpoint?.goal ?? lesson.tagline) : lesson.watch
+  // A lesson without a checkpoint has nothing to aim at, so the task line
+  // keeps naming the action. The tagline is a subtitle, not an instruction —
+  // and it is the one string here long enough to clip on a short phone.
+  const task = doing ? (lesson.checkpoint?.goal ?? lesson.watch) : lesson.watch
   const hint = lesson.checkpoint?.hint
   const actions = lesson.actions ?? []
 

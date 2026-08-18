@@ -1844,15 +1844,29 @@
   }
 }
 
-/* Very short portrait phones: the two reserved lines of task copy are the
-   first thing that can go, since most tasks fit on one. */
+/* Very short portrait phones. Both lines of task copy are kept — dropping to
+   one clips most of the step-one copy — and the height comes back out of the
+   type scale and the action row instead. The button stays above 44px.
+
+     12 + 14 + 4 + 36 + 8 + 28 + 8 + 50 + 12 = 172
+   */
 @media (orientation: portrait) and (max-height: 640px) {
   .lbar {
-    height: 160px;
+    height: 172px;
   }
 
   .lbar__task {
-    height: 20px;
-    -webkit-line-clamp: 1;
+    height: 36px;
+    font-size: 15px;
+    line-height: 18px;
+  }
+
+  .lbar__act {
+    height: 50px;
+  }
+
+  .lbar__act .btn,
+  .lbar__hint {
+    min-height: 46px;
   }
 }

@@ -348,19 +348,19 @@ export const lessons: Lesson[] = [
     readouts: [
       {
         id: 'oh',
-        label: 'Opp ÷ Hyp',
+        label: 'O ÷ H',
         tone: 'rose',
         value: (s) => fixed(num(s, 'OppRatio'), 3),
       },
       {
         id: 'ah',
-        label: 'Adj ÷ Hyp',
+        label: 'A ÷ H',
         tone: 'rose',
         value: (s) => fixed(num(s, 'AdjRatio'), 3),
       },
       {
         id: 'oa',
-        label: 'Opp ÷ Adj',
+        label: 'O ÷ A',
         tone: 'rose',
         value: (s) => fixed(num(s, 'TanRatio'), 3),
       },
