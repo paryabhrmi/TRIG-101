@@ -106,24 +106,63 @@ appear in the index with a SOON badge and open a screen naming what they will
 cover. Titles are provisional — rename them freely, and move an entry from
 `upcoming` into `lessons` once its artboard exists.
 
-Copy is bilingual (English / Persian) with full RTL support; the switch is in
-the app bar. Progress persists in `localStorage` and tracks the ten playable
-lessons; numbering runs against all fifteen.
+Progress persists in `localStorage` and tracks the ten playable lessons;
+numbering runs against all fifteen.
 
 ## Design
 
-The app chrome deliberately borrows the file's own visual language so the
-canvas does not look pasted into someone else's UI:
+Everything the app draws comes from one token file, `src/styles/global.css`.
+No rule in `src/styles/app.css` names a colour, a font size, a weight or a
+radius directly — if you find yourself typing a hex, the system is missing a
+role and the role is what should be added.
 
-- the navy `#0D1062` and the blueprint grid come from the `Cover` artboard;
-- panels are drawn like the `Ratio` panel — dark navy inside a thin steel-blue
-  rule, with a teal-to-navy header wash;
-- buttons reproduce the glossy silver-edged pills from the `Frequency (B)` row;
-- readout labels take accent colours the way the ratio panel colours its terms;
-- **M PLUS Rounded 1c** stands in for the file's DIN Round Pro.
+**Colour.** The palette is sampled from the Rive file, because the artwork
+cannot change and so the shell is the thing that has to agree with it. Each of
+the six accents is one hue in six roles:
 
-Light-themed artboards (`Angle`, `SecretRatios`) sit on a white card; the dark
-ones blend straight into the page.
+| role | what it is |
+| --- | --- |
+| `--x` | the fill — chunky surfaces, banners, filled keys |
+| `--x-edge` | the hard darker border drawn under the fill |
+| `--x-on` | text and icons that ride **on** the fill |
+| `--x-ink` | the accent used **as** text, on paper or on `--x-soft` |
+| `--x-soft` | its tinted surface |
+| `--x-line` | its tinted border |
+
+The steps are measured, not eyeballed: `on` against `fill`, and `ink` against
+both paper and `soft`, all clear 4.5:1. Amber is the one accent whose `on`
+colour is ink rather than white — no step of amber that still reads as amber
+can carry white text — so anything that sits on an amber fill inverts with it,
+via the `--wash-*` tokens.
+
+Each accent means one thing, everywhere:
+
+- **blue** — the brand, and every interactive affordance;
+- **green** — solved, correct, complete. The app's only success colour;
+- **amber** — not built yet, held back, hinted at;
+- **rose** — wrong answers, and the one destructive action;
+- **violet, cyan** — chapter accents and canvas readouts.
+
+A chapter picks one of them and republishes it as `--tone`/`--tone-edge`/
+`--tone-on`/`--tone-ink`; nothing downstream of `.chapter--*` names an accent.
+
+**Shape.** Every pressable thing in the app is the same object: a flat fill
+riding on a hard darker edge (`--edge`), which sinks into that edge when
+pressed. Nothing dims and nothing scales. Buttons, quiz options, number keys
+and the hint key are all that one object at different sizes.
+
+**Type.** One scale, `--t-micro` through `--t-display`, and four weights
+(`--w-body` 500, `--w-mid` 700, `--w-bold` 800, `--w-black` 900). Only those
+four are fetched from Google Fonts. **Nunito** carries the rounded, game-like
+voice; **M PLUS Rounded 1c** backs it up and stands in for the file's
+DIN Round Pro.
+
+**The canvas.** The artboards are never restyled — the app owns the chrome
+around them and nothing inside them. The two dark artboard themes are inverted
+into the light one (`--invert-artboard`) so the whole product is a single white
+surface; the field behind an inverted artboard carries `--field-inverted`, the
+measured result of running the file's navy through that filter, so canvas and
+page are one continuous surface rather than a tile on a backdrop.
 
 ## Rive integration notes
 

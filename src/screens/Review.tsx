@@ -142,7 +142,7 @@ export function Review({ chapter, onBack, onGoto, onFinish }: Props) {
         progress={index / questions.length}
       />
 
-      <div className="quiz">
+      <div className="pane quiz">
         <p className="quiz__prompt">{q.prompt}</p>
 
         <ul className="quiz__options">

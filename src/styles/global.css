@@ -1,24 +1,103 @@
 /* ---------------------------------------------------------------------------
    Trigonometry 101 — design tokens
 
-   A light, premium shell derived from the light-themed panels inside the Rive
-   file (the SOH CAH TOA card): near-white paper, soft grey surfaces, and the
-   file's own saturated accents used sparingly and with intent.
+   One system, one source of truth. The palette is sampled from the Rive file
+   itself — the artwork cannot change, so the shell is the thing that has to
+   agree with it — and then stepped until every pairing the app actually draws
+   clears 4.5:1. Nothing below is decorative: each token names a role, and a
+   rule that needs a colour picks the role, never a hex.
    --------------------------------------------------------------------------- */
 
 :root {
-  /* Paper */
+  /* -------------------------------------------------------------------------
+     Paper & ink — one neutral ramp, blue-tinted to sit under the navy ink.
+     ------------------------------------------------------------------------- */
   --paper: #ffffff;
-  --paper-2: #f6f7fb;
-  --surface: #f2f4fa;
-  --line: #e6e9f4;
-  --line-strong: #d5dae9;
+  --paper-2: #f7f8fc;
+  --surface: #eef1f8;
+  --line: #e4e8f2;
+  --line-strong: #cfd6e6;
 
-  /* Ink — sampled from the label text in the Angle artboard. */
   --ink: #141a46;
   --ink-2: #4a5279;
-  --ink-3: #858db0;
-  --ink-mute: #8a92b4;
+  --ink-3: #646b8d;
+
+  /* -------------------------------------------------------------------------
+     Accents
+
+     Every accent is one hue from the artwork, expressed in six roles. A rule
+     never reaches past these: the fill is the chunky surface, the edge is the
+     hard border drawn under it, `on` is whatever text rides on the fill, `ink`
+     is the accent used AS text, and soft/line are its tinted surface pair.
+
+     The steps are measured, not eyeballed. `on` against `fill`, `ink` against
+     both paper and `soft` — every one of those pairs clears 4.5:1.
+     ------------------------------------------------------------------------- */
+
+  /* Blue — the brand, and every interactive affordance in the app. */
+  --blue: #0f6fe8;
+  --blue-edge: #0b52ac;
+  --blue-on: #ffffff;
+  --blue-ink: #0e66d5;
+  --blue-soft: #e2eefc;
+  --blue-line: #adcef7;
+
+  /* Green — solved, correct, complete. The app's only success colour. */
+  --green: #188655;
+  --green-edge: #12633f;
+  --green-on: #ffffff;
+  --green-ink: #16794d;
+  --green-soft: #e3f0eb;
+  --green-line: #b0d6c5;
+
+  /* Amber — not built yet, held back, hinted at. The one accent bright enough
+     that its text goes dark: white on amber is unreadable at every step that
+     still reads as amber, so `on` is ink and the fill keeps its brightness. */
+  --amber: #f5a623;
+  --amber-edge: #c67f09;
+  --amber-on: #141a46;
+  --amber-ink: #9b6307;
+  --amber-soft: #fef4e5;
+  --amber-line: #fce1b4;
+
+  /* Violet & cyan — chapter accents and canvas readouts. */
+  --violet: #854db8;
+  --violet-edge: #63378a;
+  --violet-on: #ffffff;
+  --violet-ink: #854db8;
+  --violet-soft: #f0eaf6;
+  --violet-line: #d6c2e7;
+
+  --cyan: #0e7bb8;
+  --cyan-edge: #0a5b88;
+  --cyan-on: #ffffff;
+  --cyan-ink: #0c70a7;
+  --cyan-soft: #e2f0f7;
+  --cyan-line: #add3e9;
+
+  /* Rose — wrong answers, and the one destructive action in the app. */
+  --rose: #d62744;
+  --rose-edge: #9e1d32;
+  --rose-on: #ffffff;
+  --rose-ink: #c82440;
+  --rose-soft: #fae5e9;
+  --rose-line: #f1b6bf;
+
+  /* A surface lifted off a coloured fill borrows that fill's own `on` colour
+     at low alpha, so one rule works on every accent without naming any of
+     them. Amber redefines these four because its `on` colour is ink. */
+  --wash: rgba(255, 255, 255, 0.18);
+  --wash-hi: rgba(255, 255, 255, 0.30);
+  --wash-line: rgba(255, 255, 255, 0.45);
+  --wash-shade: rgba(0, 0, 0, 0.16);
+
+  /* The chapter tone every accented block reads from. Home sets the four
+     values per chapter; everything downstream — headline, keys, review row —
+     only ever sees `--tone`. */
+  --tone: var(--blue);
+  --tone-edge: var(--blue-edge);
+  --tone-on: var(--blue-on);
+  --tone-ink: var(--blue-ink);
 
   /**
    * Eight of the ten artboards are drawn light-on-navy inside the Rive file.
@@ -30,56 +109,85 @@
    * brightness/contrast pair lifts the result the last step to white.
    */
   --invert-artboard: invert(1) hue-rotate(180deg) brightness(1.06) contrast(1.06);
+  /* #0d1062 through that filter lands here; measured, not guessed. */
+  --field-inverted: #f6f9ff;
 
-  /* Accents, straight out of the artwork. */
-  --blue: #0075ff;
-  --cyan: #2baff7;
-  --amber: #feaf36;
-  --violet: #854db8;
-  --mint: #21b573;
-  --rose: #ff4d6a;
+  /* -------------------------------------------------------------------------
+     Type — one scale. Twelve steps replace the two dozen sizes the screens had
+     drifted into, and no step is a half-pixel.
+     ------------------------------------------------------------------------- */
+  --font-ui: 'Nunito', 'M PLUS Rounded 1c', ui-rounded, 'SF Pro Rounded',
+    system-ui, -apple-system, 'Segoe UI', sans-serif;
 
-  /**
-   * The game-like shell palette. Every accent comes in two steps: the fill
-   * and the darker "edge" drawn as a hard bottom border, which is what makes
-   * flat shapes read as chunky, pressable pieces.
-   */
-  --duo-blue: #55a6e8;
-  --duo-blue-dark: #4285c2;
-  --duo-amber: #e0a03c;
-  --duo-amber-dark: #bd811f;
-  --duo-green: #58cc02;
-  --duo-green-dark: #47a302;
-  --duo-violet: #ce82ff;
-  --duo-violet-dark: #a568cc;
-  --duo-line: #e5e5e5;
-  --duo-key: #f7f7f7;
+  --t-micro: 10px; /* tags riding inside a row */
+  --t-caps: 11px; /* kickers, pills, step names */
+  --t-xs: 12px; /* dense values in the bar's slot */
+  --t-sm: 13px; /* hints and secondary notes */
+  --t-md: 14px; /* body */
+  --t-lg: 15px; /* lead body and button labels */
+  --t-xl: 16px; /* the task line */
+  --t-2xl: 17px; /* row and bar titles */
+  --t-3xl: 19px; /* the quiz prompt */
+  --t-4xl: 21px; /* screen headings */
+  --t-5xl: 26px; /* chapter and hero headings */
+  --t-display: 54px; /* the score, and nothing else */
 
-  /* Shape */
+  /* Four weights, each with a job. 400 and 600 are gone — they read as
+     accidents of whichever screen was written that day. */
+  --w-body: 500;
+  --w-mid: 700;
+  --w-bold: 800;
+  --w-black: 900;
+
+  /* Caps are always tracked out; the amount is a token so they match. */
+  --track-caps: 0.07em;
+
+  /* -------------------------------------------------------------------------
+     Shape
+     ------------------------------------------------------------------------- */
+  --r-2xs: 4px;
+  --r-xs: 6px;
   --r-sm: 10px;
   --r-md: 14px;
   --r-lg: 20px;
   --r-xl: 28px;
   --r-pill: 999px;
 
-  /* Elevation — premium means soft and low-contrast, never heavy. */
-  --lift-1: 0 1px 2px rgba(20, 26, 70, 0.05), 0 2px 8px rgba(20, 26, 70, 0.04);
-  --lift-2: 0 2px 6px rgba(20, 26, 70, 0.06), 0 10px 26px rgba(20, 26, 70, 0.08);
-  --lift-3: 0 -2px 10px rgba(20, 26, 70, 0.05), 0 -18px 44px rgba(20, 26, 70, 0.12);
+  /* Two border weights. Chunky pieces take --b, quiet surfaces --b-hair. */
+  --b-hair: 1px;
+  --b: 2px;
 
-  /* Rhythm — spacing sits on a 4px grid throughout. */
+  /* The hard bottom border that makes a flat shape read as pressable. One
+     depth for anything you press, a shallower one for tags that you don't. */
+  --edge: 4px;
+  --edge-sm: 2px;
+
+  /* -------------------------------------------------------------------------
+     Elevation — premium means soft and low-contrast, never heavy.
+     ------------------------------------------------------------------------- */
+  /* The one raised card in the app — the desktop gate's. */
+  --lift-card: 0 2px 6px rgba(20, 26, 70, 0.06), 0 10px 26px rgba(20, 26, 70, 0.08);
+  /* The sheet, thrown upward over the artwork. */
+  --lift-sheet: 0 -2px 10px rgba(20, 26, 70, 0.05),
+    0 -18px 44px rgba(20, 26, 70, 0.12);
+  /* The fixed dock, which only has to separate itself from the canvas. */
+  --lift-dock: 0 -10px 28px -20px rgba(20, 26, 70, 0.5);
+  /* The same separation turned on its side, for the landscape column. */
+  --lift-rail: -14px 0 34px -22px rgba(20, 26, 70, 0.35);
+
+  /* -------------------------------------------------------------------------
+     Rhythm — spacing sits on a 4px grid throughout.
+     ------------------------------------------------------------------------- */
   --gut: 20px;
   /* How far the bottom sheet rides up over the artwork. */
   --sheet-overlap: 24px;
   --safe-t: env(safe-area-inset-top, 0px);
   --safe-b: env(safe-area-inset-bottom, 0px);
 
-  /* Type — Nunito's heavy weights are the classic web stand-in for the
-     rounded "game" face; M PLUS Rounded 1c backs it up. */
-  --font-ui: 'Nunito', 'M PLUS Rounded 1c', ui-rounded, 'SF Pro Rounded',
-    system-ui, -apple-system, 'Segoe UI', sans-serif;
-
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --dur-press: 0.12s;
+  --dur-tint: 0.2s;
+  --dur-move: 0.3s;
 }
 
 * {
@@ -102,7 +210,7 @@ html {
 body {
   margin: 0;
   font-family: var(--font-ui);
-  font-weight: 500;
+  font-weight: var(--w-body);
   color: var(--ink);
   background: var(--paper);
   -webkit-font-smoothing: antialiased;
@@ -138,9 +246,15 @@ ul {
 }
 
 :focus-visible {
-  outline: 2px solid var(--blue);
+  outline: var(--b) solid var(--blue);
   outline-offset: 3px;
-  border-radius: 6px;
+  border-radius: var(--r-xs);
+}
+
+/* On a coloured fill the ring has to leave the fill, not blend into it. */
+.appbar :focus-visible,
+.row--review:focus-visible {
+  outline-color: var(--paper);
 }
 
 @media (prefers-reduced-motion: reduce) {

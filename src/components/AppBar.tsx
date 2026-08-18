@@ -11,7 +11,7 @@ interface Props {
 
 export function AppBar({ onBack, title, subtitle, right, progress }: Props) {
   return (
-    <header className="appbar appbar--light">
+    <header className="appbar">
       <div className="appbar__row">
         {onBack ? (
           <button type="button" className="iconbtn" onClick={onBack} aria-label="Back">

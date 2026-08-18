@@ -12,9 +12,20 @@
   background: var(--paper);
 }
 
+/* One scrolling pane, one set of rules. Home, About and the quiz all use it. */
+.pane {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
 /* ===========================================================================
    App bar — a flat, saturated banner with a hard darker bottom edge, so it
-   reads as one chunky game piece rather than a translucent strip.
+   reads as one chunky piece rather than a translucent strip.
    =========================================================================== */
 
 .appbar {
@@ -22,11 +33,8 @@
   z-index: 3;
   flex: 0 0 auto;
   padding-top: var(--safe-t);
-}
-
-.appbar--light {
-  background: var(--duo-blue);
-  border-bottom: 4px solid var(--duo-blue-dark);
+  background: var(--blue);
+  border-bottom: var(--edge) solid var(--blue-edge);
 }
 
 .appbar__row {
@@ -45,19 +53,21 @@
   gap: 1px;
 }
 
+/* Solid white, not a translucent one: the subtitle is 11px, and every step of
+   transparency over the banner takes it below the readable line. */
 .appbar__sub {
-  font-size: 11px;
-  font-weight: 800;
+  font-size: var(--t-caps);
+  font-weight: var(--w-bold);
   letter-spacing: 0.09em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.85);
+  color: var(--blue-on);
 }
 
 .appbar__title {
-  font-size: 17px;
-  font-weight: 900;
+  font-size: var(--t-2xl);
+  font-weight: var(--w-black);
   line-height: 1.2;
-  color: #ffffff;
+  color: var(--blue-on);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -70,28 +80,34 @@
   gap: 8px;
 }
 
-/* On the blue banner the pills go glassy white. */
+/* On the banner a pill goes solid paper and carries accent ink. A glassy fill
+   cannot hold 11px black type against a saturated blue. */
 .appbar .pill {
-  background: rgba(255, 255, 255, 0.16);
-  border-color: rgba(255, 255, 255, 0.4);
-  color: #ffffff;
+  background: var(--paper);
+  border-color: var(--paper);
+  color: var(--blue-ink);
 }
 
+/* The status keeps its own accent — only the plate under it turns to paper.
+   A "Soon" that reads blue in the bar and amber in the page is two colours
+   for one state. */
 .appbar .pill--done {
-  background: #ffffff;
-  border-color: #ffffff;
-  color: var(--duo-green-dark);
+  color: var(--green-ink);
+}
+
+.appbar .pill--soon {
+  color: var(--amber-ink);
 }
 
 .appbar__track {
-  height: 4px;
-  background: var(--duo-blue-dark);
+  height: var(--edge);
+  background: var(--blue-edge);
 }
 
 .appbar__fill {
   height: 100%;
   transform-origin: left center;
-  background: #ffffff;
+  background: var(--paper);
   transition: transform 0.45s var(--ease);
 }
 
@@ -102,14 +118,15 @@
   width: 40px;
   height: 40px;
   border-radius: var(--r-md);
-  background: rgba(255, 255, 255, 0.14);
-  border: 2px solid rgba(255, 255, 255, 0.35);
-  color: #ffffff;
+  background: var(--wash);
+  border: var(--b) solid var(--wash-line);
+  color: var(--blue-on);
   transition: transform 0.18s var(--ease), background 0.18s var(--ease);
 }
 
 .iconbtn:active {
   transform: scale(0.94);
+  background: var(--wash-hi);
 }
 
 .iconbtn--ghost {
@@ -119,6 +136,11 @@
   pointer-events: none;
 }
 
+/* ---------------------------------------------------------------------------
+   Pills and tags — one shape, three tones. The tag variants are the same
+   object shrunk, so a "Soon" inside a row and a "Soon" in the bar match.
+   --------------------------------------------------------------------------- */
+
 .pill {
   display: inline-flex;
   align-items: center;
@@ -126,35 +148,56 @@
   padding: 0 12px;
   border-radius: var(--r-pill);
   background: var(--surface);
-  border: 1px solid var(--line);
-  font-size: 11px;
-  font-weight: 900;
-  letter-spacing: 0.06em;
+  border: var(--b-hair) solid var(--line);
+  font-size: var(--t-caps);
+  font-weight: var(--w-black);
+  letter-spacing: var(--track-caps);
   text-transform: uppercase;
   white-space: nowrap;
   color: var(--ink-2);
 }
 
 .pill--done {
-  background: rgba(33, 181, 115, 0.12);
-  border-color: rgba(33, 181, 115, 0.4);
-  color: var(--mint);
+  background: var(--green-soft);
+  border-color: var(--green-line);
+  color: var(--green-ink);
 }
 
 .pill--soon {
-  background: rgba(254, 175, 54, 0.14);
-  border-color: rgba(254, 175, 54, 0.45);
-  color: #b57708;
+  background: var(--amber-soft);
+  border-color: var(--amber-line);
+  color: var(--amber-ink);
+}
+
+/* The in-row version: no border, tighter, one size down. */
+.tag {
+  flex: 0 0 auto;
+  padding: 4px 10px;
+  border-radius: var(--r-pill);
+  font-size: var(--t-micro);
+  font-weight: var(--w-black);
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.tag--soon {
+  background: var(--amber-soft);
+  color: var(--amber-ink);
 }
 
 /* ===========================================================================
    Buttons
+
+   Every pressable thing in the app is the same object: a flat fill riding on a
+   hard darker edge, which sinks into that edge when pressed. Nothing dims,
+   nothing scales — the press is the shape moving down onto its own shadow.
    =========================================================================== */
 
-/* Every button is a flat fill riding on a hard darker edge; pressing it sinks
-   the fill into the edge instead of dimming or scaling. */
 .btn {
-  --edge: var(--duo-line);
+  --btn-fill: var(--paper);
+  --btn-edge: var(--line);
+  --btn-on: var(--blue-ink);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -162,35 +205,40 @@
   min-height: 50px;
   padding: 0 22px;
   border-radius: var(--r-md);
-  font-size: 15px;
-  font-weight: 900;
+  font-size: var(--t-lg);
+  font-weight: var(--w-black);
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  box-shadow: 0 4px 0 var(--edge);
-  transition: transform 0.12s var(--ease), box-shadow 0.12s var(--ease),
-    opacity 0.2s var(--ease);
+  color: var(--btn-on);
+  background: var(--btn-fill);
+  box-shadow: 0 var(--edge) 0 var(--btn-edge);
+  transition: transform var(--dur-press) var(--ease),
+    box-shadow var(--dur-press) var(--ease), opacity var(--dur-tint) var(--ease);
 }
 
 .btn--primary {
-  --edge: var(--duo-blue-dark);
-  color: #ffffff;
-  background: var(--duo-blue);
+  --btn-fill: var(--blue);
+  --btn-edge: var(--blue-edge);
+  --btn-on: var(--blue-on);
 }
 
+/* A toggle that is currently on reads as solved, in the app's one green. */
 .btn--primary.is-on {
-  --edge: var(--duo-green-dark);
-  background: var(--duo-green);
+  --btn-fill: var(--green);
+  --btn-edge: var(--green-edge);
+  --btn-on: var(--green-on);
 }
 
 .btn--ghost {
-  color: var(--duo-blue);
-  background: var(--paper);
-  border: 2px solid var(--duo-line);
+  --btn-fill: var(--paper);
+  --btn-edge: var(--line);
+  --btn-on: var(--blue-ink);
+  border: var(--b) solid var(--line);
 }
 
 .btn:active {
   transform: translateY(3px);
-  box-shadow: 0 1px 0 var(--edge);
+  box-shadow: 0 1px 0 var(--btn-edge);
 }
 
 .btn:disabled {
@@ -202,14 +250,23 @@
   width: 100%;
 }
 
+/* A square button — the hint key is the only one, but it inherits the whole
+   press behaviour rather than restating it. */
+.btn--key {
+  width: 50px;
+  min-height: 50px;
+  padding: 0;
+  font-size: var(--t-4xl);
+}
+
 .linkish {
   display: inline-block;
   padding: 8px 4px;
-  font-size: 13.5px;
-  font-weight: 800;
+  font-size: var(--t-sm);
+  font-weight: var(--w-bold);
   letter-spacing: 0.03em;
   text-transform: uppercase;
-  color: var(--duo-blue-dark);
+  color: var(--blue-ink);
 }
 
 .linkish--center {
@@ -218,8 +275,13 @@
   text-align: center;
 }
 
+.linkish--quiet {
+  margin-inline-start: auto;
+  color: var(--ink-3);
+}
+
 .linkish--warn {
-  color: var(--rose);
+  color: var(--rose-ink);
 }
 
 /* ===========================================================================
@@ -266,7 +328,7 @@
   background: linear-gradient(
     100deg,
     transparent 20%,
-    rgba(43, 175, 247, 0.12) 42%,
+    var(--blue-soft) 42%,
     transparent 64%
   );
   background-size: 220% 100%;
@@ -307,7 +369,7 @@
     180deg,
     transparent 66%,
     rgba(255, 255, 255, 0.72) 80%,
-    #ffffff 92%
+    var(--paper) 92%
   );
 }
 
@@ -318,7 +380,7 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
-  padding: 0 var(--gut) calc(30px + var(--safe-b));
+  padding: 0 var(--gut) calc(32px + var(--safe-b));
   opacity: 0;
   transform: translateY(14px);
   transition: opacity 0.6s var(--ease), transform 0.6s var(--ease);
@@ -331,8 +393,8 @@
 
 .splash__tagline {
   text-align: center;
-  font-size: 15.5px;
-  font-weight: 400;
+  font-size: var(--t-lg);
+  font-weight: var(--w-body);
   line-height: 1.55;
   color: var(--ink-2);
   text-wrap: balance;
@@ -344,13 +406,6 @@
 
 .home__scroll,
 .about__scroll {
-  position: relative;
-  z-index: 1;
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior: contain;
   padding: 4px var(--gut) 0;
 }
 
@@ -358,70 +413,89 @@
   height: calc(32px + var(--safe-b));
 }
 
-/* The home banner: flat blue, bold white wordmark, hard darker bottom edge. */
+/* The home banner is the app bar without the bar: same fill, same hard edge,
+   so the two screens read as one surface at the top. */
 .duohead {
   position: relative;
   z-index: 3;
   flex: 0 0 auto;
   padding: calc(var(--safe-t) + 16px) var(--gut) 16px;
-  background: var(--duo-blue);
-  border-bottom: 4px solid var(--duo-blue-dark);
+  background: var(--blue);
+  border-bottom: var(--edge) solid var(--blue-edge);
 }
 
 .duohead__title {
-  font-size: 21px;
-  font-weight: 900;
+  font-size: var(--t-4xl);
+  font-weight: var(--w-black);
   letter-spacing: 0.02em;
   text-transform: uppercase;
-  color: #ffffff;
+  color: var(--blue-on);
 }
 
 .duohead__sub {
-  margin-top: 2px;
-  font-size: 16px;
-  font-weight: 700;
-  color: rgba(255, 255, 255, 0.95);
+  margin-top: 4px;
+  font-size: var(--t-xl);
+  font-weight: var(--w-mid);
+  color: var(--blue-on);
 }
 
-/* Each chapter carries its accent as a pair of custom properties; everything
-   inside — headline, number keys, the review row — reads from them. */
+/* Each chapter carries its accent as the four `--tone-*` tokens; everything
+   inside — headline, number keys, the review row — reads from them and never
+   names a colour of its own. The four sets are the same four accents the rest
+   of the app uses, so a chapter is a tint of the system, not a palette. */
 .chapter {
   padding-top: 32px;
 }
 
 .chapter--blue {
-  --tone: var(--duo-blue);
-  --tone-dark: var(--duo-blue-dark);
+  --tone: var(--blue);
+  --tone-edge: var(--blue-edge);
+  --tone-on: var(--blue-on);
+  --tone-ink: var(--blue-ink);
 }
 
+/* Amber is the one accent whose `on` colour is ink, so its washes invert with
+   it: a dark key on a bright fill rather than a light one. */
 .chapter--amber {
-  --tone: var(--duo-amber);
-  --tone-dark: var(--duo-amber-dark);
+  --wash: rgba(20, 26, 70, 0.12);
+  --wash-hi: rgba(20, 26, 70, 0.2);
+  --wash-line: rgba(20, 26, 70, 0.26);
+  --wash-shade: rgba(20, 26, 70, 0.34);
+  --tone: var(--amber);
+  --tone-edge: var(--amber-edge);
+  --tone-on: var(--amber-on);
+  --tone-ink: var(--amber-ink);
 }
 
 .chapter--green {
-  --tone: var(--duo-green);
-  --tone-dark: var(--duo-green-dark);
+  --tone: var(--green);
+  --tone-edge: var(--green-edge);
+  --tone-on: var(--green-on);
+  --tone-ink: var(--green-ink);
 }
 
 .chapter--violet {
-  --tone: var(--duo-violet);
-  --tone-dark: var(--duo-violet-dark);
+  --tone: var(--violet);
+  --tone-edge: var(--violet-edge);
+  --tone-on: var(--violet-on);
+  --tone-ink: var(--violet-ink);
 }
 
 .chapter__no {
   display: block;
-  font-size: 15px;
-  font-weight: 800;
-  color: var(--tone-dark);
+  font-size: var(--t-lg);
+  font-weight: var(--w-bold);
+  color: var(--ink-3);
 }
 
+/* The headline takes the accent's ink step, not its fill: a 26px word in the
+   raw fill is a pale word on white, whichever accent it is. */
 .chapter__title {
-  margin-top: 1px;
-  font-size: 26px;
-  font-weight: 900;
+  margin-top: 2px;
+  font-size: var(--t-5xl);
+  font-weight: var(--w-black);
   letter-spacing: -0.01em;
-  color: var(--tone);
+  color: var(--tone-ink);
 }
 
 /* One card per chapter: rows divided by hairlines, review row filling the
@@ -429,13 +503,13 @@
 .group {
   margin-top: 16px;
   background: var(--paper);
-  border: 2px solid var(--duo-line);
+  border: var(--b) solid var(--line);
   border-radius: var(--r-lg);
   overflow: hidden;
 }
 
 .group li + li .row {
-  border-top: 2px solid var(--duo-line);
+  border-top: var(--b) solid var(--line);
 }
 
 .row {
@@ -458,26 +532,26 @@
   place-items: center;
   width: 44px;
   height: 44px;
-  border-radius: 14px;
-  background: var(--duo-key);
-  border: 2px solid var(--duo-line);
-  border-bottom-width: 4px;
-  font-size: 16px;
-  font-weight: 900;
+  border-radius: var(--r-md);
+  background: var(--paper-2);
+  border: var(--b) solid var(--line);
+  border-bottom-width: var(--edge);
+  font-size: var(--t-xl);
+  font-weight: var(--w-black);
   font-variant-numeric: tabular-nums;
-  color: var(--tone);
+  color: var(--tone-ink);
 }
 
 .row__title {
   flex: 1;
   min-width: 0;
-  font-size: 17px;
-  font-weight: 800;
+  font-size: var(--t-2xl);
+  font-weight: var(--w-bold);
   color: var(--ink);
 }
 
 .row.is-done .row__key {
-  color: var(--duo-green-dark);
+  color: var(--green-ink);
 }
 
 .row.is-soon .row__key {
@@ -488,39 +562,18 @@
   color: var(--ink-2);
 }
 
-.row__soon {
-  flex: 0 0 auto;
-  padding: 4px 10px;
-  border-radius: var(--r-pill);
-  background: rgba(254, 175, 54, 0.15);
-  color: #b57708;
-  font-size: 10px;
-  font-weight: 900;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-
 /* The next lesson wears the chapter accent and a Start tag, so the index
    always answers "where do I go?" without reading every row. */
 .row--next .row__key {
   background: var(--tone);
-  border-color: var(--tone-dark);
-  color: #ffffff;
+  border-color: var(--tone-edge);
+  color: var(--tone-on);
 }
 
-.row__next {
-  flex: 0 0 auto;
-  padding: 4px 10px;
-  border-radius: var(--r-pill);
+.tag--next {
   background: var(--tone);
-  box-shadow: 0 2px 0 var(--tone-dark);
-  color: #ffffff;
-  font-size: 10px;
-  font-weight: 900;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-  white-space: nowrap;
+  box-shadow: 0 var(--edge-sm) 0 var(--tone-edge);
+  color: var(--tone-on);
   animation: next-nudge 2.2s var(--ease) infinite;
 }
 
@@ -544,38 +597,33 @@
 }
 
 .row--review:active {
-  background: var(--tone-dark);
+  background: var(--tone-edge);
 }
 
 .row--review .row__key {
-  background: rgba(255, 255, 255, 0.24);
-  border-color: rgba(255, 255, 255, 0.42);
-  border-bottom-color: rgba(0, 0, 0, 0.16);
-  color: #ffffff;
+  background: var(--wash);
+  border-color: var(--wash-line);
+  border-bottom-color: var(--wash-shade);
+  color: var(--tone-on);
 }
 
 .row--review .row__title {
-  color: #ffffff;
+  color: var(--tone-on);
 }
 
 /* ===========================================================================
-   Lesson — full-bleed stage with the sheet rising over it
+   Lesson — full-bleed stage with the bottom pane rising over it
    =========================================================================== */
 
-/* The stage takes whatever the sheet does not. That is the point of the
-   stepped flow: a short step leaves more room, so the artwork grows instead
-   of the empty space. Fit.Contain never crops, so a smaller box only ever means
-   smaller artwork — never a hidden slider. The padding is the strip the sheet
-   overlaps, kept outside the canvas box. */
 /* Every artboard in the file is 1:1 (only `Ratio` differs, at 500×538), so a
    square box the width of the screen holds any of them complete, edge to edge,
    with no crop and no letterbox. The size is fixed by the viewport width, which
    means it does not move between steps or lessons.
 
    The field is the space that square sits in. It carries the artboard's own
-   background colour — white for the light artboards, #f6f9ff for the dark ones
-   once the invert filter has run over them — so the canvas and the page around
-   it are one continuous surface instead of a tile on a backdrop. */
+   background colour — paper for the light artboards, the inverted navy for the
+   dark ones — so the canvas and the page around it are one continuous surface
+   instead of a tile on a backdrop. */
 .lesson {
   --field: var(--paper);
   background: var(--field);
@@ -583,8 +631,7 @@
 
 .lesson--navy,
 .lesson--deep {
-  /* #0d1062 through --invert-artboard lands here; measured, not guessed. */
-  --field: #f6f9ff;
+  --field: var(--field-inverted);
 }
 
 .lesson__field {
@@ -641,75 +688,8 @@
   padding-bottom: var(--sheet-overlap);
 }
 
-/* The sheet overlaps that padding strip so the two read as one composition
-   rather than two stacked boxes. It starts as a slim peek — the instruction
-   and its button — and opens on demand for readouts and explanation, so the
-   artwork keeps the screen by default. It is sized by its step's content,
-   capped so the longest step still leaves the artwork usable. */
-.sheet {
-  position: relative;
-  z-index: 2;
-  flex: 0 1 auto;
-  min-height: 0;
-  max-height: min(56dvh, 470px);
-  display: flex;
-  flex-direction: column;
-  margin-top: calc(-1 * var(--sheet-overlap));
-  background: var(--paper);
-  border-radius: var(--r-xl) var(--r-xl) 0 0;
-  box-shadow: var(--lift-3);
-  /* Without this, scrolled content shows through the rounded top corners. */
-  overflow: hidden;
-}
-
-.sheet__scroll {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior: contain;
-  padding: 12px var(--gut) calc(20px + var(--safe-b));
-}
-
-/* The universal bottom-sheet affordance: a grabber that toggles the sheet. */
-.sheet__grab {
-  flex: 0 0 auto;
-  display: grid;
-  place-items: center;
-  width: 100%;
-  padding: 8px 0 2px;
-}
-
-.sheet__handle {
-  width: 44px;
-  height: 5px;
-  border-radius: var(--r-pill);
-  background: var(--line-strong);
-  transition: background 0.2s var(--ease);
-}
-
-.sheet__grab:active .sheet__handle {
-  background: var(--ink-3);
-}
-
-/* Detail content slides in as the sheet opens instead of just appearing. */
-.sheet__detail {
-  animation: detail-in 0.3s var(--ease);
-}
-
-@keyframes detail-in {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-
 /* ---------------------------------------------------------------------------
-   Solve burst — a dozen accent-coloured flecks thrown from where the sheet
+   Solve burst — a dozen accent-coloured flecks thrown from where the pane
    meets the artwork, once, the moment a checkpoint is first cracked.
    --------------------------------------------------------------------------- */
 
@@ -725,7 +705,7 @@
   position: absolute;
   width: 9px;
   height: 9px;
-  border-radius: 2px;
+  border-radius: var(--r-2xs);
   opacity: 0;
   /* var(--ease) front-loads so hard the flecks die in ~200ms; a plain
      ease-out keeps them airborne long enough to register. */
@@ -746,6 +726,8 @@
   }
 }
 
+/* The confetti is the palette, in order — the same six accents the rest of
+   the app is built from, at their fill step. */
 .burst i:nth-child(6n + 1) {
   background: var(--blue);
 }
@@ -753,7 +735,7 @@
   background: var(--amber);
 }
 .burst i:nth-child(6n + 3) {
-  background: var(--mint);
+  background: var(--green);
 }
 .burst i:nth-child(6n + 4) {
   background: var(--rose);
@@ -821,10 +803,83 @@
   animation-delay: 0.11s;
 }
 
-/* ---------------------------------------------------------------------------
-   Stepped lesson: find it → try it → why it works. One step at a time keeps
-   the sheet short, which is what gives the canvas its height back.
-   --------------------------------------------------------------------------- */
+/* ===========================================================================
+   Lesson sheet — the `?ui=sheet` pane, kept in the system
+
+   This is the collapsible sheet the lesson screen shipped with before the
+   fixed bar replaced it. It is still reachable on a live deploy, so it is
+   held to the same tokens as everything else rather than left to drift.
+   =========================================================================== */
+
+/* It starts as a slim peek — the instruction and its button — and opens on
+   demand for readouts and explanation, so the artwork keeps the screen by
+   default. It is sized by its step's content, capped so the longest step still
+   leaves the artwork usable. */
+.sheet {
+  position: relative;
+  z-index: 2;
+  flex: 0 1 auto;
+  min-height: 0;
+  max-height: min(56dvh, 470px);
+  display: flex;
+  flex-direction: column;
+  margin-top: calc(-1 * var(--sheet-overlap));
+  background: var(--paper);
+  border-radius: var(--r-xl) var(--r-xl) 0 0;
+  box-shadow: var(--lift-sheet);
+  /* Without this, scrolled content shows through the rounded top corners. */
+  overflow: hidden;
+}
+
+.sheet__scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  padding: 12px var(--gut) calc(20px + var(--safe-b));
+}
+
+/* The universal bottom-sheet affordance: a grabber that toggles the sheet. */
+.sheet__grab {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  padding: 8px 0 2px;
+}
+
+.sheet__handle {
+  width: 44px;
+  height: 5px;
+  border-radius: var(--r-pill);
+  background: var(--line-strong);
+  transition: background var(--dur-tint) var(--ease);
+}
+
+.sheet__grab:active .sheet__handle {
+  background: var(--ink-3);
+}
+
+/* Detail content slides in as the sheet opens instead of just appearing. */
+.sheet__detail {
+  animation: detail-in var(--dur-move) var(--ease);
+}
+
+@keyframes detail-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.sheet__foot {
+  padding-top: 20px;
+}
 
 /* One pill per step: the current one carries its name, the rest collapse to
    dots. The whole row stays one quiet line, but the roadmap is always named. */
@@ -860,7 +915,7 @@
 }
 
 .steps__seg.is-done .steps__dot {
-  background: var(--mint);
+  background: var(--green);
 }
 
 .steps__seg.is-current .steps__dot {
@@ -868,9 +923,9 @@
 }
 
 .steps__name {
-  font-size: 11px;
-  font-weight: 900;
-  letter-spacing: 0.06em;
+  font-size: var(--t-caps);
+  font-weight: var(--w-black);
+  letter-spacing: var(--track-caps);
   text-transform: uppercase;
   color: var(--ink-2);
   white-space: nowrap;
@@ -895,8 +950,8 @@
 }
 
 .step__lead {
-  font-size: 17px;
-  font-weight: 800;
+  font-size: var(--t-2xl);
+  font-weight: var(--w-bold);
   line-height: 1.45;
   color: var(--ink);
   text-wrap: balance;
@@ -904,34 +959,12 @@
 
 .step__hint {
   flex: 1;
-  font-size: 13px;
-  font-weight: 600;
+  font-size: var(--t-sm);
+  font-weight: var(--w-body);
   line-height: 1.5;
   color: var(--ink-2);
   /* Hints can appear unasked (stuck detection), so they ease in. */
-  animation: detail-in 0.3s var(--ease);
-}
-
-.step__win {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 12px;
-  font-size: 14px;
-  font-weight: 800;
-  color: var(--mint);
-}
-
-.step__win span {
-  display: grid;
-  place-items: center;
-  width: 20px;
-  height: 20px;
-  border-radius: var(--r-pill);
-  background: var(--mint);
-  color: #ffffff;
-  font-size: 11px;
-  animation: pop 0.4s var(--ease);
+  animation: detail-in var(--dur-move) var(--ease);
 }
 
 .hintrow {
@@ -941,16 +974,48 @@
   padding-top: 12px;
 }
 
-.linkish--quiet {
-  margin-inline-start: auto;
-  color: var(--ink-3);
-}
-
 .actions {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
   padding-top: 16px;
+}
+
+/* ---------------------------------------------------------------------------
+   The solve line. Both panes say the same thing the same way.
+   --------------------------------------------------------------------------- */
+
+.win {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--t-md);
+  font-weight: var(--w-bold);
+  color: var(--green-ink);
+}
+
+.win span {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: var(--r-pill);
+  background: var(--green);
+  color: var(--green-on);
+  font-size: var(--t-caps);
+  animation: pop 0.4s var(--ease);
+}
+
+@keyframes pop {
+  0% {
+    transform: scale(0.4);
+  }
+  60% {
+    transform: scale(1.18);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 /* ---------------------------------------------------------------------------
@@ -975,7 +1040,7 @@
   padding: 10px 12px;
   border-radius: var(--r-sm);
   background: var(--paper-2);
-  border: 1px solid var(--line);
+  border: var(--b-hair) solid var(--line);
 }
 
 /* An odd tile at the end would leave a hole in the grid; let it take the
@@ -985,51 +1050,40 @@
 }
 
 .chip__label {
-  font-size: 10.5px;
-  font-weight: 900;
-  letter-spacing: 0.06em;
+  font-size: var(--t-micro);
+  font-weight: var(--w-black);
+  letter-spacing: var(--track-caps);
   text-transform: uppercase;
   white-space: nowrap;
 }
 
 .chip__value {
-  font-size: 18px;
-  font-weight: 800;
+  font-size: var(--t-3xl);
+  font-weight: var(--w-bold);
   font-variant-numeric: tabular-nums;
   line-height: 1.1;
   color: var(--ink);
 }
 
-/* Accents darkened where the raw artwork colour is too pale for small text. */
+/* Each tile names its accent's ink step — the one measured to hold small
+   type on the tile's own tinted paper. */
 .chip--blue .chip__label {
-  color: var(--blue);
+  color: var(--blue-ink);
 }
 .chip--cyan .chip__label {
-  color: #0e8fd6;
+  color: var(--cyan-ink);
 }
 .chip--amber .chip__label {
-  color: #b57708;
+  color: var(--amber-ink);
 }
 .chip--violet .chip__label {
-  color: var(--violet);
+  color: var(--violet-ink);
 }
 .chip--mint .chip__label {
-  color: #189a63;
+  color: var(--green-ink);
 }
 .chip--rose .chip__label {
-  color: #e13a57;
-}
-
-@keyframes pop {
-  0% {
-    transform: scale(0.4);
-  }
-  60% {
-    transform: scale(1.18);
-  }
-  100% {
-    transform: scale(1);
-  }
+  color: var(--rose-ink);
 }
 
 .prose {
@@ -1040,19 +1094,15 @@
 }
 
 .prose p {
-  font-size: 14.5px;
-  font-weight: 500;
+  font-size: var(--t-md);
+  font-weight: var(--w-body);
   line-height: 1.75;
   color: var(--ink-2);
 }
 
 .prose__dim {
   color: var(--ink-3) !important;
-  font-size: 13.5px !important;
-}
-
-.sheet__foot {
-  padding-top: 20px;
+  font-size: var(--t-sm) !important;
 }
 
 /* ===========================================================================
@@ -1068,9 +1118,9 @@
    knob out from under the finger.
 
      12  padding
-     14  step name
+     14  step name          --t-caps on a 14px line
       4  gap
-     40  task, two lines reserved
+     40  task, two lines reserved     --t-xl on a 20px line
       8  gap
      28  instrument slot — aim bar, ratio cells, conditions, or empty
       8  gap
@@ -1089,15 +1139,15 @@
   display: flex;
   flex-direction: column;
   background: var(--paper);
-  border-top: 1px solid var(--line);
-  box-shadow: 0 -10px 28px -20px rgba(20, 26, 70, 0.5);
+  border-top: var(--b-hair) solid var(--line);
+  box-shadow: var(--lift-dock);
 }
 
 .lbar__step {
   flex: 0 0 auto;
   height: 14px;
-  font-size: 11px;
-  font-weight: 800;
+  font-size: var(--t-caps);
+  font-weight: var(--w-bold);
   letter-spacing: 0.09em;
   text-transform: uppercase;
   line-height: 14px;
@@ -1110,8 +1160,8 @@
   flex: 0 0 auto;
   margin-top: 4px;
   height: 40px;
-  font-size: 16px;
-  font-weight: 800;
+  font-size: var(--t-xl);
+  font-weight: var(--w-bold);
   line-height: 20px;
   color: var(--ink);
   display: -webkit-box;
@@ -1121,7 +1171,7 @@
 }
 
 .lbar.is-hit .lbar__task {
-  color: var(--duo-green-dark);
+  color: var(--green-ink);
 }
 
 .lbar__slot {
@@ -1141,31 +1191,6 @@
   gap: 8px;
 }
 
-.lbar__act .btn {
-  min-height: 50px;
-}
-
-/* The hint is a target you can actually hit, not an 11px text link. */
-.lbar__hint {
-  --edge: var(--duo-line);
-  flex: 0 0 auto;
-  width: 50px;
-  min-height: 50px;
-  border-radius: var(--r-md);
-  background: var(--paper);
-  border: 2px solid var(--duo-line);
-  color: var(--duo-blue);
-  font-size: 20px;
-  font-weight: 900;
-  box-shadow: 0 4px 0 var(--edge);
-  transition: transform 0.12s var(--ease), box-shadow 0.12s var(--ease);
-}
-
-.lbar__hint:active {
-  transform: translateY(3px);
-  box-shadow: 0 1px 0 var(--edge);
-}
-
 /* A hint takes the slot rather than adding a row, then hands it back. */
 .lbar__hintline {
   flex: 1;
@@ -1173,15 +1198,15 @@
   padding: 0 10px;
   border-left: 3px solid var(--amber);
   border-radius: 3px;
-  font-size: 13px;
-  font-weight: 600;
+  font-size: var(--t-sm);
+  font-weight: var(--w-body);
   line-height: 1.45;
   color: var(--ink-2);
   overflow: hidden;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
-  animation: detail-in 0.3s var(--ease);
+  animation: detail-in var(--dur-move) var(--ease);
 }
 
 /* ---------------------------------------------------------------------------
@@ -1201,8 +1226,8 @@
 
 .aim__goal {
   flex: 0 0 auto;
-  font-size: 12.5px;
-  font-weight: 900;
+  font-size: var(--t-xs);
+  font-weight: var(--w-black);
   font-variant-numeric: tabular-nums;
   color: var(--ink-2);
   white-space: nowrap;
@@ -1221,7 +1246,7 @@
   display: block;
   height: 100%;
   border-radius: var(--r-pill);
-  background: var(--duo-blue);
+  background: var(--blue);
   transition: width 0.12s linear;
 }
 
@@ -1229,20 +1254,20 @@
   flex: 0 0 auto;
   min-width: 66px;
   text-align: end;
-  font-size: 11px;
-  font-weight: 900;
+  font-size: var(--t-caps);
+  font-weight: var(--w-black);
   letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--ink-3);
 }
 
 .lbar.is-hit .aim__fill {
-  background: var(--duo-green);
+  background: var(--green);
 }
 
 .lbar.is-hit .aim__goal,
 .lbar.is-hit .aim__state {
-  color: var(--duo-green-dark);
+  color: var(--green-ink);
 }
 
 /* ---------------------------------------------------------------------------
@@ -1257,59 +1282,64 @@
   width: 100%;
 }
 
-.cells__c {
-  flex: 1;
-  min-width: 0;
-  height: 28px;
-  padding: 0 8px;
-  border-radius: var(--r-sm);
-  border: 1.5px solid rgba(88, 204, 2, 0.4);
-  background: rgba(88, 204, 2, 0.08);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 6px;
-}
-
-.cells__l {
-  font-size: 9px;
-  font-weight: 900;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--ink-3);
-  white-space: nowrap;
-}
-
-.cells__v {
-  font-size: 13px;
-  font-weight: 800;
-  font-variant-numeric: tabular-nums;
-  color: var(--duo-green-dark);
-}
-
+.cells__c,
 .conds__c {
   flex: 1;
   min-width: 0;
   height: 28px;
-  padding: 0 9px;
   border-radius: var(--r-sm);
-  border: 1.5px solid var(--line);
+  border: var(--b-hair) solid var(--line);
   background: var(--paper-2);
   display: flex;
   align-items: center;
+  overflow: hidden;
+  transition: background var(--dur-tint) var(--ease),
+    border-color var(--dur-tint) var(--ease), color var(--dur-tint) var(--ease);
+}
+
+/* A live readout is already met by definition — it is the number the learner
+   is moving — so the cells wear the solved tint from the start. */
+.cells__c {
+  padding: 0 8px;
+  justify-content: space-between;
   gap: 6px;
-  font-size: 11.5px;
-  font-weight: 800;
+  border-color: var(--green-line);
+  background: var(--green-soft);
+}
+
+.cells__l {
+  min-width: 0;
+  font-size: var(--t-micro);
+  font-weight: var(--w-black);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
   color: var(--ink-2);
   white-space: nowrap;
   overflow: hidden;
-  transition: background 0.2s var(--ease), border-color 0.2s var(--ease);
+  text-overflow: ellipsis;
+}
+
+.cells__v {
+  flex: 0 0 auto;
+  font-size: var(--t-sm);
+  font-weight: var(--w-bold);
+  font-variant-numeric: tabular-nums;
+  color: var(--green-ink);
+}
+
+.conds__c {
+  padding: 0 9px;
+  gap: 6px;
+  font-size: var(--t-xs);
+  font-weight: var(--w-bold);
+  color: var(--ink-2);
+  white-space: nowrap;
 }
 
 .conds__c.is-on {
-  border-color: rgba(88, 204, 2, 0.5);
-  background: rgba(88, 204, 2, 0.09);
-  color: var(--duo-green-dark);
+  border-color: var(--green-line);
+  background: var(--green-soft);
+  color: var(--green-ink);
 }
 
 .conds__b {
@@ -1318,15 +1348,15 @@
   place-items: center;
   width: 14px;
   height: 14px;
-  border-radius: 4px;
-  border: 2px solid var(--line-strong);
-  font-size: 9px;
-  color: #ffffff;
+  border-radius: var(--r-2xs);
+  border: var(--b) solid var(--line-strong);
+  font-size: var(--t-micro);
+  color: var(--green-on);
 }
 
 .conds__c.is-on .conds__b {
-  background: var(--duo-green);
-  border-color: var(--duo-green);
+  background: var(--green);
+  border-color: var(--green);
 }
 
 /* ---------------------------------------------------------------------------
@@ -1350,33 +1380,11 @@
   }
 }
 
-.lbar__win {
-  flex: 0 0 auto;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 13px;
-  font-weight: 800;
-  color: var(--mint);
-}
-
-.lbar__win span {
-  display: grid;
-  place-items: center;
-  width: 20px;
-  height: 20px;
-  border-radius: var(--r-pill);
-  background: var(--mint);
-  color: #ffffff;
-  font-size: 11px;
-  animation: pop 0.4s var(--ease);
-}
-
 .lbar__title {
   flex: 0 0 auto;
-  margin-top: 10px;
-  font-size: 20px;
-  font-weight: 900;
+  margin-top: 12px;
+  font-size: var(--t-4xl);
+  font-weight: var(--w-black);
   line-height: 1.2;
   color: var(--ink);
   text-wrap: balance;
@@ -1385,7 +1393,7 @@
 .lbar__prose {
   flex: 1 1 auto;
   min-height: 0;
-  margin-top: 10px;
+  margin-top: 12px;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
@@ -1395,8 +1403,8 @@
 }
 
 .lbar__prose p {
-  font-size: 14.5px;
-  font-weight: 500;
+  font-size: var(--t-md);
+  font-weight: var(--w-body);
   line-height: 1.7;
   color: var(--ink-2);
 }
@@ -1406,19 +1414,12 @@
    =========================================================================== */
 
 .quiz {
-  position: relative;
-  z-index: 1;
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior: contain;
   padding: 24px var(--gut) calc(24px + var(--safe-b));
 }
 
 .quiz__prompt {
-  font-size: 19px;
-  font-weight: 800;
+  font-size: var(--t-3xl);
+  font-weight: var(--w-bold);
   line-height: 1.45;
   color: var(--ink);
   text-wrap: balance;
@@ -1431,29 +1432,34 @@
   padding-top: 20px;
 }
 
+/* An option is the button object at full width: same radius, same hard edge,
+   same sink on press — only the type is sentence case rather than caps,
+   because these are answers, not commands. */
 .quiz__option {
+  --opt-line: var(--line);
   display: flex;
   align-items: center;
   gap: 12px;
   width: 100%;
   padding: 14px 16px;
   text-align: start;
-  font-size: 15px;
-  font-weight: 700;
+  font-size: var(--t-lg);
+  font-weight: var(--w-mid);
   line-height: 1.4;
   color: var(--ink);
   background: var(--paper);
-  border: 2px solid var(--duo-line);
-  border-radius: 16px;
-  box-shadow: 0 3px 0 var(--duo-line);
-  transition: transform 0.14s var(--ease), border-color 0.2s var(--ease),
-    background 0.2s var(--ease), opacity 0.2s var(--ease),
-    box-shadow 0.14s var(--ease);
+  border: var(--b) solid var(--opt-line);
+  border-radius: var(--r-md);
+  box-shadow: 0 var(--edge) 0 var(--opt-line);
+  transition: transform var(--dur-press) var(--ease),
+    border-color var(--dur-tint) var(--ease),
+    background var(--dur-tint) var(--ease), opacity var(--dur-tint) var(--ease),
+    box-shadow var(--dur-press) var(--ease);
 }
 
 .quiz__option:active {
-  transform: translateY(2px);
-  box-shadow: 0 1px 0 var(--duo-line);
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 var(--opt-line);
 }
 
 .quiz__key {
@@ -1462,36 +1468,34 @@
   place-items: center;
   width: 32px;
   height: 32px;
-  border-radius: 10px;
-  background: var(--duo-key);
-  border: 2px solid var(--duo-line);
-  font-size: 12px;
-  font-weight: 900;
+  border-radius: var(--r-sm);
+  background: var(--paper-2);
+  border: var(--b) solid var(--line);
+  font-size: var(--t-xs);
+  font-weight: var(--w-black);
   color: var(--ink-2);
 }
 
 .quiz__option.is-right {
-  background: rgba(88, 204, 2, 0.09);
-  border-color: rgba(88, 204, 2, 0.55);
-  box-shadow: 0 3px 0 rgba(88, 204, 2, 0.55);
+  --opt-line: var(--green-line);
+  background: var(--green-soft);
 }
 
 .quiz__option.is-right .quiz__key {
-  background: var(--duo-green);
-  border-color: var(--duo-green-dark);
-  color: #ffffff;
+  background: var(--green);
+  border-color: var(--green-edge);
+  color: var(--green-on);
 }
 
 .quiz__option.is-wrong {
-  background: rgba(255, 77, 106, 0.07);
-  border-color: rgba(255, 77, 106, 0.45);
-  box-shadow: 0 3px 0 rgba(255, 77, 106, 0.45);
+  --opt-line: var(--rose-line);
+  background: var(--rose-soft);
 }
 
 .quiz__option.is-wrong .quiz__key {
   background: var(--rose);
-  border-color: #d63c55;
-  color: #ffffff;
+  border-color: var(--rose-edge);
+  color: var(--rose-on);
 }
 
 .quiz__option.is-dim {
@@ -1502,10 +1506,10 @@
   margin-top: 16px;
   padding: 16px;
   background: var(--paper-2);
-  border: 1px solid var(--line);
+  border: var(--b-hair) solid var(--line);
   border-radius: var(--r-md);
-  font-size: 14px;
-  font-weight: 600;
+  font-size: var(--t-md);
+  font-weight: var(--w-body);
   line-height: 1.65;
   color: var(--ink-2);
 }
@@ -1518,30 +1522,30 @@
 }
 
 .score strong {
-  font-size: 54px;
-  font-weight: 900;
+  font-size: var(--t-display);
+  font-weight: var(--w-black);
   line-height: 1;
   color: var(--ink);
 }
 
 .score strong em {
   font-style: normal;
-  font-size: 26px;
+  font-size: var(--t-5xl);
   color: var(--ink-3);
 }
 
 .score.is-perfect strong {
-  color: var(--mint);
+  color: var(--green-ink);
 }
 
 .score span {
-  font-size: 13px;
-  font-weight: 800;
+  font-size: var(--t-sm);
+  font-weight: var(--w-bold);
   color: var(--ink-3);
 }
 
 /* ===========================================================================
-   Coming-soon lesson
+   Centred message screens — the coming-soon lesson, and the review result
    =========================================================================== */
 
 .soon {
@@ -1565,23 +1569,12 @@
   height: 140px;
   border-radius: var(--r-lg);
   background: var(--paper-2);
-  border: 1px dashed var(--line-strong);
-}
-
-.soon__badge {
-  padding: 5px 12px;
-  border-radius: var(--r-pill);
-  background: rgba(254, 175, 54, 0.15);
-  color: #b57708;
-  font-size: 11px;
-  font-weight: 900;
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
+  border: var(--b-hair) dashed var(--line-strong);
 }
 
 .soon__title {
-  font-size: 25px;
-  font-weight: 900;
+  font-size: var(--t-5xl);
+  font-weight: var(--w-black);
   letter-spacing: -0.015em;
   color: var(--ink);
   text-wrap: balance;
@@ -1589,8 +1582,8 @@
 
 .soon__tag {
   max-width: 34ch;
-  font-size: 14.5px;
-  font-weight: 700;
+  font-size: var(--t-lg);
+  font-weight: var(--w-mid);
   line-height: 1.6;
   color: var(--ink-2);
   text-wrap: balance;
@@ -1598,8 +1591,8 @@
 
 .soon__note {
   max-width: 34ch;
-  font-size: 13px;
-  font-weight: 500;
+  font-size: var(--t-sm);
+  font-weight: var(--w-body);
   line-height: 1.6;
   color: var(--ink-3);
 }
@@ -1623,15 +1616,15 @@
 }
 
 .about__name {
-  font-size: 24px;
-  font-weight: 900;
+  font-size: var(--t-5xl);
+  font-weight: var(--w-black);
   letter-spacing: -0.015em;
   color: var(--ink);
 }
 
 .about__kicker {
-  font-size: 11px;
-  font-weight: 900;
+  font-size: var(--t-caps);
+  font-weight: var(--w-black);
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--ink-3);
@@ -1641,11 +1634,11 @@
   margin-top: 20px;
   padding: 16px;
   background: var(--paper-2);
-  border: 1px solid var(--line);
+  border: var(--b-hair) solid var(--line);
   border-radius: var(--r-md);
   text-align: center;
-  font-size: 13px;
-  font-weight: 800;
+  font-size: var(--t-sm);
+  font-weight: var(--w-bold);
   color: var(--ink-2);
 }
 
@@ -1653,13 +1646,21 @@
    Desktop gate
    =========================================================================== */
 
-.gate {
+.gate,
+.framer {
   position: relative;
   min-height: 100dvh;
   display: grid;
   place-items: center;
+  background: radial-gradient(
+    120% 90% at 50% -20%,
+    var(--blue-soft) 0%,
+    var(--paper) 60%
+  );
+}
+
+.gate {
   padding: 48px 32px;
-  background: radial-gradient(120% 90% at 50% -20%, #eef3ff 0%, var(--paper) 60%);
   overflow-y: auto;
 }
 
@@ -1676,17 +1677,19 @@
 }
 
 .gate__kicker {
-  font-size: 11px;
-  font-weight: 900;
+  font-size: var(--t-caps);
+  font-weight: var(--w-black);
   letter-spacing: 0.22em;
   text-transform: uppercase;
   color: var(--ink-3);
 }
 
+/* The one fluid size in the app, and the only place a display face has room
+   to behave like one — the gate is desktop-only by definition. */
 .gate__title {
-  margin-top: 10px;
+  margin-top: 12px;
   font-size: clamp(34px, 5vw, 56px);
-  font-weight: 900;
+  font-weight: var(--w-black);
   letter-spacing: -0.03em;
   line-height: 1.02;
   color: var(--ink);
@@ -1695,8 +1698,8 @@
 .gate__tagline {
   margin-top: 12px;
   max-width: 46ch;
-  font-size: 16px;
-  font-weight: 600;
+  font-size: var(--t-xl);
+  font-weight: var(--w-body);
   line-height: 1.6;
   color: var(--ink-2);
 }
@@ -1709,9 +1712,9 @@
   gap: 32px;
   padding: 28px;
   background: var(--paper);
-  border: 1px solid var(--line);
+  border: var(--b-hair) solid var(--line);
   border-radius: var(--r-xl);
-  box-shadow: var(--lift-2);
+  box-shadow: var(--lift-card);
   text-align: start;
 }
 
@@ -1720,31 +1723,19 @@
   min-width: 0;
 }
 
-.gate__badge {
-  display: inline-block;
-  padding: 5px 11px;
-  border-radius: var(--r-pill);
-  background: rgba(254, 175, 54, 0.15);
-  color: #b57708;
-  font-size: 11px;
-  font-weight: 900;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-}
-
 .gate__h2 {
   margin-top: 12px;
-  font-size: 25px;
-  font-weight: 900;
+  font-size: var(--t-5xl);
+  font-weight: var(--w-black);
   letter-spacing: -0.015em;
   color: var(--ink);
 }
 
 .gate__body {
-  margin-top: 9px;
-  margin-bottom: 18px;
-  font-size: 14.5px;
-  font-weight: 500;
+  margin-top: 8px;
+  margin-bottom: 20px;
+  font-size: var(--t-md);
+  font-weight: var(--w-body);
   line-height: 1.7;
   color: var(--ink-2);
 }
@@ -1758,19 +1749,19 @@
   padding: 14px;
   border-radius: var(--r-lg);
   background: var(--paper-2);
-  border: 1px solid var(--line);
+  border: var(--b-hair) solid var(--line);
 }
 
 .gate__qr canvas {
   display: block;
-  border-radius: 6px;
+  border-radius: var(--r-xs);
 }
 
 .gate__qr span {
   max-width: 168px;
   text-align: center;
-  font-size: 11px;
-  font-weight: 800;
+  font-size: var(--t-caps);
+  font-weight: var(--w-bold);
   line-height: 1.4;
   color: var(--ink-2);
 }
@@ -1780,18 +1771,13 @@
    =========================================================================== */
 
 .framer {
-  position: relative;
-  min-height: 100dvh;
-  display: grid;
-  place-items: center;
   padding: 40px;
-  background: radial-gradient(120% 90% at 50% -20%, #eef3ff 0%, var(--paper) 60%);
 }
 
 .framer__close {
   position: absolute;
-  top: 26px;
-  inset-inline-end: 30px;
+  top: 24px;
+  inset-inline-end: 32px;
   z-index: 3;
 }
 
@@ -1802,7 +1788,7 @@
   height: min(844px, calc(100dvh - 80px));
   padding: 12px;
   border-radius: 54px;
-  background: linear-gradient(160deg, #dfe4f2, #b9c1d8);
+  background: linear-gradient(160deg, var(--line), var(--line-strong));
   box-shadow: 0 40px 90px -34px rgba(20, 26, 70, 0.45),
     inset 0 0 0 1px rgba(255, 255, 255, 0.7);
 }
@@ -1815,7 +1801,7 @@
   width: 116px;
   height: 26px;
   border-radius: var(--r-pill);
-  background: #141a46;
+  background: var(--ink);
   z-index: 2;
 }
 
@@ -1888,7 +1874,7 @@
     grid-column: 2;
     margin-top: 0;
     border-radius: var(--r-xl) 0 0 0;
-    box-shadow: -14px 0 34px -22px rgba(20, 26, 70, 0.35);
+    box-shadow: var(--lift-rail);
   }
 
   /* Beside the canvas the fixed height is wrong — there is no canvas below it
@@ -1899,8 +1885,8 @@
     height: auto;
     max-height: none;
     border-top: 0;
-    border-inline-start: 1px solid var(--line);
-    box-shadow: -14px 0 34px -22px rgba(20, 26, 70, 0.35);
+    border-inline-start: var(--b-hair) solid var(--line);
+    box-shadow: var(--lift-rail);
   }
 
   .lesson .lbar__prose {
@@ -1927,7 +1913,7 @@
 
   .lbar__task {
     height: 36px;
-    font-size: 15px;
+    font-size: var(--t-lg);
     line-height: 18px;
   }
 
@@ -1935,8 +1921,7 @@
     height: 50px;
   }
 
-  .lbar__act .btn,
-  .lbar__hint {
+  .lbar__act .btn {
     min-height: 46px;
   }
 }

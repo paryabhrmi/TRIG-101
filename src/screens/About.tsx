@@ -15,7 +15,7 @@ export function About({ onBack }: Props) {
     <div className="screen about">
       <AppBar onBack={onBack} title="About this app" />
 
-      <div className="about__scroll">
+      <div className="pane about__scroll">
         <div className="about__hero">
           <Mark size={72} />
           <h2 className="about__name">Trigonometry 101</h2>

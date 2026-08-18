@@ -52,7 +52,7 @@ export function LessonBar({
     return (
       <div className="lbar lbar--panel">
         {solved && (
-          <p className="lbar__win">
+          <p className="win">
             <span aria-hidden="true">✓</span> Nice — that is the idea
           </p>
         )}
@@ -162,7 +162,7 @@ export function LessonBar({
             {hint && (
               <button
                 type="button"
-                className="lbar__hint"
+                className="btn btn--ghost btn--key"
                 onClick={onHint}
                 aria-label="Show a hint"
               >

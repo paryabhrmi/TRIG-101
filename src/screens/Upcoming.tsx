@@ -26,7 +26,7 @@ export function Upcoming({ lesson, onBack }: Props) {
           <Mark size={88} />
         </div>
 
-        <span className="soon__badge">Not built yet</span>
+        <span className="pill pill--soon">Not built yet</span>
         <h2 className="soon__title">{lesson.title}</h2>
         <p className="soon__tag">{lesson.tagline}</p>
         <p className="soon__note">{lesson.note}</p>

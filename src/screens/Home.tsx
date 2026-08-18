@@ -26,7 +26,7 @@ export function Home({ onOpen, onReview, onAbout }: Props) {
         <p className="duohead__sub">Lessons</p>
       </header>
 
-      <div className="home__scroll">
+      <div className="pane home__scroll">
         {chapters.map((chapter) => {
           const ready = lessons.filter((l) => l.chapter === chapter.id)
           const soon = upcoming.filter((l) => l.chapter === chapter.id)
@@ -57,7 +57,7 @@ export function Home({ onOpen, onReview, onAbout }: Props) {
                           {done ? '✓' : String(i + 1).padStart(2, '0')}
                         </span>
                         <span className="row__title">{lesson.title}</span>
-                        {isNext && <span className="row__next">Start</span>}
+                        {isNext && <span className="tag tag--next">Start</span>}
                       </button>
                     </li>
                   )
@@ -74,7 +74,7 @@ export function Home({ onOpen, onReview, onAbout }: Props) {
                         {String(ready.length + i + 1).padStart(2, '0')}
                       </span>
                       <span className="row__title">{lesson.title}</span>
-                      <span className="row__soon">Soon</span>
+                      <span className="tag tag--soon">Soon</span>
                     </button>
                   </li>
                 ))}

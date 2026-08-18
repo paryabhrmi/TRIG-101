@@ -155,7 +155,7 @@ export function LessonSheet({
         {step === 'learn' && (
           <>
             {solved && (
-              <p className="step__win">
+              <p className="win">
                 <span aria-hidden="true">✓</span> Nice — that is the idea.
               </p>
             )}
