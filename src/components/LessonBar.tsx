@@ -95,12 +95,15 @@ export function LessonBar({
     <div className={`lbar ${solved && doing ? 'is-hit' : ''}`.trim()}>
       <Steps step={step} solved={solved} onStep={onStep} tight />
 
-      <p className="lbar__task">{task}</p>
+      {/* The instruction and its instrument are one block, centred in the room
+          between the stepper and the button. Eight of the ten lessons have
+          nothing to put in the slot on this step, and a reserved row that is
+          empty most of the time reads as a hole rather than as structure — so
+          it collapses when it has nothing to say and the block re-centres. */}
+      <div className="lbar__body">
+        <p className="lbar__task">{task}</p>
 
-      {/* One slot, one line, always 28px: a hint if the learner asked for one,
-          otherwise whatever this lesson measures — and nothing at all for the
-          lessons whose artboard already says everything. */}
-      <div className="lbar__slot">
+        <div className="lbar__slot">
         {hintUp && hint ? (
           <p className="lbar__hintline">{hint}</p>
         ) : !doing ? null : lesson.readouts.length ? (
@@ -131,7 +134,8 @@ export function LessonBar({
             </span>
             <span className="aim__state">{aimWord(aim, solved)}</span>
           </div>
-        ) : null}
+          ) : null}
+        </div>
       </div>
 
       <div className="lbar__act">

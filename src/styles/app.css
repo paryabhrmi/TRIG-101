@@ -1189,24 +1189,19 @@
    thumb, and a canvas that rescales mid-drag takes the knob out from under the
    finger.
 
-   Every row is reserved whether or not this lesson fills it. The rows come to
-   180px, which is why that is `--dock-h`'s floor:
+   Three parts, and only the middle one flexes:
 
      12  padding
      14  stepper — three segments and the current step's name
-      4  gap
-     40  task, two lines reserved     --t-xl on a 20px line
-      8  gap
-     28  instrument slot — aim bar, ratio cells, conditions, or empty
-      8  gap
+      *  the instruction and its instrument, centred in what is left
      54  action row (a 50px button and its 4px edge)
      12  padding
     ---
-    180  plus the bottom safe area
+    180  floor, plus the bottom safe area
 
-   Anything `--dock-h` has beyond that lands between the slot and the action
-   row, which is pinned to the foot so the primary button is in the same place
-   on every step.
+   The floor is what those parts need with a two-line task and a full slot.
+   Anything beyond it goes to the middle, which centres its block rather than
+   dropping the difference in one gap above the button.
    =========================================================================== */
 
 .lbar {
@@ -1222,18 +1217,32 @@
   box-shadow: var(--lift-dock);
 }
 
-/* Two lines are reserved whatever the copy runs to, which is the whole reason
-   the bar keeps one height across the first two steps. */
+/* The instruction and its instrument, centred in whatever the stepper and the
+   action row leave. The dock's height is fixed, so this block does not have to
+   reserve anything to keep the canvas still — it just has to look composed at
+   whatever height it lands on. */
+.lbar__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 12px;
+  padding: 8px 0;
+}
+
+/* The task is the one thing on the dock in the first step, so it carries the
+   weight. Three lines is the ceiling; the longest copy in the course runs to
+   two. */
 .lbar__task {
   flex: 0 0 auto;
-  margin-top: 4px;
-  height: 40px;
-  font-size: var(--t-xl);
+  font-size: var(--t-2xl);
   font-weight: var(--w-bold);
-  line-height: 20px;
+  line-height: 1.35;
   color: var(--ink);
+  text-wrap: balance;
   display: -webkit-box;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -1244,16 +1253,19 @@
 
 .lbar__slot {
   flex: 0 0 auto;
-  margin-top: 8px;
   height: 28px;
   display: flex;
   align-items: center;
 }
 
+/* Nothing to measure on this step: the row goes rather than sitting there as
+   a reserved gap. The dock's height does not depend on it. */
+.lbar__slot:empty {
+  display: none;
+}
+
 .lbar__act {
   flex: 0 0 auto;
-  margin-top: auto;
-  padding-top: 8px;
   height: 54px;
   display: flex;
   align-items: flex-start;
