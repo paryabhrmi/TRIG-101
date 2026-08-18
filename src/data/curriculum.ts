@@ -86,6 +86,19 @@ export interface Lesson {
   stage: StageTone
   /** False for artboards that carry no view model (Rive warns if you bind). */
   bindViewModel: boolean
+  /**
+   * Extra artboards drawn under the main one and bound to its view model, so
+   * they drive it.
+   *
+   * `Ratio` is the only lesson that needs this. Its two sliders were authored
+   * as their own artboards (`Ratio/AngleSlider`, `Ratiop/ScaleSlider`) rather
+   * than nested into the lesson artboard, so on its own the lesson renders a
+   * triangle with nothing to touch and a checkpoint that cannot be reached.
+   * Sharing one `TriangleViewModel` instance across all three reconnects them:
+   * dragging a slider moves `AngleControl`/`ScaleControl`, and the triangle
+   * follows. Everywhere else the controls are already part of the artboard.
+   */
+  controls?: string[]
   chapter: number
   title: string
   tagline: string
@@ -333,6 +346,7 @@ export const lessons: Lesson[] = [
     stateMachine: SM,
     stage: 'paper',
     bindViewModel: true,
+    controls: ['Ratio/AngleSlider', 'Ratiop/ScaleSlider'],
     chapter: 1,
     title: 'Shape, not size',
     tagline: 'Blow the triangle up. The ratios refuse to change.',

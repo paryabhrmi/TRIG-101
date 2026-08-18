@@ -567,19 +567,77 @@
    of the empty space. Fit.Contain never crops, so a smaller box only ever means
    smaller artwork — never a hidden slider. The padding is the strip the sheet
    overlaps, kept outside the canvas box. */
-.lesson__stage {
+/* Every artboard in the file is 1:1 (only `Ratio` differs, at 500×538), so a
+   square box the width of the screen holds any of them complete, edge to edge,
+   with no crop and no letterbox. The size is fixed by the viewport width, which
+   means it does not move between steps or lessons.
+
+   The field is the space that square sits in. It carries the artboard's own
+   background colour — white for the light artboards, #f6f9ff for the dark ones
+   once the invert filter has run over them — so the canvas and the page around
+   it are one continuous surface instead of a tile on a backdrop. */
+.lesson {
+  --field: var(--paper);
+  background: var(--field);
+}
+
+.lesson--navy,
+.lesson--deep {
+  /* #0d1062 through --invert-artboard lands here; measured, not guessed. */
+  --field: #f6f9ff;
+}
+
+.lesson__field {
   position: relative;
   z-index: 1;
   flex: 1 1 auto;
-  min-height: 30dvh;
-  width: 100%;
+  min-height: 0;
   display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background: var(--field);
+}
+
+.lesson__art {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Lets the square below measure itself against this box's height as well as
+     its width, so it is never taller than the room it has. */
+  container-type: size;
+}
+
+.lesson .stage {
+  flex: 0 0 auto;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  background: transparent;
+}
+
+/* Square by the smaller of the two dimensions: full-width on any phone tall
+   enough for it, and merely inset rather than cropped when it is not. */
+@supports (container-type: size) {
+  .lesson__art .stage {
+    width: min(100%, 100cqh);
+  }
+}
+
+/* `Ratio`'s two sliders are their own artboards; they sit directly under the
+   triangle and are bound to it, so the three read as one control surface. */
+.lesson__controls {
+  flex: 0 0 auto;
+}
+
+.lesson .stage--control {
+  width: 100%;
+  aspect-ratio: 550 / 60;
 }
 
 /* The sheet rides up over the artwork, so that strip is kept clear of the
-   canvas box. The bar does not overlap anything, so it takes no padding and
-   the artboard runs from one edge of the screen to the other. */
-.lesson--sheet .lesson__stage {
+   canvas box. The bar does not overlap anything. */
+.lesson--sheet .lesson__field {
   padding-bottom: var(--sheet-overlap);
 }
 
@@ -1780,8 +1838,8 @@
    =========================================================================== */
 
 @media (max-height: 720px) {
-  .lesson__stage {
-    max-height: 52dvh;
+  .lesson__field {
+    min-height: 0;
   }
 }
 
@@ -1804,14 +1862,26 @@
     grid-column: 1 / -1;
   }
 
-  .lesson__stage {
+  .lesson__field {
     grid-column: 1;
     width: auto;
     height: auto;
-    aspect-ratio: auto;
     max-height: none;
     padding: 0;
     min-height: 0;
+  }
+
+  /* Beside the bar there is no fixed width to square off against, so the
+     artboard takes the column and Contain keeps it whole. */
+  .lesson__art .stage {
+    width: 100%;
+    height: 100%;
+    aspect-ratio: auto;
+  }
+
+  .lesson .stage--control {
+    flex: 0 0 auto;
+    aspect-ratio: 550 / 60;
   }
 
   .lesson .sheet {

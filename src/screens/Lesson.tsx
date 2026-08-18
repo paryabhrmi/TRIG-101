@@ -122,17 +122,39 @@ export function LessonScreen({ lesson, onBack, onGoto, onReview, onFinish }: Pro
         progress={(index + (solved ? 1 : 0)) / lessons.length}
       />
 
-      {/* Full-bleed stage: the artboard spans the full width of the screen,
-          edge to edge, with no card and no inset around it. */}
-      <div className="lesson__stage">
-        <RiveStage
-          key={lesson.id}
-          artboard={lesson.artboard}
-          stateMachine={lesson.stateMachine}
-          stage={lesson.stage}
-          bindViewModel={lesson.bindViewModel}
-          onReady={setRive}
-        />
+      {/* The artboard is a fixed square the width of the screen — every artboard
+          in the file is 1:1, so it lands edge to edge with nothing cropped and
+          nothing letterboxed. The field around it carries the artboard's own
+          background colour, so the two read as one surface rather than a
+          picture sitting on a page. */}
+      <div className="lesson__field">
+        <div className="lesson__art">
+          <RiveStage
+            key={lesson.id}
+            artboard={lesson.artboard}
+            stateMachine={lesson.stateMachine}
+            stage={lesson.stage}
+            bindViewModel={lesson.bindViewModel}
+            onReady={setRive}
+          />
+        </div>
+
+        {lesson.controls && (
+          <div className="lesson__controls">
+            {lesson.controls.map((artboard) => (
+              <RiveStage
+                key={`${lesson.id}:${artboard}`}
+                artboard={artboard}
+                stateMachine={lesson.stateMachine}
+                stage={lesson.stage}
+                bindViewModel={false}
+                bindTo={rive}
+                className="stage--control"
+              />
+            ))}
+          </div>
+        )}
+
         {celebrate && (
           <div className="burst" aria-hidden="true">
             {Array.from({ length: 12 }, (_, i) => (

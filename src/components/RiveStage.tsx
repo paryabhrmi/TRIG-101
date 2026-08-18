@@ -1,5 +1,5 @@
 import { Alignment, Fit, Layout, useRive } from '@rive-app/react-canvas'
-import { useEffect, useRef } from 'react'
+import { useEffect } from 'react'
 import type { Rive } from '@rive-app/react-canvas'
 import type { StageTone } from '../data/curriculum'
 
@@ -12,29 +12,15 @@ interface Props {
   bindViewModel: boolean
   /** Handed the Rive instance once the artboard is live. */
   onReady?: (rive: Rive) => void
+  /**
+   * Draw this artboard against another one's view-model instance instead of
+   * its own. Used for control artboards that were authored separately from the
+   * lesson they drive — sharing the instance is what reconnects them.
+   */
+  bindTo?: Rive | null
   className?: string
   fit?: Fit
 }
-
-/**
- * Every artboard in the file is square or near it (`Ratio` is 500×538, the
- * rest are 1:1), so on a portrait stage `FitWidth` and `Contain` scale
- * identically — but `FitWidth` also guarantees the artwork reaches both edges
- * of the screen whatever height the stage ends up with. It is only unsafe once
- * the stage is wider than the artboard, which is the landscape layout, and
- * there `Contain` takes over so nothing is cropped.
- */
-const fitFor = (box: HTMLElement | null): Fit =>
-  box && box.clientWidth > box.clientHeight ? Fit.Contain : Fit.FitWidth
-
-/**
- * A square artboard on a tall phone leaves slack above and below it. Settling
- * the artwork on the bottom of the stage collects that slack into one band
- * under the app bar instead of splitting it in two — and it puts the sliders,
- * which sit along the artboard's bottom edge, within easy reach of the thumb.
- */
-const alignFor = (box: HTMLElement | null): Alignment =>
-  box && box.clientWidth > box.clientHeight ? Alignment.Center : Alignment.BottomCenter
 
 /**
  * A single Rive artboard, sized to its container.
@@ -50,10 +36,9 @@ export function RiveStage({
   bindViewModel,
   onReady,
   className,
-  fit,
+  bindTo,
+  fit = Fit.Contain,
 }: Props) {
-  const box = useRef<HTMLDivElement>(null)
-
   const { rive, RiveComponent } = useRive(
     {
       src: RIVE_SRC,
@@ -63,7 +48,7 @@ export function RiveStage({
       // Binding an artboard that has no view model logs a runtime error, so
       // only opt in where the file actually defines one.
       autoBind: bindViewModel,
-      layout: new Layout({ fit: fit ?? Fit.FitWidth, alignment: Alignment.BottomCenter }),
+      layout: new Layout({ fit, alignment: Alignment.Center }),
     },
     { shouldResizeCanvasToContainer: true, useDevicePixelRatio: true },
   )
@@ -75,27 +60,23 @@ export function RiveStage({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rive])
 
-  // Rotating the phone changes which fit is safe, so the layout is re-applied
-  // rather than fixed at load.
+  // A control artboard carries no data of its own; binding it to the artboard
+  // it drives is what makes dragging it move anything.
   useEffect(() => {
-    if (!rive || fit) return
-
-    const apply = () => {
-      const nextFit = fitFor(box.current)
-      const nextAlign = alignFor(box.current)
-      if (rive.layout.fit !== nextFit || rive.layout.alignment !== nextAlign) {
-        rive.layout = new Layout({ fit: nextFit, alignment: nextAlign })
-      }
+    if (!rive || !bindTo) return
+    const instance = (bindTo as unknown as { viewModelInstance?: unknown }).viewModelInstance
+    if (!instance) return
+    try {
+      ;(rive as unknown as { bindViewModelInstance: (i: unknown) => void }).bindViewModelInstance(
+        instance,
+      )
+    } catch {
+      // An artboard with nothing bindable simply stays inert.
     }
-
-    apply()
-    const observer = new ResizeObserver(apply)
-    if (box.current) observer.observe(box.current)
-    return () => observer.disconnect()
-  }, [rive, fit])
+  }, [rive, bindTo])
 
   return (
-    <div ref={box} className={`stage stage--${stage} ${className ?? ''}`.trim()}>
+    <div className={`stage stage--${stage} ${className ?? ''}`.trim()}>
       <RiveComponent className="stage__canvas" />
       {!rive && <div className="stage__pending" aria-hidden="true" />}
     </div>

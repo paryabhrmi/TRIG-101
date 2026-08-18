@@ -136,14 +136,27 @@ AmpFrqSin), `ViewModel2` (CircletoSin/Cos/Tan) and `RadDegVM` (RadDeg). The
 `Angle` artboard has **no** view model — binding one logs a runtime error, so
 lessons declare `bindViewModel` explicitly.
 
-**Fit and alignment.** Every artboard is square or near it (`Ratio` is 500×538,
-the rest are 1:1). On a portrait stage `FitWidth` therefore scales identically to
-`Contain`, while also guaranteeing the artwork reaches both edges of the screen
-whatever height the stage ends up with. Landscape keeps `Contain`, because there
-the stage is wider than the artboard and `FitWidth` would crop. The artwork is
-bottom-aligned so the slack a square artboard leaves on a tall phone collects in
-one band under the app bar rather than two, which also brings the artboards'
-sliders within thumb reach.
+**A square stage, and one surface.** Every artboard is 1:1 (`Ratio` alone is
+500×538), so the stage is a square the width of the screen: `Contain` then lands
+any artboard in it complete, edge to edge, with nothing cropped and nothing
+letterboxed, at a size fixed by the viewport rather than by which step is open.
+Where a phone is too short for a full-width square — only `Ratio`, which shares
+the field with its two sliders — the square insets rather than crops.
+
+The field around the square carries the artboard's own background: `--paper` for
+the light artboards, and `#f6f9ff` for the dark ones, which is where `#0d1062`
+lands after `--invert-artboard` (measured off the rendered canvas, not guessed).
+So the canvas and the page are one continuous surface rather than a tile on a
+backdrop.
+
+**Controls that live in their own artboards.** `Ratio`'s two sliders were
+authored as separate artboards — `Ratio/AngleSlider` and `Ratiop/ScaleSlider` —
+rather than nested into the lesson artboard, so on its own that lesson draws a
+triangle with nothing to touch and a checkpoint that cannot be reached. The app
+draws them under it and hands them the lesson artboard's own view-model instance
+(`bindViewModelInstance`), which reconnects them: dragging a slider moves
+`AngleControl`/`ScaleControl` and the triangle follows. `Lesson.controls`
+declares this; no other lesson needs it.
 
 **Reads, not writes.** Property writes only stick *after* the state machine's
 first advance; before that, initialisation overwrites them. More importantly,
