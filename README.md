@@ -4,8 +4,8 @@ An interactive, mobile-first course that teaches sine, cosine and tangent by
 letting you drag them. Fifteen lessons planned, ten built, one Rive file doing
 the heavy lifting.
 
-**Live:** https://paryabhrmi.github.io/TRIG-101/ (published by
-`.github/workflows/deploy.yml` — see [Deploying](#deploying))
+**Live:** https://trig101.vercel.app (project name is claimed on first
+deploy — see [Deploying](#deploying))
 
 > **Desktop is intentionally gated in this MVP.** Every lesson is a thumb-drag
 > on a canvas laid out for a phone, so wide viewports get an honest "open this
@@ -204,19 +204,20 @@ either narrow the window or use the phone-frame preview on the gate.
 
 ## Deploying
 
-Pushing to `main` runs `.github/workflows/deploy.yml`, which builds and
-publishes `dist/` to GitHub Pages at https://paryabhrmi.github.io/TRIG-101/.
+The site deploys on [Vercel](https://vercel.com), connected to this GitHub
+repository. One-time setup: on vercel.com, **Add New → Project**, import
+`paryabhrmi/TRIG-101`, and accept the auto-detected Vite settings
+(`npm run build`, output `dist`). Name the project `trig101` to get the
+`trig101.vercel.app` URL (first come, first served — pick another name if
+it's taken).
 
-No manual setup is needed: the workflow passes `enablement: true` to
-`configure-pages`, so a fresh fork or a renamed repository provisions its own
-Pages site on the first run.
+After that, every push to the production branch deploys automatically, and
+every other branch gets its own preview URL on push. No workflow file or
+config is needed; Vercel detects Vite on its own.
 
-One caveat worth knowing if this repo ever goes private: GitHub Pages on a
-private repository requires a paid plan. On Free, `configure-pages` fails
-with `Resource not accessible by integration` until the repo is public again.
-
-`vite.config.ts` sets `base: '/TRIG-101/'` for production builds. If the
-repository is ever renamed, that value has to change with it.
+The app builds with the default `/` base and hash routing, so it needs no
+rewrites and would also work unchanged behind a custom domain added in the
+Vercel dashboard later.
 
 ## Stack
 
