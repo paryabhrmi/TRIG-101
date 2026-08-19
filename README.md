@@ -181,20 +181,14 @@ jsDelivr, which would tie an otherwise static site to a third party and fail
 closed if that CDN is blocked. `src/lib/riveRuntime.ts` repoints the loader at
 the bundled copy, so the deploy is self-contained.
 
-## Known asset issues
-
-Both are inside the `.riv` file and can only be fixed in Rive and re-exported —
-neither can be patched from the app side.
+## Known asset issue
 
 **The θ glyph is still missing.** Several artboards render `θ` as a
 missing-glyph box (`Angle □ = 45.0°`), and the three wave artboards are the
 worst hit — `□ = sin(□)`, `□ = 0.00 rad`. The theta character is absent from
-the font subset embedded in the file. This one survived the V4 re-export.
-
-**The cover credits a different studio.** The `Cover` artboard now reads
-"AYNE STUDIO PRESENTS", while the About screen and the credits below name
-Lucid Paper Studios. One of the two is out of date; the app copy has been left
-alone rather than guessed at.
+the font subset embedded in the `.riv` file, so it has to be fixed in Rive and
+re-exported — it cannot be patched from the app side. This one survived the V4
+re-export.
 
 ## Running it
 
@@ -247,5 +241,5 @@ one it removes.
 
 ## Credits
 
-Animation and artwork: **Lucid Paper Studios**, authored in
+Animation and artwork: **AYNE Studio**, authored in
 [Rive](https://rive.app). This repository is the course shell around that file.

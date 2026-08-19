@@ -19,7 +19,7 @@ export function About({ onBack }: Props) {
         <div className="about__hero">
           <Mark size={72} />
           <h2 className="about__name">Trigonometry 101</h2>
-          <p className="about__kicker">Lucid Paper Studios</p>
+          <p className="about__kicker">AYNE Studio</p>
         </div>
 
         <div className="prose">
@@ -29,7 +29,7 @@ export function About({ onBack }: Props) {
             when you watch a circle turn.
           </p>
           <p className="prose__dim">
-            Animation and artwork by Lucid Paper Studios, authored in Rive. Every
+            Animation and artwork by AYNE Studio, authored in Rive. Every
             slider, toggle and button you touch lives inside that file; this app is
             the course built around it, reading the artwork's own values back out as
             live readouts.
