@@ -2,9 +2,6 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import legacy from '@vitejs/plugin-legacy'
 
-// The app is published on Vercel at the domain root, so the default `/` base
-// is correct everywhere. Asset URLs still go through `import.meta.env.BASE_URL`
-// so a sub-path host would only need a `base` set here again.
 export default defineConfig(() => ({
   plugins: [
     react(),
