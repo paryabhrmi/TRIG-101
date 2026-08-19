@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react'
-import { Fit } from '@rive-app/react-webgl'
 import { RiveStage } from '../components/RiveStage'
 import { lessons } from '../data/curriculum'
 import { useProgress } from '../lib/progress'
-import type { Rive } from '@rive-app/react-webgl'
+import type { Rive } from '@rive-app/react-canvas'
 
 interface Props {
   onStart: () => void
@@ -35,11 +34,10 @@ export function Splash({ onStart, onResume }: Props) {
       <RiveStage
         artboard="Cover"
         stateMachine="State Machine 1"
-        stage="paper"
         bindViewModel={false}
-        // The cover is 810×1440; Cover-fit would crop the wordmark on a
-        // narrower phone, and the artboard's paper matches the screen anyway.
-        fit={Fit.Contain}
+        // Pinned to the screen rather than to the artboard's 810×1440 ratio:
+        // the cover's paper matches the page, so letterboxing it would only
+        // draw a seam where there is nothing to see.
         className="splash__art"
         onReady={play}
       />

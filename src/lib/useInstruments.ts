@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import type { Rive } from '@rive-app/react-webgl'
+import type { Rive } from '@rive-app/react-canvas'
 import type { Lesson, Sample } from '../data/curriculum'
 
 /** How often the readouts refresh. Fast enough to feel live, slow enough
@@ -13,10 +13,17 @@ const DWELL_MS = 350
 export interface Instruments {
   /** Formatted readout strings, index-aligned with `lesson.readouts`. */
   values: string[]
+  /**
+   * How far along the checkpoint's target the learner is, 0 to 1, or null
+   * where the lesson has no numeric target. The value itself is deliberately
+   * not returned: every artboard prints its own numbers, so the app's job is
+   * the distance to the goal, not a second copy of the reading.
+   */
+  aim: number | null
+  /** Index-aligned with `lesson.conditions`. */
+  conditions: boolean[]
   /** True once the lesson's checkpoint has been satisfied. */
   solved: boolean
-  /** Marks the checkpoint satisfied from outside (e.g. an action button). */
-  markSolved: () => void
 }
 
 /**
@@ -27,12 +34,24 @@ export interface Instruments {
  * readout formatter can therefore ask for any property by name and always get
  * the current frame's value.
  */
+/**
+ * @param armed Whether the checkpoint may award the lesson yet. Several
+ *   artboards run themselves through now, so their checkpoint is already
+ *   satisfied while the learner is still reading what it is — arming it with
+ *   the task step is what keeps "you did it" attached to having done it. The
+ *   readouts and the aim bar are live either way.
+ */
 export function useInstruments(
   rive: Rive | null,
   lesson: Lesson,
   alreadyDone: boolean,
+  armed: boolean,
 ): Instruments {
   const [values, setValues] = useState<string[]>(() => lesson.readouts.map(() => '—'))
+  const [aim, setAim] = useState<number | null>(null)
+  const [conditions, setConditions] = useState<boolean[]>(() =>
+    (lesson.conditions ?? []).map(() => false),
+  )
   const [solved, setSolved] = useState(alreadyDone)
 
   // Keep the latest lesson/solved state reachable from the interval without
@@ -41,10 +60,25 @@ export function useInstruments(
   lessonRef.current = lesson
   const solvedRef = useRef(solved)
   solvedRef.current = solved
+  const armedRef = useRef(armed)
+  armedRef.current = armed
 
   useEffect(() => {
     setSolved(alreadyDone)
+    setAim(null)
+    setConditions((lesson.conditions ?? []).map(() => false))
+    // `lesson.conditions` is stable per lesson; keying on the id is enough.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [alreadyDone, lesson.id])
+
+  // The one lesson whose artboard plays itself through and measures nothing
+  // while it does. Watching it is the task, so the clock is the checkpoint —
+  // started when the learner takes the task, not when the screen mounts.
+  useEffect(() => {
+    if (!rive || !armed || !lesson.autoSolveMs || solvedRef.current) return
+    const id = window.setTimeout(() => setSolved(true), lesson.autoSolveMs)
+    return () => window.clearTimeout(id)
+  }, [rive, armed, lesson.autoSolveMs, lesson.id])
 
   useEffect(() => {
     if (!rive) return
@@ -114,8 +148,38 @@ export function useInstruments(
         )
       }
 
+      const target = current.checkpoint?.target
+      if (target) {
+        let next: number | null = null
+        try {
+          const gap = Math.abs(target.read(sample) - target.goal)
+          next = Math.max(0, Math.min(1, 1 - gap / target.span))
+        } catch {
+          next = null
+        }
+        // Round before comparing: the raw value jitters every frame and would
+        // re-render the bar at 14fps for a change no one can see.
+        setAim((prev) => {
+          const rounded = next === null ? null : Math.round(next * 200) / 200
+          return prev === rounded ? prev : rounded
+        })
+      }
+
+      if (current.conditions?.length) {
+        const next = current.conditions.map((c) => {
+          try {
+            return c.test(sample)
+          } catch {
+            return false
+          }
+        })
+        setConditions((prev) =>
+          prev.length === next.length && prev.every((v, i) => v === next[i]) ? prev : next,
+        )
+      }
+
       const check = current.checkpoint
-      if (check && !solvedRef.current) {
+      if (check && armedRef.current && !solvedRef.current) {
         let pass = false
         try {
           pass = check.test(sample)
@@ -137,7 +201,5 @@ export function useInstruments(
     return () => window.clearInterval(id)
   }, [rive, lesson.id])
 
-  const markSolved = () => setSolved(true)
-
-  return { values, solved, markSolved }
+  return { values, aim, conditions, solved }
 }
