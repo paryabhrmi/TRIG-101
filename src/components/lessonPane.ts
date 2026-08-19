@@ -1,4 +1,4 @@
-import type { Lesson, LessonAction, nextStop } from '../data/curriculum'
+import type { Lesson, nextStop } from '../data/curriculum'
 
 /** Watch what to touch → do the task → read why it happened. */
 export type Step = 'watch' | 'do' | 'learn'
@@ -9,9 +9,8 @@ export const stepName = (s: Step) =>
   s === 'watch' ? 'Find it' : s === 'do' ? 'Try it' : 'Why it works'
 
 /**
- * Everything a bottom pane needs. The lesson screen owns the state; a pane
- * only draws it, which is what lets the two implementations be swapped at
- * runtime without either one holding state the other would lose.
+ * Everything the bottom sheet needs. The lesson screen owns the state; the
+ * sheet only draws it.
  */
 export interface LessonPaneProps {
   lesson: Lesson
@@ -26,10 +25,6 @@ export interface LessonPaneProps {
   conditions: boolean[]
   showHint: boolean
   onHint: () => void
-  toggles: Record<string, boolean>
-  onAction: (action: LessonAction) => void
-  /** False until the artboard is live, so its buttons cannot be pressed early. */
-  ready: boolean
   after: ReturnType<typeof nextStop>
   onNext: () => void
 }

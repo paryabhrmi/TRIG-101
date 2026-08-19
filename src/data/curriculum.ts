@@ -11,8 +11,6 @@
  * README.md for the full map.
  */
 
-/** Which of the file's two artboard themes this lesson uses. */
-export type StageTone = 'navy' | 'deep' | 'paper'
 export type Tone = 'blue' | 'cyan' | 'amber' | 'violet' | 'mint' | 'rose'
 
 /** One frame of artboard state, sampled from the view model + state machine. */
@@ -69,36 +67,12 @@ export interface Condition {
   test: (s: Sample) => boolean
 }
 
-export interface LessonAction {
-  /** State-machine input name. */
-  input: string
-  kind: 'trigger' | 'bool'
-  label: string
-  tone?: 'primary' | 'ghost'
-  /** Pressing this satisfies the lesson instead of a measured checkpoint. */
-  completes?: boolean
-}
-
 export interface Lesson {
   id: string
   artboard: string
   stateMachine: string
-  stage: StageTone
   /** False for artboards that carry no view model (Rive warns if you bind). */
   bindViewModel: boolean
-  /**
-   * Extra artboards drawn under the main one and bound to its view model, so
-   * they drive it.
-   *
-   * `Ratio` is the only lesson that needs this. Its two sliders were authored
-   * as their own artboards (`Ratio/AngleSlider`, `Ratiop/ScaleSlider`) rather
-   * than nested into the lesson artboard, so on its own the lesson renders a
-   * triangle with nothing to touch and a checkpoint that cannot be reached.
-   * Sharing one `TriangleViewModel` instance across all three reconnects them:
-   * dragging a slider moves `AngleControl`/`ScaleControl`, and the triangle
-   * follows. Everywhere else the controls are already part of the artboard.
-   */
-  controls?: string[]
   chapter: number
   title: string
   tagline: string
@@ -108,21 +82,28 @@ export interface Lesson {
   /**
    * Values the app shows that the artboard does not.
    *
-   * Nine of the ten artboards print their own instrument panel — `UnitCircle`
-   * writes `Hyp / Opp / Adj` under the circle, `SecretRatios` carries a full
-   * SOH CAH TOA table, the wave artboards print θ in degrees and radians next
-   * to the value being plotted. Mirroring any of those into a tile says the
-   * same thing twice and costs the canvas the room to say it. So this list
-   * holds only what the file leaves out: the ratios in lesson 2, and the
-   * radian expressed in π in lesson 4.
+   * Every artboard in the file now prints its own instrument panel — `Ratio`
+   * carries the three ratios it used to leave out, `UnitCircle` writes
+   * `Hyp / Opp / Adj` under the circle, `SecretRatios` carries a full SOH CAH
+   * TOA table, the wave artboards print θ in degrees and radians next to the
+   * value being plotted. Mirroring any of those into a tile says the same
+   * thing twice and costs the canvas the room to say it. What is left is the
+   * one reading the file does not draw: lesson 4's radian in terms of π.
    */
   readouts: Readout[]
-  actions?: LessonAction[]
   checkpoint?: Checkpoint
-  /** Fills the lesson bar's slot where a numeric target does not fit. */
+  /** Fills the sheet's slot where a numeric target does not fit. */
   conditions?: Condition[]
   /** Boolean state-machine inputs to mirror into `Sample.b`. */
   watchInputs?: string[]
+  /**
+   * Marks the lesson solved this long after the artboard goes live.
+   *
+   * For the one lesson whose artboard plays itself through and exposes
+   * nothing to measure while it does: the task really is to watch, so the
+   * time the animation takes is the checkpoint.
+   */
+  autoSolveMs?: number
 }
 
 /**
@@ -176,12 +157,15 @@ function fixed(value: number, decimals: number): string {
   return v.toFixed(decimals)
 }
 
-/** `AmpFrqSin` exposes amplitude as a raw pixel span; map it back to 0.5–2.5. */
-function amplitude(s: Sample): number {
-  const raw = num(s, 'sliderA')
-  const a = 0.5 + ((raw - 24) / 95.8) * 2
-  return Math.min(2.5, Math.max(0.5, a))
-}
+/**
+ * `AmpFrqSin`'s amplitude slider reports a raw pixel span, not the 0.5–2.5 it
+ * prints on its own ruler. Measured against the runtime, the knob travels
+ * between roughly 47 and 120 — so "amplitude at max" is asked of the travel
+ * itself rather than converted into a physical amplitude the app would then
+ * be maintaining a second, driftable copy of.
+ */
+const AMP_TOP = 120
+const ampAtMax = (s: Sample) => num(s, 'sliderA') >= AMP_TOP - 3
 
 export const chapters: Chapter[] = [
   {
@@ -310,7 +294,6 @@ export const lessons: Lesson[] = [
     id: 'sides',
     artboard: 'Angle',
     stateMachine: SM,
-    stage: 'paper',
     bindViewModel: false,
     chapter: 1,
     watchInputs: ['Boolean 1'],
@@ -344,9 +327,7 @@ export const lessons: Lesson[] = [
     id: 'ratio',
     artboard: 'Ratio',
     stateMachine: SM,
-    stage: 'paper',
     bindViewModel: true,
-    controls: ['Ratio/AngleSlider', 'Ratiop/ScaleSlider'],
     chapter: 1,
     title: 'Shape, not size',
     tagline: 'Blow the triangle up. The ratios refuse to change.',
@@ -356,28 +337,14 @@ export const lessons: Lesson[] = [
       'Similar triangles share their side ratios exactly. That is the hinge the entire subject swings on.',
       'Drag Scale end to end: Opposite, Adjacent and Hypotenuse all move. The three ratios below them do not.',
     ],
-    // The artboard prints the three sides with their values but no ratios —
-    // and the ratios are the whole lesson. The only tiles in the course that
-    // are not already on the canvas.
-    readouts: [
-      {
-        id: 'oh',
-        label: 'O ÷ H',
-        tone: 'rose',
-        value: (s) => fixed(num(s, 'OppRatio'), 3),
-      },
-      {
-        id: 'ah',
-        label: 'A ÷ H',
-        tone: 'rose',
-        value: (s) => fixed(num(s, 'AdjRatio'), 3),
-      },
-      {
-        id: 'oa',
-        label: 'O ÷ A',
-        tone: 'rose',
-        value: (s) => fixed(num(s, 'TanRatio'), 3),
-      },
+    // The artboard now carries the three ratios itself, in the coloured cards
+    // under the triangle — they were the only tiles in the course the file did
+    // not draw. What the canvas still cannot say is which half of a two-part
+    // task is outstanding, so that is what the slot holds.
+    readouts: [],
+    conditions: [
+      { label: 'angle at 60°', test: (s) => Math.abs(num(s, 'AngleControl') - 60) <= 3 },
+      { label: 'scale past 160', test: (s) => num(s, 'ScaleControl') >= 160 },
     ],
     checkpoint: {
       goal: 'Hold 60°, then push Scale past 160',
@@ -390,7 +357,6 @@ export const lessons: Lesson[] = [
     id: 'soh-cah-toa',
     artboard: 'SecretRatios',
     stateMachine: SM,
-    stage: 'paper',
     bindViewModel: true,
     chapter: 1,
     title: 'SOH CAH TOA',
@@ -424,7 +390,6 @@ export const lessons: Lesson[] = [
     id: 'radians',
     artboard: 'RadDeg',
     stateMachine: SM,
-    stage: 'paper',
     bindViewModel: true,
     chapter: 2,
     title: 'Radians',
@@ -460,12 +425,11 @@ export const lessons: Lesson[] = [
     id: 'unit-circle',
     artboard: 'UnitCircle',
     stateMachine: SM,
-    stage: 'navy',
     bindViewModel: true,
     chapter: 2,
     title: 'The unit circle',
     tagline: 'Trigonometry escapes the triangle.',
-    watch: 'Press Spin it and follow the arm all the way round.',
+    watch: 'The arm is already turning. Follow it all the way round.',
     body: [
       'Set the hypotenuse to 1 and pin it at the origin. Now the angle can keep going — past 90°, past 180°, past a full turn.',
       "The handle's height above the axis is sin θ. Its distance along the axis is cos θ. Always.",
@@ -474,13 +438,9 @@ export const lessons: Lesson[] = [
     // `Hyp: 1  Opp: …  Adj: …` is printed under the circle by the artboard.
     readouts: [],
     conditions: [{ label: 'cos θ below zero', test: (s) => num(s, 'adj') < -0.5 }],
-    actions: [
-      { input: 'start', kind: 'trigger', label: 'Spin it', tone: 'primary' },
-      { input: 'reset', kind: 'trigger', label: 'Reset', tone: 'ghost' },
-    ],
     checkpoint: {
       goal: 'Catch cos θ going negative',
-      hint: 'Press Spin it and watch Adj once the arm passes the top of the circle.',
+      hint: 'Watch Adj once the arm passes the top of the circle.',
       test: (s) => num(s, 'adj') < -0.5,
     },
   },
@@ -490,7 +450,6 @@ export const lessons: Lesson[] = [
     id: 'sine-wave',
     artboard: 'CircletoSin',
     stateMachine: SM,
-    stage: 'deep',
     bindViewModel: true,
     chapter: 3,
     title: 'Unrolling the sine',
@@ -519,7 +478,6 @@ export const lessons: Lesson[] = [
     id: 'cosine-wave',
     artboard: 'CircletoCos',
     stateMachine: SM,
-    stage: 'deep',
     bindViewModel: true,
     chapter: 3,
     title: 'Cosine, one quarter early',
@@ -548,7 +506,6 @@ export const lessons: Lesson[] = [
     id: 'tangent',
     artboard: 'CircletoTan',
     stateMachine: SM,
-    stage: 'deep',
     bindViewModel: true,
     chapter: 3,
     title: 'Tangent and its walls',
@@ -577,12 +534,11 @@ export const lessons: Lesson[] = [
     id: 'amplitude-frequency',
     artboard: 'AmpFrqSin',
     stateMachine: SM,
-    stage: 'navy',
     bindViewModel: true,
     chapter: 3,
     title: 'Amplitude and frequency',
     tagline: 'Two dials turn one wave into every wave.',
-    watch: 'A slider for amplitude, buttons for frequency.',
+    watch: 'The wave is already drawing. A slider sets A, three buttons set B.',
     body: [
       'y = A·sin(Bθ). A stretches the wave vertically; B squeezes it horizontally.',
       'Amplitude is how loud. Frequency is how high the note. For sound, that is not a metaphor.',
@@ -593,42 +549,34 @@ export const lessons: Lesson[] = [
     // which half of a two-part checkpoint is still outstanding.
     readouts: [],
     conditions: [
-      { label: 'A at max', test: (s) => amplitude(s) > 2.35 },
+      { label: 'A at max', test: ampAtMax },
       { label: 'B = 3', test: (s) => num(s, 'frqNum') >= 3 },
     ],
-    actions: [{ input: 'start', kind: 'bool', label: 'Animate', tone: 'primary' }],
     checkpoint: {
       goal: 'Amplitude at max, frequency at 3',
       hint: 'Amplitude is the slider; frequency is the row of buttons.',
-      test: (s) => amplitude(s) > 2.35 && num(s, 'frqNum') >= 3,
+      test: (s) => ampAtMax(s) && num(s, 'frqNum') >= 3,
     },
   },
   {
     id: 'the-swing',
     artboard: 'TheSwing',
     stateMachine: SM,
-    stage: 'navy',
     bindViewModel: true,
     chapter: 3,
     title: 'Where the wave shows up',
     tagline: 'A pendulum knows no trigonometry. It obeys it anyway.',
-    watch: 'Press Release it and follow the weight.',
+    watch: 'The weight is already swinging. Follow it.',
     body: [
-      'Release the weight and track its horizontal position over time.',
+      'The weight is let go, and its horizontal position is tracked over time.',
       'The trace is a sine wave. So is a plucked string, an alternating current, a tide, and the brightness of one pixel in a radio signal.',
       'You did not learn a rule about triangles. You learned the shape of anything that repeats.',
     ],
-    // Nothing to mirror: the lesson completes the moment Release it is pressed.
+    // The swing runs off its own timeline and puts nothing on the view model
+    // while it does, so there is no reading to test. The task is honestly just
+    // to watch, and the time the trace takes to draw is the checkpoint.
     readouts: [],
-    actions: [
-      {
-        input: 'start',
-        kind: 'trigger',
-        label: 'Release it',
-        tone: 'primary',
-        completes: true,
-      },
-    ],
+    autoSolveMs: 2600,
   },
 ]
 

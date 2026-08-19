@@ -1,15 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { AppBar } from '../components/AppBar'
-import { LessonBar } from '../components/LessonBar'
 import { LessonSheet } from '../components/LessonSheet'
 import { RiveStage } from '../components/RiveStage'
 import { TOTAL_LESSONS, lessons, nextStop, slotNumber } from '../data/curriculum'
 import { useProgress } from '../lib/progress'
 import { useInstruments } from '../lib/useInstruments'
-import { uiMode } from '../lib/uiMode'
 import type { Rive } from '@rive-app/react-canvas'
 import type { Step } from '../components/lessonPane'
-import type { Lesson as LessonModel, LessonAction } from '../data/curriculum'
+import type { Lesson as LessonModel } from '../data/curriculum'
 
 interface Props {
   lesson: LessonModel
@@ -25,24 +23,20 @@ const STUCK_MS = 20_000
 export function LessonScreen({ lesson, onBack, onGoto, onReview, onFinish }: Props) {
   const { progress, complete } = useProgress()
   const [rive, setRive] = useState<Rive | null>(null)
-  const [toggles, setToggles] = useState<Record<string, boolean>>({})
   const [step, setStep] = useState<Step>('watch')
   const [showHint, setShowHint] = useState(false)
   const [celebrate, setCelebrate] = useState(false)
-
-  // Read once per mount: swapping panes mid-lesson would drop the pane's own
-  // state, and the choice is a deploy-level one rather than a setting.
-  const [mode] = useState(uiMode)
 
   const index = lessons.indexOf(lesson)
   const alreadyDone = !!progress[lesson.id]
   const n = slotNumber(lesson.id)
   const after = useMemo(() => nextStop(lesson.id), [lesson.id])
 
-  const { values, aim, conditions, solved, markSolved } = useInstruments(
+  const { values, aim, conditions, solved } = useInstruments(
     rive,
     lesson,
     alreadyDone,
+    step === 'do',
   )
 
   useEffect(() => {
@@ -73,47 +67,14 @@ export function LessonScreen({ lesson, onBack, onGoto, onReview, onFinish }: Pro
     return () => window.clearTimeout(id)
   }, [solved])
 
-  const runAction = (action: LessonAction) => {
-    const input = rive
-      ?.stateMachineInputs(lesson.stateMachine)
-      ?.find((i) => i.name === action.input)
-    if (!input) return
-
-    if (action.kind === 'trigger') {
-      input.fire()
-    } else {
-      const next = !toggles[action.input]
-      input.value = next
-      setToggles((prev) => ({ ...prev, [action.input]: next }))
-    }
-    if (action.completes) markSolved()
-  }
-
   const goNext = () => {
     if (after?.kind === 'lesson') onGoto(after.id)
     else if (after?.kind === 'review') onReview(after.chapter)
     else onFinish()
   }
 
-  const paneProps = {
-    lesson,
-    step,
-    onStep: setStep,
-    solved,
-    values,
-    aim,
-    conditions,
-    showHint,
-    onHint: () => setShowHint(true),
-    toggles,
-    onAction: runAction,
-    ready: !!rive,
-    after,
-    onNext: goNext,
-  }
-
   return (
-    <div className={`screen lesson lesson--${lesson.stage} lesson--${mode}`}>
+    <div className="screen lesson">
       <AppBar
         onBack={onBack}
         subtitle={`Lesson ${n} of ${TOTAL_LESSONS}`}
@@ -122,38 +83,19 @@ export function LessonScreen({ lesson, onBack, onGoto, onReview, onFinish }: Pro
         progress={(index + (solved ? 1 : 0)) / lessons.length}
       />
 
-      {/* The artboard is a fixed square the width of the screen — every artboard
-          in the file is 1:1, so it lands edge to edge with nothing cropped and
-          nothing letterboxed. The field around it carries the artboard's own
-          background colour, so the two read as one surface rather than a
-          picture sitting on a page. */}
+      {/* The artboard takes the full width of the screen in its own aspect
+          ratio, so it lands edge to edge with nothing cropped and nothing
+          letterboxed. The field it sits in carries the same paper as the
+          artboards do, so the canvas and the page read as one surface rather
+          than a picture pasted onto a backdrop. */}
       <div className="lesson__field">
-        <div className="lesson__art">
-          <RiveStage
-            key={lesson.id}
-            artboard={lesson.artboard}
-            stateMachine={lesson.stateMachine}
-            stage={lesson.stage}
-            bindViewModel={lesson.bindViewModel}
-            onReady={setRive}
-          />
-        </div>
-
-        {lesson.controls && (
-          <div className="lesson__controls">
-            {lesson.controls.map((artboard) => (
-              <RiveStage
-                key={`${lesson.id}:${artboard}`}
-                artboard={artboard}
-                stateMachine={lesson.stateMachine}
-                stage={lesson.stage}
-                bindViewModel={false}
-                bindTo={rive}
-                className="stage--control"
-              />
-            ))}
-          </div>
-        )}
+        <RiveStage
+          key={lesson.id}
+          artboard={lesson.artboard}
+          stateMachine={lesson.stateMachine}
+          bindViewModel={lesson.bindViewModel}
+          onReady={setRive}
+        />
 
         {celebrate && (
           <div className="burst" aria-hidden="true">
@@ -164,7 +106,19 @@ export function LessonScreen({ lesson, onBack, onGoto, onReview, onFinish }: Pro
         )}
       </div>
 
-      {mode === 'sheet' ? <LessonSheet {...paneProps} /> : <LessonBar {...paneProps} />}
+      <LessonSheet
+        lesson={lesson}
+        step={step}
+        onStep={setStep}
+        solved={solved}
+        values={values}
+        aim={aim}
+        conditions={conditions}
+        showHint={showHint}
+        onHint={() => setShowHint(true)}
+        after={after}
+        onNext={goNext}
+      />
     </div>
   )
 }

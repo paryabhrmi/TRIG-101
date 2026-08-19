@@ -1,29 +1,25 @@
 import { Alignment, Fit, Layout, useRive } from '@rive-app/react-canvas'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import type { Rive } from '@rive-app/react-canvas'
-import type { StageTone } from '../data/curriculum'
 
 export const RIVE_SRC = `${import.meta.env.BASE_URL}trig101.riv`
 
 interface Props {
   artboard: string
   stateMachine: string
-  stage: StageTone
   bindViewModel: boolean
   /** Handed the Rive instance once the artboard is live. */
   onReady?: (rive: Rive) => void
-  /**
-   * Draw this artboard against another one's view-model instance instead of
-   * its own. Used for control artboards that were authored separately from the
-   * lesson they drive — sharing the instance is what reconnects them.
-   */
-  bindTo?: Rive | null
   className?: string
-  fit?: Fit
 }
 
 /**
- * A single Rive artboard, sized to its container.
+ * A single Rive artboard, drawn the full width of whatever it sits in.
+ *
+ * The box takes the artboard's own aspect ratio, read off the file on load
+ * rather than hard-coded here, so the artwork lands edge to edge with nothing
+ * cropped and nothing letterboxed — `Ratio` is 500×570 where the rest are
+ * square, and a fixed square box would have pillarboxed it.
  *
  * The artboards ship with their own sliders and toggles, so this canvas is the
  * app's primary input surface — hence `touch-action: none`, which stops a drag
@@ -32,12 +28,9 @@ interface Props {
 export function RiveStage({
   artboard,
   stateMachine,
-  stage,
   bindViewModel,
   onReady,
   className,
-  bindTo,
-  fit = Fit.Contain,
 }: Props) {
   const { rive, RiveComponent } = useRive(
     {
@@ -48,35 +41,50 @@ export function RiveStage({
       // Binding an artboard that has no view model logs a runtime error, so
       // only opt in where the file actually defines one.
       autoBind: bindViewModel,
-      layout: new Layout({ fit, alignment: Alignment.Center }),
+      /**
+       * `Fit.Contain` against a box already cut to the artboard's ratio is an
+       * exact width fit: no scale-down, no bars, no crop.
+       *
+       * `Fit.None` was measured as the alternative and does not survive
+       * contact with this file. It pins the artboard to one artboard-unit per
+       * *device* pixel while the runtime maps touches in CSS pixels, so on a
+       * 390px screen a drag across the SecretRatios slider moved the angle
+       * 23.9° where the pointer asked for 30.7° — the knob walks out from
+       * under the thumb. It also caps the drawing surface at the artboard's
+       * own 500px, which is a third of the pixels a modern phone wants. Since
+       * every lesson here is a thumb-drag, that trade is not available.
+       */
+      layout: new Layout({ fit: Fit.Contain, alignment: Alignment.Center }),
     },
     { shouldResizeCanvasToContainer: true, useDevicePixelRatio: true },
   )
 
+  // Read off the file rather than tabulated here, so re-exporting an artboard
+  // at a new size needs no code change.
+  const [ratio, setRatio] = useState<number | null>(null)
+
   useEffect(() => {
-    if (rive && onReady) onReady(rive)
+    if (!rive) return
+    const bounds = rive.bounds
+    if (bounds) {
+      const w = bounds.maxX - bounds.minX
+      const h = bounds.maxY - bounds.minY
+      if (w > 0 && h > 0) setRatio(w / h)
+    }
+    onReady?.(rive)
     // `onReady` is expected to be stable; re-running on every parent render
     // would restart the consumer's polling loop.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rive])
 
-  // A control artboard carries no data of its own; binding it to the artboard
-  // it drives is what makes dragging it move anything.
-  useEffect(() => {
-    if (!rive || !bindTo) return
-    const instance = (bindTo as unknown as { viewModelInstance?: unknown }).viewModelInstance
-    if (!instance) return
-    try {
-      ;(rive as unknown as { bindViewModelInstance: (i: unknown) => void }).bindViewModelInstance(
-        instance,
-      )
-    } catch {
-      // An artboard with nothing bindable simply stays inert.
-    }
-  }, [rive, bindTo])
-
   return (
-    <div className={`stage stage--${stage} ${className ?? ''}`.trim()}>
+    <div
+      className={`stage ${className ?? ''}`.trim()}
+      // Square until the file says otherwise: every artboard but `Ratio` is
+      // 1:1, so the box is the right shape before the first frame is drawn and
+      // the layout never jumps as the artboard arrives.
+      style={{ aspectRatio: ratio ?? 1 }}
+    >
       <RiveComponent className="stage__canvas" />
       {!rive && <div className="stage__pending" aria-hidden="true" />}
     </div>

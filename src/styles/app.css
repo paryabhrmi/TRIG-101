@@ -226,11 +226,16 @@
    Rive stage — full bleed, never a floating card
    =========================================================================== */
 
+/* The box is cut to the artboard's own aspect ratio — set inline from the
+   file on load — so `Fit.Contain` inside it is an exact width fit: no
+   scale-down, no bars, no crop. */
 .stage {
   position: relative;
-  flex: 1;
+  flex: 0 1 auto;
+  width: 100%;
   min-height: 0;
   overflow: hidden;
+  background: transparent;
   /* The canvas is the app's input surface: a drag on an in-canvas slider
      must not scroll the page out from under the finger. */
   touch-action: none;
@@ -238,26 +243,11 @@
   user-select: none;
 }
 
-/* Every stage is paper now — the two dark artboard themes are inverted into
-   the light one, so the whole product is a single white surface. */
-.stage--navy,
-.stage--deep,
-.stage--paper {
-  background: var(--paper);
-}
-
 .stage__canvas {
   width: 100%;
   height: 100%;
   display: block;
   touch-action: none;
-}
-
-/* Applied to the canvas, not the wrapper, so the white behind it stays white
-   while the artboard is being loaded and there is never a navy flash. */
-.stage--navy .stage__canvas,
-.stage--deep .stage__canvas {
-  filter: var(--invert-artboard);
 }
 
 .stage__pending {
@@ -559,164 +549,55 @@
 }
 
 /* ===========================================================================
-   Lesson — full-bleed stage with the sheet rising over it
+   Lesson — the artboard at full width, the sheet under it
+
+   The screen is two bands. The artboard takes the top one at the full width
+   of the phone in its own aspect ratio, so it lands edge to edge with nothing
+   cropped and nothing letterboxed. The sheet takes everything below it, right
+   down to the bottom of the screen — so the leftover space under a short
+   artboard belongs to the sheet rather than showing as a band of empty paper.
+
+   That also fixes the sheet's height for the whole lesson. It never grows or
+   shrinks between steps, which matters because the artboards' sliders are
+   dragged by thumb, and a canvas that resizes mid-drag moves the knob out
+   from under the finger. A step with more to say scrolls inside the sheet.
    =========================================================================== */
 
-/* The stage takes whatever the sheet does not. That is the point of the
-   stepped flow: a short step leaves more room, so the artwork grows instead
-   of the empty space. Fit.Contain never crops, so a smaller box only ever means
-   smaller artwork — never a hidden slider. The padding is the strip the sheet
-   overlaps, kept outside the canvas box. */
-/* Every artboard in the file is 1:1 (only `Ratio` differs, at 500×538), so a
-   square box the width of the screen holds any of them complete, edge to edge,
-   with no crop and no letterbox. The size is fixed by the viewport width, which
-   means it does not move between steps or lessons.
-
-   The field is the space that square sits in. It carries the artboard's own
-   background colour — white for the light artboards, #f6f9ff for the dark ones
-   once the invert filter has run over them — so the canvas and the page around
-   it are one continuous surface instead of a tile on a backdrop. */
 .lesson {
-  --field: var(--paper);
-  background: var(--field);
-}
-
-.lesson--navy,
-.lesson--deep {
-  /* #0d1062 through --invert-artboard lands here; measured, not guessed. */
-  --field: #f6f9ff;
+  background: var(--paper);
 }
 
 .lesson__field {
   position: relative;
   z-index: 1;
-  flex: 1 1 auto;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  background: var(--field);
-}
-
-.lesson__art {
-  flex: 1 1 auto;
-  min-height: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  /* Lets the square below measure itself against this box's height as well as
-     its width, so it is never taller than the room it has. */
-  container-type: size;
-}
-
-.lesson .stage {
-  flex: 0 0 auto;
-  width: 100%;
-  aspect-ratio: 1 / 1;
-  background: transparent;
-}
-
-/* Square by the smaller of the two dimensions: full-width on any phone tall
-   enough for it, and merely inset rather than cropped when it is not. */
-@supports (container-type: size) {
-  .lesson__art .stage {
-    width: min(100%, 100cqh);
-  }
-}
-
-/* `Ratio`'s two sliders are their own artboards; they sit directly under the
-   triangle and are bound to it, so the three read as one control surface. */
-.lesson__controls {
-  flex: 0 0 auto;
-}
-
-.lesson .stage--control {
-  width: 100%;
-  aspect-ratio: 550 / 60;
-}
-
-/* The sheet rides up over the artwork, so that strip is kept clear of the
-   canvas box. The bar does not overlap anything. */
-.lesson--sheet .lesson__field {
-  padding-bottom: var(--sheet-overlap);
-}
-
-/* The sheet overlaps that padding strip so the two read as one composition
-   rather than two stacked boxes. It starts as a slim peek — the instruction
-   and its button — and opens on demand for readouts and explanation, so the
-   artwork keeps the screen by default. It is sized by its step's content,
-   capped so the longest step still leaves the artwork usable. */
-.sheet {
-  position: relative;
-  z-index: 2;
+  /* Never grows: the sheet takes the slack. Shrinks only where the phone is
+     too short to give the artboard its full width, and then the artboard
+     insets rather than crops. */
   flex: 0 1 auto;
   min-height: 0;
-  max-height: min(56dvh, 470px);
   display: flex;
   flex-direction: column;
-  margin-top: calc(-1 * var(--sheet-overlap));
+  justify-content: center;
   background: var(--paper);
-  border-radius: var(--r-xl) var(--r-xl) 0 0;
-  box-shadow: var(--lift-3);
-  /* Without this, scrolled content shows through the rounded top corners. */
-  overflow: hidden;
 }
 
-.sheet__scroll {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior: contain;
-  padding: 12px var(--gut) calc(20px + var(--safe-b));
-}
-
-/* The universal bottom-sheet affordance: a grabber that toggles the sheet. */
-.sheet__grab {
-  flex: 0 0 auto;
-  display: grid;
-  place-items: center;
-  width: 100%;
-  padding: 8px 0 2px;
-}
-
-.sheet__handle {
-  width: 44px;
-  height: 5px;
-  border-radius: var(--r-pill);
-  background: var(--line-strong);
-  transition: background 0.2s var(--ease);
-}
-
-.sheet__grab:active .sheet__handle {
-  background: var(--ink-3);
-}
-
-/* Detail content slides in as the sheet opens instead of just appearing. */
-.sheet__detail {
-  animation: detail-in 0.3s var(--ease);
-}
-
-@keyframes detail-in {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
+/* On any phone tall enough, the artboard is exactly as wide as the screen.
+   The cap is what stops a tall artboard on a short phone from squeezing the
+   sheet down to a strip. */
+.lesson .stage {
+  max-height: min(58dvh, 100%);
+  margin-inline: auto;
 }
 
 /* ---------------------------------------------------------------------------
-   Solve burst — a dozen accent-coloured flecks thrown from where the sheet
-   meets the artwork, once, the moment a checkpoint is first cracked.
+   Solve burst — a dozen accent-coloured flecks thrown from the seam where the
+   sheet meets the artwork, once, the moment a checkpoint is first cracked.
    --------------------------------------------------------------------------- */
 
 .burst {
   position: absolute;
   left: 50%;
-  bottom: calc(var(--sheet-overlap) + 10px);
+  bottom: 10px;
   z-index: 2;
   pointer-events: none;
 }
@@ -821,205 +702,6 @@
   animation-delay: 0.11s;
 }
 
-/* ---------------------------------------------------------------------------
-   Stepped lesson: find it → try it → why it works. One step at a time keeps
-   the sheet short, which is what gives the canvas its height back.
-   --------------------------------------------------------------------------- */
-
-/* One pill per step: the current one carries its name, the rest collapse to
-   dots. The whole row stays one quiet line, but the roadmap is always named. */
-.steps {
-  flex: 0 0 auto;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  padding: 4px calc(var(--gut) - 8px) 0;
-}
-
-.steps__seg {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  min-height: 36px;
-  padding: 0 8px;
-  border-radius: var(--r-pill);
-  transition: background 0.25s var(--ease);
-}
-
-.steps__seg.is-current {
-  background: var(--surface);
-  padding-inline-end: 12px;
-}
-
-.steps__dot {
-  width: 8px;
-  height: 8px;
-  border-radius: var(--r-pill);
-  background: var(--line-strong);
-  transition: background 0.25s var(--ease);
-}
-
-.steps__seg.is-done .steps__dot {
-  background: var(--mint);
-}
-
-.steps__seg.is-current .steps__dot {
-  background: var(--blue);
-}
-
-.steps__name {
-  font-size: 11px;
-  font-weight: 900;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--ink-2);
-  white-space: nowrap;
-}
-
-/* The details toggle: one chevron, flipping over as the sheet opens. */
-.steps__more {
-  margin-inline-start: auto;
-  display: grid;
-  place-items: center;
-  width: 40px;
-  height: 36px;
-  color: var(--ink-3);
-}
-
-.steps__more svg {
-  transition: transform 0.25s var(--ease);
-}
-
-.steps__more[aria-expanded='true'] svg {
-  transform: rotate(180deg);
-}
-
-.step__lead {
-  font-size: 17px;
-  font-weight: 800;
-  line-height: 1.45;
-  color: var(--ink);
-  text-wrap: balance;
-}
-
-.step__hint {
-  flex: 1;
-  font-size: 13px;
-  font-weight: 600;
-  line-height: 1.5;
-  color: var(--ink-2);
-  /* Hints can appear unasked (stuck detection), so they ease in. */
-  animation: detail-in 0.3s var(--ease);
-}
-
-.step__win {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 12px;
-  font-size: 14px;
-  font-weight: 800;
-  color: var(--mint);
-}
-
-.step__win span {
-  display: grid;
-  place-items: center;
-  width: 20px;
-  height: 20px;
-  border-radius: var(--r-pill);
-  background: var(--mint);
-  color: #ffffff;
-  font-size: 11px;
-  animation: pop 0.4s var(--ease);
-}
-
-.hintrow {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding-top: 12px;
-}
-
-.linkish--quiet {
-  margin-inline-start: auto;
-  color: var(--ink-3);
-}
-
-.actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  padding-top: 16px;
-}
-
-/* ---------------------------------------------------------------------------
-   Readout tiles — quiet mirrors of the canvas. The artwork above is already
-   saturated, so the tiles stay neutral and carry their accent only in the
-   label, which is what ties a tile to its coloured side on the canvas.
-   --------------------------------------------------------------------------- */
-
-/* Always two columns: with the odd-tile rule below, every count closes
-   cleanly — 2, 2+full, 2+2, 2+2+full — on any screen width. */
-.instruments {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 8px;
-  padding-top: 16px;
-}
-
-.chip {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding: 10px 12px;
-  border-radius: var(--r-sm);
-  background: var(--paper-2);
-  border: 1px solid var(--line);
-}
-
-/* An odd tile at the end would leave a hole in the grid; let it take the
-   whole row instead so every layout closes cleanly. */
-.chip:last-child:nth-child(odd) {
-  grid-column: 1 / -1;
-}
-
-.chip__label {
-  font-size: 10.5px;
-  font-weight: 900;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-
-.chip__value {
-  font-size: 18px;
-  font-weight: 800;
-  font-variant-numeric: tabular-nums;
-  line-height: 1.1;
-  color: var(--ink);
-}
-
-/* Accents darkened where the raw artwork colour is too pale for small text. */
-.chip--blue .chip__label {
-  color: var(--blue);
-}
-.chip--cyan .chip__label {
-  color: #0e8fd6;
-}
-.chip--amber .chip__label {
-  color: #b57708;
-}
-.chip--violet .chip__label {
-  color: var(--violet);
-}
-.chip--mint .chip__label {
-  color: #189a63;
-}
-.chip--rose .chip__label {
-  color: #e13a57;
-}
-
 @keyframes pop {
   0% {
     transform: scale(0.4);
@@ -1056,46 +738,68 @@
 }
 
 /* ===========================================================================
-   Lesson bar — the app's share of the screen, and all of it
+   Bottom sheet — the app's share of the screen, and all of it
 
    The artboard above is the input surface and carries its own instrument
-   panel, so this dock holds only what the file cannot know: the task, how far
+   panel, so this sheet holds only what the file cannot know: the task, how far
    off it the learner still is, and what happens next.
 
-   The height is fixed. Every row is reserved whether or not this lesson fills
-   it, so moving between steps never resizes the canvas — the artboards'
-   sliders are dragged by thumb, and a canvas that rescales mid-drag takes the
-   knob out from under the finger.
-
-     12  padding
-     14  step name
-      4  gap
-     40  task, two lines reserved
-      8  gap
-     28  instrument slot — aim bar, ratio cells, conditions, or empty
-      8  gap
-     54  action row (a 50px button and its 4px edge)
-     12  padding
-    ---
-    180  plus the bottom safe area
+   It meets the bottom edge of the artboard and runs to the bottom of the
+   screen. Rounded top corners and a grabber line say "sheet" the way every
+   phone does; the action row is pinned under a scrolling body, so a step with
+   more to say scrolls inside the sheet instead of pushing its button off the
+   screen or resizing the canvas above it.
    =========================================================================== */
 
-.lbar {
+.sheet {
   position: relative;
   z-index: 2;
-  flex: 0 0 auto;
-  height: 180px;
-  padding: 12px var(--gut) calc(12px + var(--safe-b));
+  /**
+   * Takes every pixel the artboard leaves, down to the bottom of the screen.
+   *
+   * The zero basis is what keeps the artboard still. Sized from its content
+   * instead, the sheet would claim a different share of a short screen on
+   * every step — and the artboard, which gives up the difference, would
+   * resize under a thumb that is mid-drag on one of its sliders. From zero,
+   * the artboard states its height first and the sheet takes the remainder,
+   * whatever the step happens to say.
+   */
+  flex: 1 1 0;
+  min-height: 200px;
   display: flex;
   flex-direction: column;
-  background: var(--paper);
+  padding: 0 var(--gut) calc(12px + var(--safe-b));
+  background: var(--paper-2);
   border-top: 1px solid var(--line);
-  box-shadow: 0 -10px 28px -20px rgba(20, 26, 70, 0.5);
+  border-radius: var(--r-xl) var(--r-xl) 0 0;
+  box-shadow: var(--lift-3);
 }
 
-.lbar__step {
+/* The grabber. The sheet does not drag — its height is fixed on purpose — but
+   the line is what makes the panel read as a sheet rather than as a footer,
+   and it marks where the canvas stops and the app starts. */
+.sheet__grip {
   flex: 0 0 auto;
-  height: 14px;
+  width: 44px;
+  height: 5px;
+  margin: 10px auto 8px;
+  border-radius: var(--r-pill);
+  background: var(--line-strong);
+}
+
+/* Everything above the action row scrolls, so a long explanation is reachable
+   without the sheet growing into the canvas. */
+.sheet__scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  /* Clear of the rounded corners, and clear of the action row's shadow. */
+  padding-bottom: 4px;
+}
+
+.sheet__step {
   font-size: 11px;
   font-weight: 800;
   letter-spacing: 0.09em;
@@ -1104,49 +808,114 @@
   color: var(--ink-3);
 }
 
-/* Two lines are reserved whatever the copy runs to, which is the whole reason
-   the bar keeps one height across the first two steps. */
-.lbar__task {
-  flex: 0 0 auto;
+.sheet__task {
   margin-top: 4px;
-  height: 40px;
   font-size: 16px;
   font-weight: 800;
   line-height: 20px;
   color: var(--ink);
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+  text-wrap: balance;
 }
 
-.lbar.is-hit .lbar__task {
+.sheet.is-hit .sheet__task {
   color: var(--duo-green-dark);
 }
 
-.lbar__slot {
-  flex: 0 0 auto;
+/* The task says what to do; this says why it is worth doing — on the task
+   step it drops back to naming what to touch, which is the thing a learner
+   who has started dragging still needs. */
+.sheet__lede {
   margin-top: 8px;
-  height: 28px;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.6;
+  color: var(--ink-2);
+  text-wrap: pretty;
+}
+
+/* One line for whatever this lesson measures. Reserved whether or not it is
+   filled, so revealing a hint never shifts the copy above it. */
+.sheet__slot {
+  margin-top: 10px;
+  min-height: 28px;
   display: flex;
   align-items: center;
 }
 
-.lbar__act {
+.sheet__win {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--mint);
+}
+
+.sheet__win span {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: var(--r-pill);
+  background: var(--mint);
+  color: #ffffff;
+  font-size: 11px;
+  animation: pop 0.4s var(--ease);
+}
+
+.sheet__title {
+  margin-top: 10px;
+  font-size: 20px;
+  font-weight: 900;
+  line-height: 1.2;
+  color: var(--ink);
+  text-wrap: balance;
+}
+
+.sheet__prose {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sheet__prose p {
+  font-size: 14.5px;
+  font-weight: 500;
+  line-height: 1.7;
+  color: var(--ink-2);
+}
+
+/* Pinned under the scroll: the way forward is always on screen. */
+.sheet__act {
+  position: relative;
   flex: 0 0 auto;
-  margin-top: 8px;
-  height: 54px;
+  margin-top: 10px;
+  padding-top: 10px;
   display: flex;
   align-items: flex-start;
   gap: 8px;
 }
 
-.lbar__act .btn {
+/* Copy running under the action row would otherwise end on a hard edge and
+   read as clipped rather than as scrollable. Over an unscrolled sheet the
+   gradient is paper on paper and shows nothing. */
+.sheet__act::before {
+  content: '';
+  position: absolute;
+  inset-inline: 0;
+  bottom: 100%;
+  height: 22px;
+  background: linear-gradient(to top, var(--paper-2), transparent);
+  pointer-events: none;
+}
+
+.sheet__act .btn {
   min-height: 50px;
 }
 
 /* The hint is a target you can actually hit, not an 11px text link. */
-.lbar__hint {
+.sheet__hint {
   --edge: var(--duo-line);
   flex: 0 0 auto;
   width: 50px;
@@ -1161,13 +930,13 @@
   transition: transform 0.12s var(--ease), box-shadow 0.12s var(--ease);
 }
 
-.lbar__hint:active {
+.sheet__hint:active {
   transform: translateY(3px);
   box-shadow: 0 1px 0 var(--edge);
 }
 
 /* A hint takes the slot rather than adding a row, then hands it back. */
-.lbar__hintline {
+.sheet__hintline {
   flex: 1;
   min-width: 0;
   padding: 0 10px;
@@ -1236,12 +1005,12 @@
   color: var(--ink-3);
 }
 
-.lbar.is-hit .aim__fill {
+.sheet.is-hit .aim__fill {
   background: var(--duo-green);
 }
 
-.lbar.is-hit .aim__goal,
-.lbar.is-hit .aim__state {
+.sheet.is-hit .aim__goal,
+.sheet.is-hit .aim__state {
   color: var(--duo-green-dark);
 }
 
@@ -1327,78 +1096,6 @@
 .conds__c.is-on .conds__b {
   background: var(--duo-green);
   border-color: var(--duo-green);
-}
-
-/* ---------------------------------------------------------------------------
-   The third state: the same dock, opened once, after the lesson is solved.
-   Progress opens it — there is nothing here for the learner to drag.
-   --------------------------------------------------------------------------- */
-
-.lbar--panel {
-  height: auto;
-  max-height: 58dvh;
-  padding-top: 16px;
-  animation: panel-in 0.32s var(--ease);
-}
-
-@keyframes panel-in {
-  from {
-    transform: translateY(24px);
-  }
-  to {
-    transform: none;
-  }
-}
-
-.lbar__win {
-  flex: 0 0 auto;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 13px;
-  font-weight: 800;
-  color: var(--mint);
-}
-
-.lbar__win span {
-  display: grid;
-  place-items: center;
-  width: 20px;
-  height: 20px;
-  border-radius: var(--r-pill);
-  background: var(--mint);
-  color: #ffffff;
-  font-size: 11px;
-  animation: pop 0.4s var(--ease);
-}
-
-.lbar__title {
-  flex: 0 0 auto;
-  margin-top: 10px;
-  font-size: 20px;
-  font-weight: 900;
-  line-height: 1.2;
-  color: var(--ink);
-  text-wrap: balance;
-}
-
-.lbar__prose {
-  flex: 1 1 auto;
-  min-height: 0;
-  margin-top: 10px;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior: contain;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.lbar__prose p {
-  font-size: 14.5px;
-  font-weight: 500;
-  line-height: 1.7;
-  color: var(--ink-2);
 }
 
 /* ===========================================================================
@@ -1850,7 +1547,7 @@
 }
 
 /* A short, wide viewport stacked vertically leaves the artwork a tiny stamp
-   in a sea of white. Put the bottom pane beside it instead. */
+   in a sea of white. Put the sheet beside it instead. */
 @media (orientation: landscape) and (max-height: 560px) {
   .lesson {
     display: grid;
@@ -1864,79 +1561,54 @@
 
   .lesson__field {
     grid-column: 1;
-    width: auto;
-    height: auto;
-    max-height: none;
-    padding: 0;
     min-height: 0;
   }
 
-  /* Beside the bar there is no fixed width to square off against, so the
-     artboard takes the column and Contain keeps it whole. */
-  .lesson__art .stage {
-    width: 100%;
+  /* Beside the sheet there is no screen width to fill, so the artboard takes
+     the column and its ratio keeps it whole inside it. */
+  .lesson .stage {
+    max-height: 100%;
+    max-width: 100%;
+    width: auto;
     height: 100%;
-    aspect-ratio: auto;
   }
 
-  .lesson .stage--control {
-    flex: 0 0 auto;
-    aspect-ratio: 550 / 60;
-  }
-
+  /* Down the side there is no canvas below it to protect, so the sheet takes
+     the column and its corners round on the one edge that shows. */
   .lesson .sheet {
     grid-column: 2;
-    margin-top: 0;
+    min-height: 0;
+    border-top: 0;
+    border-inline-start: 1px solid var(--line);
     border-radius: var(--r-xl) 0 0 0;
     box-shadow: -14px 0 34px -22px rgba(20, 26, 70, 0.35);
   }
 
-  /* Beside the canvas the fixed height is wrong — there is no canvas below it
-     to protect, and the column is taller than the bar ever needs to be. */
-  .lesson .lbar,
-  .lesson .lbar--panel {
-    grid-column: 2;
-    height: auto;
-    max-height: none;
-    border-top: 0;
-    border-inline-start: 1px solid var(--line);
-    box-shadow: -14px 0 34px -22px rgba(20, 26, 70, 0.35);
+  /* The grabber reads as a sheet edge only along the top; beside the canvas
+     it is just a stray mark. */
+  .sheet__grip {
+    display: none;
   }
 
-  .lesson .lbar__prose {
-    flex: 1 1 auto;
-  }
-
-  /* The action row is pinned to the bottom of the column instead of sitting
-     directly under the slot. */
-  .lesson .lbar__act {
-    margin-top: auto;
+  .sheet__scroll {
+    padding-top: 14px;
   }
 }
 
-/* Very short portrait phones. Both lines of task copy are kept — dropping to
-   one clips most of the step-one copy — and the height comes back out of the
-   type scale and the action row instead. The button stays above 44px.
-
-     12 + 14 + 4 + 36 + 8 + 28 + 8 + 50 + 12 = 172
-   */
+/* Very short portrait phones: the height comes back out of the type scale
+   rather than out of the artboard. The button stays above 44px. */
 @media (orientation: portrait) and (max-height: 640px) {
-  .lbar {
-    height: 172px;
+  .sheet {
+    min-height: 168px;
   }
 
-  .lbar__task {
-    height: 36px;
+  .sheet__task {
     font-size: 15px;
     line-height: 18px;
   }
 
-  .lbar__act {
-    height: 50px;
-  }
-
-  .lbar__act .btn,
-  .lbar__hint {
+  .sheet__act .btn,
+  .sheet__hint {
     min-height: 46px;
   }
 }
