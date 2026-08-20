@@ -1,23 +1,15 @@
 import { Alignment, Fit, Layout, useRive } from '@rive-app/react-canvas'
 import { useEffect } from 'react'
 import type { Rive } from '@rive-app/react-canvas'
-import type { StageTone } from '../data/curriculum'
 
 export const RIVE_SRC = `${import.meta.env.BASE_URL}trig101.riv`
 
 interface Props {
   artboard: string
   stateMachine: string
-  stage: StageTone
   bindViewModel: boolean
   /** Handed the Rive instance once the artboard is live. */
   onReady?: (rive: Rive) => void
-  /**
-   * Draw this artboard against another one's view-model instance instead of
-   * its own. Used for control artboards that were authored separately from the
-   * lesson they drive — sharing the instance is what reconnects them.
-   */
-  bindTo?: Rive | null
   className?: string
   fit?: Fit
 }
@@ -32,11 +24,9 @@ interface Props {
 export function RiveStage({
   artboard,
   stateMachine,
-  stage,
   bindViewModel,
   onReady,
   className,
-  bindTo,
   fit = Fit.Contain,
 }: Props) {
   const { rive, RiveComponent } = useRive(
@@ -60,23 +50,8 @@ export function RiveStage({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rive])
 
-  // A control artboard carries no data of its own; binding it to the artboard
-  // it drives is what makes dragging it move anything.
-  useEffect(() => {
-    if (!rive || !bindTo) return
-    const instance = (bindTo as unknown as { viewModelInstance?: unknown }).viewModelInstance
-    if (!instance) return
-    try {
-      ;(rive as unknown as { bindViewModelInstance: (i: unknown) => void }).bindViewModelInstance(
-        instance,
-      )
-    } catch {
-      // An artboard with nothing bindable simply stays inert.
-    }
-  }, [rive, bindTo])
-
   return (
-    <div className={`stage stage--${stage} ${className ?? ''}`.trim()}>
+    <div className={`stage ${className ?? ''}`.trim()}>
       <RiveComponent className="stage__canvas" />
       {!rive && <div className="stage__pending" aria-hidden="true" />}
     </div>

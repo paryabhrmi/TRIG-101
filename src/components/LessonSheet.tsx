@@ -19,9 +19,6 @@ export function LessonSheet({
   values,
   showHint,
   onHint,
-  toggles,
-  onAction,
-  ready,
   after,
   onNext,
 }: LessonPaneProps) {
@@ -106,24 +103,6 @@ export function LessonSheet({
             <p className="step__lead">
               {lesson.checkpoint ? lesson.checkpoint.goal : lesson.tagline}
             </p>
-
-            {lesson.actions && lesson.actions.length > 0 && (
-              <div className="actions">
-                {lesson.actions.map((action) => (
-                  <button
-                    key={action.input}
-                    type="button"
-                    className={`btn ${
-                      action.tone === 'ghost' ? 'btn--ghost' : 'btn--primary'
-                    } ${toggles[action.input] ? 'is-on' : ''}`.trim()}
-                    onClick={() => onAction(action)}
-                    disabled={!ready}
-                  >
-                    {action.label}
-                  </button>
-                ))}
-              </div>
-            )}
 
             {open && (
               <div className="sheet__detail">

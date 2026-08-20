@@ -17,9 +17,10 @@ deploy — see [Deploying](#deploying))
 
 ## The idea
 
-The course is built around one Rive file (`public/trig101.riv`, 44 artboards)
-authored by Lucid Paper Studios. Those artboards ship with their own sliders,
-toggles and buttons and are fully interactive on their own.
+The course is built around one Rive file (`public/trig101.riv`, 45 artboards)
+authored by Ayne Studio. Those artboards ship with their own sliders, toggles
+and buttons and are fully interactive on their own — and three of them run
+their animation the moment they load, with no input at all.
 
 So the app does not re-implement the controls. Instead:
 
@@ -60,17 +61,16 @@ The third step ("why it works") opens the same bar into a panel, once, when the
 lesson is solved. There is nothing to drag and no handle to find.
 
 **What goes in the instrument slot is decided by what the artboards already
-draw.** Rendering all ten showed that nine print their own numbers: `UnitCircle`
-writes `Hyp / Opp / Adj` under the circle, `SecretRatios` carries a full SOH CAH
-TOA table, the three wave artboards print θ in degrees and in radians beside the
-plotted value, and `AmpFrqSin`'s slider carries its own 0.5–2.5 scale. Twenty-six
-of the course's thirty-two readout tiles were copies of something already on the
-canvas. So the rule is:
+draw.** Rendering all ten shows that every one prints its own numbers:
+`UnitCircle` writes `Hyp / Opp / Adj` under the circle, `Ratio` carries the three
+ratio cards under the triangle, `SecretRatios` a full SOH CAH TOA table, the
+three wave artboards print θ in degrees and in radians beside the plotted value,
+and `AmpFrqSin`'s slider carries its own 0.5–2.5 scale. So the rule is:
 
 > The artboard says where you are. The bar says where you are going.
 
-What survives is four tiles the file does not draw — the three ratios in lesson 2
-and the radian in terms of π in lesson 4 — plus:
+What survives is one tile the file does not draw — the radian in terms of π in
+lesson 4 — plus:
 
 - an **aim bar** (`Checkpoint.target`), which shows the distance left to the
   checkpoint and never the reading itself;
@@ -91,72 +91,72 @@ anywhere in the UI. See `src/lib/uiMode.ts`.
 | # | Lesson | Artboard | Checkpoint |
 |---|--------|----------|------------|
 | 1 | Naming the sides | `Angle` | Flip the focus to angle B |
-| 2 | Shape, not size | `Ratio` | Hold 60°, push Scale past 160 |
+| 2 | Shape, not size | `Ratio` | Hold 60°, drag Scale to the right |
 | 3 | SOH CAH TOA | `SecretRatios` | Bring sin θ to 0.50 |
 | 4 | Radians | `RadDeg` | Set the angle to one radian |
-| 5 | The unit circle | `UnitCircle` | Spin until cos θ goes negative |
+| 5 | The unit circle | `UnitCircle` | Watch until cos θ goes negative |
 | 6 | Unrolling the sine | `CircletoSin` | Sweep past 2π |
 | 7 | Cosine, one quarter early | `CircletoCos` | Sweep until cos θ bottoms out |
 | 8 | Tangent and its walls | `CircletoTan` | Sweep through the 90° asymptote |
 | 9 | Amplitude and frequency | `AmpFrqSin` | Max amplitude, frequency 3 |
-| 10 | Where the wave shows up | `TheSwing` | Release the pendulum |
+| 10 | Where the wave shows up | `TheSwing` | Watch one full swing draw itself |
 
 Slots 11–15 (`upcoming` in `src/data/curriculum.ts`) are placeholders: they
 appear in the index with a SOON badge and open a screen naming what they will
 cover. Titles are provisional — rename them freely, and move an entry from
 `upcoming` into `lessons` once its artboard exists.
 
-Copy is bilingual (English / Persian) with full RTL support; the switch is in
-the app bar. Progress persists in `localStorage` and tracks the ten playable
-lessons; numbering runs against all fifteen.
+Progress persists in `localStorage` and tracks the ten playable lessons;
+numbering runs against all fifteen.
 
 ## Design
 
 The app chrome deliberately borrows the file's own visual language so the
 canvas does not look pasted into someone else's UI:
 
-- the navy `#0D1062` and the blueprint grid come from the `Cover` artboard;
-- panels are drawn like the `Ratio` panel — dark navy inside a thin steel-blue
-  rule, with a teal-to-navy header wash;
-- buttons reproduce the glossy silver-edged pills from the `Frequency (B)` row;
-- readout labels take accent colours the way the ratio panel colours its terms;
-- **M PLUS Rounded 1c** stands in for the file's DIN Round Pro.
+- the paper white and the blueprint grid come from the `Cover` artboard;
+- buttons reproduce the chunky silver-edged pills from the `Frequency (B)` row;
+- readout labels take accent colours the way the ratio cards colour their terms;
+- **Nunito**, backed by **M PLUS Rounded 1c**, stands in for the file's rounded
+  display face.
 
-Light-themed artboards (`Angle`, `SecretRatios`) sit on a white card; the dark
-ones blend straight into the page.
+Every artboard in the file is drawn on white, so there is a single surface from
+the app bar to the bottom of the canvas: no cards, no inverted artwork, no
+theme to switch per lesson.
 
 ## Rive integration notes
 
 These were calibrated against the runtime and are worth knowing before editing
 `src/data/curriculum.ts`.
 
-**View models.** Three of the file's four view models are used:
-`TriangleViewModel` (Ratio, SecretRatios, TheSwing), `ViewModel1` (UnitCircle,
-AmpFrqSin), `ViewModel2` (CircletoSin/Cos/Tan) and `RadDegVM` (RadDeg). The
-`Angle` artboard has **no** view model — binding one logs a runtime error, so
-lessons declare `bindViewModel` explicitly.
+**View models.** The file carries five: `TriangleViewModel` (Ratio,
+SecretRatios, TheSwing), `ViewModel1` (UnitCircle, AmpFrqSin), `ViewModel2`
+(CircletoSin/Cos/Tan), `RadDegVM` (RadDeg) and `AboutVM` (the team card — see
+[The About card](#the-about-card)). The `Angle` artboard has **no** view model —
+binding one logs a runtime error, so lessons declare `bindViewModel` explicitly.
 
-**A square stage, and one surface.** Every artboard is 1:1 (`Ratio` alone is
-500×538), so the stage is a square the width of the screen: `Contain` then lands
-any artboard in it complete, edge to edge, with nothing cropped and nothing
-letterboxed, at a size fixed by the viewport rather than by which step is open.
-Where a phone is too short for a full-width square — only `Ratio`, which shares
-the field with its two sliders — the square insets rather than crops.
+**Three artboards start themselves.** `UnitCircle`, `AmpFrqSin` and `TheSwing`
+run on load and loop; their `start`/`reset` inputs no longer change anything.
+Nothing in the course needs a button pressed to see it move, so the lesson bar
+offers none — `TheSwing`, which has nothing to drag either, is completed by
+watching it through (`Lesson.watchMs`) rather than by a tap.
 
-The field around the square carries the artboard's own background: `--paper` for
-the light artboards, and `#f6f9ff` for the dark ones, which is where `#0d1062`
-lands after `--invert-artboard` (measured off the rendered canvas, not guessed).
-So the canvas and the page are one continuous surface rather than a tile on a
-backdrop.
+**A square stage, and one surface.** Every lesson artboard is 1:1, so the stage
+is a square the width of the screen: `Contain` then lands any artboard in it
+complete, edge to edge, with nothing cropped and nothing letterboxed, at a size
+fixed by the viewport rather than by which step is open. Where a phone is too
+short for a full-width square, the square insets rather than crops.
 
-**Controls that live in their own artboards.** `Ratio`'s two sliders were
-authored as separate artboards — `Ratio/AngleSlider` and `Ratiop/ScaleSlider` —
-rather than nested into the lesson artboard, so on its own that lesson draws a
-triangle with nothing to touch and a checkpoint that cannot be reached. The app
-draws them under it and hands them the lesson artboard's own view-model instance
-(`bindViewModelInstance`), which reconnects them: dragging a slider moves
-`AngleControl`/`ScaleControl` and the triangle follows. `Lesson.controls`
-declares this; no other lesson needs it.
+Every artboard is drawn on white, so the field around the square is `--paper`
+and the canvas and the page are one continuous surface rather than a tile on a
+backdrop. Earlier exports were light-on-navy and were inverted with a CSS
+filter; that filter is gone, and re-adding one would now turn the artwork black.
+
+**Every control is inside its lesson artboard.** `Ratio` used to draw a triangle
+with nothing to touch — its two sliders were separate artboards that the app had
+to draw underneath and rebind by hand. They are part of the artboard now, along
+with the three ratio cards, so no lesson declares extra control artboards and
+the app never writes to a view model to move a knob.
 
 **Reads, not writes.** Property writes only stick *after* the state machine's
 first advance; before that, initialisation overwrites them. More importantly,
@@ -182,16 +182,35 @@ outrun it. Grab the knob and it follows; users re-grab to continue. Checkpoint
 tolerances are set for thumb precision (roughly ±4–10 px of travel) rather than
 for exact values.
 
+**One value needs mapping.** `AmpFrqSin` prints amplitude on a 0.5–2.5 scale but
+publishes the knob's travel as `sliderAmp`, 9.4 at the left stop to 556.3 at the
+right — measured by dragging the knob end to end against the runtime. `sliderA`,
+the wave's drawn height, saturates at 120 about two thirds along and cannot tell
+the top of the scale from the middle of it, so the lesson reads `sliderAmp`.
+
+## The About card
+
+The file's `About` artboard is the credits: two photographs, the two names, and
+a row of social handles under each. A canvas cannot open a link, so each handle
+fires a trigger on `AboutVM` (`alirezaIG`, `alirezaLD`, `paryaIG`, `paryaLD`)
+and `src/screens/About.tsx` subscribes to those triggers and opens the address.
+The addresses are built from the handles the card itself prints.
+
 **Self-hosted WASM.** By default the Rive runtime fetches its WASM from
 jsDelivr, which would tie an otherwise static site to a third party and fail
 closed if that CDN is blocked. `src/lib/riveRuntime.ts` repoints the loader at
 the bundled copy, so the deploy is self-contained.
 
-## Known asset issue
+## Known asset issues
 
-Several artboards render `θ` as a missing-glyph box (`□ = 45.0°`). The theta
-character is absent from the font subset embedded in the `.riv` file, so it has
-to be fixed in Rive and re-exported — it cannot be patched from the app side.
+Both are file-side: they have to be fixed in Rive and re-exported, and cannot be
+patched from the app.
+
+- Several artboards render `θ` as a missing-glyph box (`□ = 45.0°`). The theta
+  character is absent from the font subset embedded in the `.riv` file.
+- In `Ratio`, the triangle grows past the artboard's bounds near the top of the
+  Scale slider and is clipped at the top edge — which is exactly where lesson 2
+  asks the learner to take it.
 
 ## Running it
 
@@ -234,5 +253,6 @@ over garbled digits. `@rive-app/react-canvas` is on 4.32.0 and reads it.
 
 ## Credits
 
-Animation and artwork: **Lucid Paper Studios**, authored in
-[Rive](https://rive.app). This repository is the course shell around that file.
+Animation and artwork: **Ayne Studio** — Alireza Gharibi (interactive design)
+and Parya Bahrami (design engineering) — authored in [Rive](https://rive.app).
+This repository is the course shell around that file.

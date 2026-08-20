@@ -1,9 +1,9 @@
 /* ---------------------------------------------------------------------------
    Trigonometry 101 — design tokens
 
-   A light, premium shell derived from the light-themed panels inside the Rive
-   file (the SOH CAH TOA card): near-white paper, soft grey surfaces, and the
-   file's own saturated accents used sparingly and with intent.
+   A light, premium shell derived from the Rive file itself, which is drawn on
+   white throughout: near-white paper, soft grey surfaces, and the file's own
+   saturated accents used sparingly and with intent.
    --------------------------------------------------------------------------- */
 
 :root {
@@ -19,17 +19,6 @@
   --ink-2: #4a5279;
   --ink-3: #858db0;
   --ink-mute: #8a92b4;
-
-  /**
-   * Eight of the ten artboards are drawn light-on-navy inside the Rive file.
-   * Their colours cannot be changed from here, and simply hiding the navy
-   * erases the artwork with it — the labels, axes and graphs are all white.
-   *
-   * Inverting and rotating the hue back turns the navy into paper and the
-   * white ink into dark ink, keeping every accent roughly on-hue. The
-   * brightness/contrast pair lifts the result the last step to white.
-   */
-  --invert-artboard: invert(1) hue-rotate(180deg) brightness(1.06) contrast(1.06);
 
   /* Accents, straight out of the artwork. */
   --blue: #0075ff;
