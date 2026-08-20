@@ -1,4 +1,4 @@
-import type { Lesson, LessonAction, nextStop } from '../data/curriculum'
+import type { Lesson, nextStop } from '../data/curriculum'
 
 /** Watch what to touch → do the task → read why it happened. */
 export type Step = 'watch' | 'do' | 'learn'
@@ -26,10 +26,6 @@ export interface LessonPaneProps {
   conditions: boolean[]
   showHint: boolean
   onHint: () => void
-  toggles: Record<string, boolean>
-  onAction: (action: LessonAction) => void
-  /** False until the artboard is live, so its buttons cannot be pressed early. */
-  ready: boolean
   after: ReturnType<typeof nextStop>
   onNext: () => void
 }

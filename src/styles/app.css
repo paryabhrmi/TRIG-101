@@ -238,11 +238,7 @@
   user-select: none;
 }
 
-/* Every stage is paper now — the two dark artboard themes are inverted into
-   the light one, so the whole product is a single white surface. */
-.stage--navy,
-.stage--deep,
-.stage--paper {
+.stage {
   background: var(--paper);
 }
 
@@ -251,13 +247,11 @@
   height: 100%;
   display: block;
   touch-action: none;
-}
-
-/* Applied to the canvas, not the wrapper, so the white behind it stays white
-   while the artboard is being loaded and there is never a navy flash. */
-.stage--navy .stage__canvas,
-.stage--deep .stage__canvas {
-  filter: var(--invert-artboard);
+  /* The canvas takes focus when a slider inside it is dragged. A focus ring
+     around the whole artwork says nothing about which control has the keyboard
+     — the page's own :focus-visible ring on real buttons does that — so the
+     canvas draws none. */
+  outline: none;
 }
 
 .stage__pending {
@@ -567,24 +561,17 @@
    of the empty space. Fit.Contain never crops, so a smaller box only ever means
    smaller artwork — never a hidden slider. The padding is the strip the sheet
    overlaps, kept outside the canvas box. */
-/* Every artboard in the file is 1:1 (only `Ratio` differs, at 500×538), so a
-   square box the width of the screen holds any of them complete, edge to edge,
-   with no crop and no letterbox. The size is fixed by the viewport width, which
-   means it does not move between steps or lessons.
+/* Every artboard in the file is 1:1, so a square box the width of the screen
+   holds any of them complete, edge to edge, with no crop and no letterbox. The
+   size is fixed by the viewport width, which means it does not move between
+   steps or lessons.
 
-   The field is the space that square sits in. It carries the artboard's own
-   background colour — white for the light artboards, #f6f9ff for the dark ones
-   once the invert filter has run over them — so the canvas and the page around
+   The field is the space that square sits in. Every artboard in the file is
+   drawn on white, so the field is white too and the canvas and the page around
    it are one continuous surface instead of a tile on a backdrop. */
 .lesson {
   --field: var(--paper);
   background: var(--field);
-}
-
-.lesson--navy,
-.lesson--deep {
-  /* #0d1062 through --invert-artboard lands here; measured, not guessed. */
-  --field: #f6f9ff;
 }
 
 .lesson__field {
@@ -622,17 +609,6 @@
   .lesson__art .stage {
     width: min(100%, 100cqh);
   }
-}
-
-/* `Ratio`'s two sliders are their own artboards; they sit directly under the
-   triangle and are bound to it, so the three read as one control surface. */
-.lesson__controls {
-  flex: 0 0 auto;
-}
-
-.lesson .stage--control {
-  width: 100%;
-  aspect-ratio: 550 / 60;
 }
 
 /* The sheet rides up over the artwork, so that strip is kept clear of the
@@ -946,11 +922,13 @@
   color: var(--ink-3);
 }
 
-.actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  padding-top: 16px;
+/* An artboard laid out as a block in a scrolling page rather than as the
+   screen's stage: it keeps its own aspect ratio and takes the column width. */
+.stage--card {
+  flex: 0 0 auto;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  margin: 4px 0 8px;
 }
 
 /* ---------------------------------------------------------------------------
@@ -1877,11 +1855,6 @@
     width: 100%;
     height: 100%;
     aspect-ratio: auto;
-  }
-
-  .lesson .stage--control {
-    flex: 0 0 auto;
-    aspect-ratio: 550 / 60;
   }
 
   .lesson .sheet {

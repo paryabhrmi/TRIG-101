@@ -5,9 +5,10 @@ import type { LessonPaneProps } from './lessonPane'
 /**
  * The lesson bar — the app's whole share of the screen.
  *
- * The artboard above is the input surface and its own instrument panel; this
- * dock carries only what the file cannot know: what the learner is being asked
- * to do, how far off it they still are, and what happens next.
+ * The artboard above is the input surface and its own instrument panel — every
+ * slider, toggle and button the course has lives inside it. This dock carries
+ * only what the file cannot know: what the learner is being asked to do, how
+ * far off it they still are, and what happens next.
  *
  * Its height is fixed at 216px (see `.lbar` in app.css) across the first two
  * steps. Every row is reserved whether or not it has content, so moving from
@@ -29,9 +30,6 @@ export function LessonBar({
   conditions,
   showHint,
   onHint,
-  toggles,
-  onAction,
-  ready,
   after,
   onNext,
 }: LessonPaneProps) {
@@ -81,7 +79,6 @@ export function LessonBar({
   // and it is the one string here long enough to clip on a short phone.
   const task = doing ? (lesson.checkpoint?.goal ?? lesson.watch) : lesson.watch
   const hint = lesson.checkpoint?.hint
-  const actions = lesson.actions ?? []
 
   return (
     <div className={`lbar ${solved && doing ? 'is-hit' : ''}`.trim()}>
@@ -135,29 +132,13 @@ export function LessonBar({
           </button>
         ) : (
           <>
-            {actions.map((action) => (
-              <button
-                key={action.input}
-                type="button"
-                className={`btn ${
-                  action.tone === 'ghost' ? 'btn--ghost' : 'btn--primary'
-                } btn--wide ${toggles[action.input] ? 'is-on' : ''}`.trim()}
-                onClick={() => onAction(action)}
-                disabled={!ready}
-              >
-                {action.label}
-              </button>
-            ))}
-
-            {!actions.length && (
-              <button
-                type="button"
-                className="btn btn--ghost btn--wide"
-                onClick={() => onStep('learn')}
-              >
-                {solved ? 'Why it works' : 'Skip'}
-              </button>
-            )}
+            <button
+              type="button"
+              className="btn btn--ghost btn--wide"
+              onClick={() => onStep('learn')}
+            >
+              {solved ? 'Why it works' : 'Skip'}
+            </button>
 
             {hint && (
               <button
