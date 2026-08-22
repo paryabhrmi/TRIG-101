@@ -27,6 +27,24 @@
     />
     <title>Trigonometry 101</title>
 
+    <!-- Microsoft Clarity: anonymous session analytics. Loaded async so it
+         never sits in front of first render, and from a foreign origin so the
+         boot-error handler above ignores it if it is blocked. -->
+    <script>
+      ;(function (c, l, a, r, i, t, y) {
+        c[a] =
+          c[a] ||
+          function () {
+            ;(c[a].q = c[a].q || []).push(arguments)
+          }
+        t = l.createElement(r)
+        t.async = 1
+        t.src = 'https://www.clarity.ms/tag/' + i
+        y = l.getElementsByTagName(r)[0]
+        y.parentNode.insertBefore(t, y)
+      })(window, document, 'clarity', 'script', 'y6chco1l3v')
+    </script>
+
     <!-- Inlined so the boot screen still renders if the stylesheet fails. -->
     <style>
       .boot {
